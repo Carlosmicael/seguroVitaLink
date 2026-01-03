@@ -46,14 +46,22 @@ class Siniestro(models.Model):
     poliza = models.ForeignKey(Poliza, on_delete=models.CASCADE, related_name='siniestros')
     tipo = models.CharField(max_length=50, choices=TIPO_CHOICES)
     descripcion = models.TextField()
-    fecha_evento = models.DateField()
+    fecha_evento = models.DateField(null=True, blank=True)
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
     fecha_reporte = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
     
     # Información de beneficiario
     nombre_beneficiario = models.CharField(max_length=150, blank=True)
+    relacion_beneficiario = models.CharField(max_length=50, blank=True)
     parentesco = models.CharField(max_length=50, blank=True)
+    
+    # Contacto
+    telefono_contacto = models.CharField(max_length=20, blank=True)
+    email_contacto = models.EmailField(blank=True)
+    
+    # Documentación
+    documento = models.FileField(upload_to='siniestros/', null=True, blank=True)
     
     # Auditoría
     revisado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, 

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}VitaLink - Gestión de Pólizas de Vida{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'utpl-blue': '#1a3a52',
+                        'utpl-gold': '#d4af37',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50">
+
+        
+    <!-- Header/Navbar -->
+    <nav class="bg-gradient-to-r from-utpl-blue to-blue-800 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="/" class="text-2xl font-bold text-utpl-gold">
+                        VitaLink
+                    </a>
+                    <span class="text-sm text-gray-200 ml-4">Universidad Técnica Particular de Loja</span>
+                </div>
+                
+                <!-- Menu -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="{% url 'siniestros:inicio' %}" class="hover:text-utpl-gold transition">Inicio</a>
+                    <a href="/admin/" class="hover:text-utpl-gold transition">Panel Admin</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-utpl-blue text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Información -->
+                <div>
+                    <h3 class="text-lg font-bold text-utpl-gold mb-4">VitaLink</h3>
+                    <p class="text-gray-300 text-sm">
+                        Plataforma segura de gestión de pólizas de vida para estudiantes de UTPL.
+                    </p>
+                </div>
+                
+                <!-- Enlaces Útiles -->
+                <div>
+                    <h4 class="text-lg font-bold text-utpl-gold mb-4">Enlaces</h4>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li><a href="{% url 'siniestros:inicio' %}" class="hover:text-utpl-gold transition">Inicio</a></li>
+                        <li><a href="{% url 'siniestros:formulario' %}" class="hover:text-utpl-gold transition">Reportar Evento</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contacto -->
+                <div>
+                    <h4 class="text-lg font-bold text-utpl-gold mb-4">Contacto</h4>
+                    <p class="text-sm text-gray-300">
+                        📞 +593 99 123 4567<br>
+                        📧 siniestros@vitalink.utpl.edu.ec<br>
+                        🕐 Lun-Vie 8:00 AM - 5:00 PM
+                    </p>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
+                <p>&copy; 2026 VitaLink - Universidad Técnica Particular de Loja. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

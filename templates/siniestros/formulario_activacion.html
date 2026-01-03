@@ -1,0 +1,252 @@
+{% extends "master/base.html" %}
+{% load static %}
+
+{% block title %}Reportar Evento | VitaLink{% endblock %}
+
+{% block content %}
+<main class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8 border-t-4 border-blue-600">
+            <div class="flex items-center mb-4">
+                <div class="flex-shrink-0">
+                    <svg class="h-10 w-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 ml-3">Reportar Evento de Estudiante UTPL</h1>
+            </div>
+            <p class="text-gray-600">Complete los siguientes datos para reportar un evento o siniestro de un estudiante de la Universidad Técnica Particular de Loja.</p>
+        </div>
+
+        <!-- Formulario -->
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <form method="POST" enctype="multipart/form-data" id="activacionForm">
+                {% csrf_token %}
+
+                <!-- Sección 1: Detalles del Evento (ahora es la primera) -->
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-blue-300">
+                        <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm mr-2">1</span>
+                        Detalles del Evento
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label for="{{ form.tipo_evento.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                {{ form.tipo_evento.label }}
+                                <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.tipo_evento }}
+                            {% if form.tipo_evento.errors %}
+                                <div class="text-red-500 text-sm mt-2">
+                                    {{ form.tipo_evento.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label for="{{ form.descripcion.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.descripcion.label }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.descripcion }}
+                        {% if form.descripcion.errors %}
+                            <div class="text-red-500 text-sm mt-2">
+                                {{ form.descripcion.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Sección 2: Información del Beneficiario -->
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-blue-300">
+                        <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm mr-2">2</span>
+                        Información del Beneficiario
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.nombre_beneficiario.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                {{ form.nombre_beneficiario.label }}
+                                <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.nombre_beneficiario }}
+                            {% if form.nombre_beneficiario.errors %}
+                                <div class="text-red-500 text-sm mt-2">
+                                    {{ form.nombre_beneficiario.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.relacion_beneficiario.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                {{ form.relacion_beneficiario.label }}
+                                <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.relacion_beneficiario }}
+                            {% if form.relacion_beneficiario.errors %}
+                                <div class="text-red-500 text-sm mt-2">
+                                    {{ form.relacion_beneficiario.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 3: Contacto -->
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-blue-300">
+                        <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm mr-2">3</span>
+                        Información de Contacto
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.telefono.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                {{ form.telefono.label }}
+                                <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.telefono }}
+                            {% if form.telefono.errors %}
+                                <div class="text-red-500 text-sm mt-2">
+                                    {{ form.telefono.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.email.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                {{ form.email.label }}
+                                <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-red-500 text-sm mt-2">
+                                    {{ form.email.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 4: Documentación -->
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-blue-300">
+                        <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm mr-2">4</span>
+                        Documentación de Soporte
+                    </h2>
+                    
+                    <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-4">
+                        <p class="text-sm text-gray-700 mb-2">
+                            <strong>¿Para qué sirve?</strong><br>
+                            Los archivos que cargues serán utilizados para validar el siniestro y como información adicional del evento reportado. 
+                            Incluye documentación como certificados médicos, reportes de accidentes, certificados de defunción u otro documento 
+                            que respalde el evento reportado.
+                        </p>
+                        <hr class="my-3 border-blue-300">
+                        <p class="text-sm text-gray-700">
+                            <strong>Archivos aceptados:</strong> PDF, Word (DOC, DOCX)<br>
+                            <strong>Tamaño máximo:</strong> 5MB
+                        </p>
+                    </div>
+
+                    <div>
+                        <label for="{{ form.archivo_documento.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {{ form.archivo_documento.label }}
+                        </label>
+                        {{ form.archivo_documento }}
+                        {% if form.archivo_documento.errors %}
+                            <div class="text-red-500 text-sm mt-2">
+                                {{ form.archivo_documento.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Sección 5: Consentimiento -->
+                <div class="mb-8 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            {{ form.acepta_terminos }}
+                        </div>
+                        <div class="ml-3">
+                            <label for="{{ form.acepta_terminos.id_for_label }}" class="text-sm font-semibold text-gray-800">
+                                {{ form.acepta_terminos.label }}
+                                <span class="text-red-500">*</span>
+                            </label>
+                            {% if form.acepta_terminos.errors %}
+                                <div class="text-red-500 text-sm mt-2">
+                                    {{ form.acepta_terminos.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 5: Verificación de Seguridad (Google reCAPTCHA v2) -->
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-blue-300">
+                        <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm mr-2">5</span>
+                        Verificación de Seguridad
+                    </h2>
+
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <div class="mb-3">
+                            {% if form.captcha.errors %}
+                                <div class="text-red-500 text-sm mb-2">{{ form.captcha.errors.0 }}</div>
+                            {% endif %}
+                            {{ form.captcha }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="flex flex-col sm:flex-row gap-4 mt-10">
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-6 rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition duration-300 ease-in-out transform hover:scale-105 shadow-lg">
+                        <svg class="inline-block w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Enviar Reporte
+                    </button>
+                    <a href="{% url 'siniestros:inicio' %}" class="flex-1 bg-gray-300 text-gray-800 py-3 px-6 rounded-lg font-bold hover:bg-gray-400 transition duration-300 ease-in-out text-center shadow-lg">
+                        <svg class="inline-block w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Cancelar
+                    </a>
+                </div>
+
+                <!-- Mensaje de ayuda -->
+                <div class="mt-8 bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                    <h3 class="text-sm font-bold text-blue-900 mb-2">¿Necesitas ayuda?</h3>
+                    <p class="text-sm text-blue-800">Si tienes dudas sobre cómo completar este formulario, contáctanos:</p>
+                    <div class="mt-2 text-sm text-blue-800">
+                        <p>📞 <strong>Teléfono:</strong> +593 99 123 4567</p>
+                        <p>📧 <strong>Email:</strong> siniestros@vitalink.utpl.edu.ec</p>
+                        <p>🕐 <strong>Horario:</strong> Lunes a Viernes 8:00 AM - 5:00 PM</p>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Advertencia de Seguridad -->
+        <div class="mt-8 bg-green-50 border border-green-200 rounded-lg p-6">
+            <h3 class="text-lg font-bold text-green-900 mb-2">ℹ️ Información Importante</h3>
+            <ul class="text-sm text-green-800 space-y-2">
+                <li>✓ El equipo de UTPL se encargará de contactarse directamente con los beneficiarios del asegurado.</li>
+                <li>✓ Si se requiere información adicional, el equipo se pondrá en contacto utilizando los datos proporcionados en este formulario.</li>
+                <li>✓ Todos los datos que proporcionas son confidenciales y protegidos.</li>
+                <li>✓ Tu solicitud será procesada en un plazo de 3 a 5 días laborales.</li>
+                <li>✓ Asegúrate de proporcionar información verídica y completa.</li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+{% endblock %}
+
