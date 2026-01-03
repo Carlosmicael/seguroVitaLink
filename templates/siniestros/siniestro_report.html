@@ -1,0 +1,253 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Siniestros - VitaLink</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'utpl-blue': '#1a3a52',
+                        'utpl-gold': '#d4af37',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-utpl-blue to-blue-800 min-h-screen flex items-center justify-center p-5">
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-fade-up">
+        <!-- Header -->
+        <div class="relative overflow-hidden bg-gradient-to-br from-utpl-blue to-blue-700 text-white px-8 py-16 md:px-12 md:py-20">
+            <div class="absolute top-0 right-0 w-80 h-80 bg-utpl-gold opacity-10 rounded-full transform translate-x-1/3 -translate-y-1/3"></div>
+            
+            <div class="relative z-10 text-center">
+                <p class="text-sm font-bold tracking-widest text-utpl-gold uppercase mb-4">
+                    Universidad Técnica Particular de Loja
+                </p>
+                <h1 class="text-5xl md:text-6xl font-black mb-3 tracking-tight">
+                    VitaLink
+                </h1>
+                <p class="text-lg md:text-xl font-light tracking-wide text-gray-100">
+                    Gestión Integral de Pólizas de Vida Estudiantil
+                </p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="px-8 py-16 md:px-12 md:py-20">
+            <!-- Intro Section -->
+            <div class="mb-16">
+                <h2 class="text-4xl font-bold text-utpl-blue mb-8 text-center">
+                    Bienvenido a tu Centro de Siniestros
+                </h2>
+                <div class="space-y-6 text-gray-700 text-lg leading-relaxed">
+                    <p>
+                        En VitaLink entendemos la importancia de tu tranquilidad y la de tu familia. 
+                        Como estudiante de la Universidad Técnica Particular de Loja, tienes acceso a una póliza de vida 
+                        que te protege en todo momento.
+                    </p>
+                    <p>
+                        Este portal te permite activar tu póliza de forma fácil, segura y transparente desde cualquier lugar. 
+                        Solo necesitas reportar un evento o necesidad, y tu solicitud será procesada para activar la cobertura de vida 
+                        que te corresponde.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Benefits Section -->
+            <div class="bg-gradient-to-br from-gray-50 to-blue-50 p-8 rounded-xl border-l-6 border-l-utpl-gold mb-16">
+                <h3 class="text-2xl font-bold text-utpl-blue mb-6">
+                    ¿Por qué confiar en VitaLink?
+                </h3>
+                <ul class="space-y-4">
+                    <li class="flex items-center text-gray-700 text-lg font-medium">
+                        <span class="text-utpl-gold text-2xl font-bold mr-4">✓</span>
+                        Cobertura completa diseñada especialmente para estudiantes UTPL
+                    </li>
+                    <li class="flex items-center text-gray-700 text-lg font-medium">
+                        <span class="text-utpl-gold text-2xl font-bold mr-4">✓</span>
+                        Gestión 100% digital sin trámites complicados
+                    </li>
+                    <li class="flex items-center text-gray-700 text-lg font-medium">
+                        <span class="text-utpl-gold text-2xl font-bold mr-4">✓</span>
+                        Procesamiento rápido de solicitudes en máximo 24 horas
+                    </li>
+                    <li class="flex items-center text-gray-700 text-lg font-medium">
+                        <span class="text-utpl-gold text-2xl font-bold mr-4">✓</span>
+                        Asistencia dedicada en español
+                    </li>
+                    <li class="flex items-center text-gray-700 text-lg font-medium">
+                        <span class="text-utpl-gold text-2xl font-bold mr-4">✓</span>
+                        Total confidencialidad y seguridad de datos
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Process Section -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-bold text-utpl-blue mb-12 text-center">
+                    Proceso para Activar tu Póliza
+                </h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Step 1 -->
+                    <div class="bg-gradient-to-br from-gray-50 to-blue-50 p-8 rounded-xl border-t-4 border-t-utpl-gold hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
+                        <div class="flex justify-center mb-5">
+                            <div class="w-14 h-14 bg-gradient-to-br from-utpl-gold to-yellow-600 rounded-full flex items-center justify-center font-bold text-2xl text-utpl-blue shadow-lg">
+                                1
+                            </div>
+                        </div>
+                        <h4 class="text-xl font-bold text-utpl-blue text-center mb-4">
+                            Reporta tu Evento
+                        </h4>
+                        <p class="text-gray-700 text-center leading-relaxed">
+                            Presiona el botón principal y completa el formulario con toda la información 
+                            del evento que requiere la activación de tu póliza.
+                        </p>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="bg-gradient-to-br from-gray-50 to-blue-50 p-8 rounded-xl border-t-4 border-t-utpl-gold hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
+                        <div class="flex justify-center mb-5">
+                            <div class="w-14 h-14 bg-gradient-to-br from-utpl-gold to-yellow-600 rounded-full flex items-center justify-center font-bold text-2xl text-utpl-blue shadow-lg">
+                                2
+                            </div>
+                        </div>
+                        <h4 class="text-xl font-bold text-utpl-blue text-center mb-4">
+                            Verificación Segura
+                        </h4>
+                        <p class="text-gray-700 text-center leading-relaxed">
+                            Nuestro equipo especializado revisará tu solicitud y documentación 
+                            de forma segura y confidencial.
+                        </p>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="bg-gradient-to-br from-gray-50 to-blue-50 p-8 rounded-xl border-t-4 border-t-utpl-gold hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
+                        <div class="flex justify-center mb-5">
+                            <div class="w-14 h-14 bg-gradient-to-br from-utpl-gold to-yellow-600 rounded-full flex items-center justify-center font-bold text-2xl text-utpl-blue shadow-lg">
+                                3
+                            </div>
+                        </div>
+                        <h4 class="text-xl font-bold text-utpl-blue text-center mb-4">
+                            Activación Inmediata
+                        </h4>
+                        <p class="text-gray-700 text-center leading-relaxed">
+                            Tu póliza de vida será activada automáticamente una vez aprobada tu solicitud. 
+                            Recibirás confirmación por correo electrónico.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA Section -->
+            <div class="bg-gradient-to-br from-gray-50 to-blue-50 p-12 rounded-xl border-2 border-utpl-gold text-center mb-16">
+                <h2 class="text-3xl font-bold text-utpl-blue mb-6">
+                    ¿Necesitas Activar tu Póliza?
+                </h2>
+                <p class="text-gray-700 text-lg mb-8 leading-relaxed max-w-2xl mx-auto">
+                    Presiona el botón de abajo para reportar un evento y activar tu cobertura de vida. 
+                    El proceso es sencillo: solo completa un formulario con tu información básica y el evento que lo motiva.
+                </p>
+                <button onclick="reportarSiniestro()" class="bg-gradient-to-r from-utpl-gold to-yellow-600 hover:from-yellow-500 hover:to-utpl-gold text-utpl-blue font-bold py-4 px-12 rounded-lg text-lg tracking-wider uppercase shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+                    📋 Reportar Evento y Activar Póliza
+                </button>
+            </div>
+
+            <!-- Info Box -->
+            <div class="bg-blue-50 border-l-4 border-l-utpl-blue p-8 rounded-lg mb-16">
+                <p class="text-gray-800 text-lg leading-relaxed">
+                    <span class="font-bold text-utpl-blue">⏱️ Información Importante:</span><br class="mb-2"/>
+                    Una vez completes el formulario de reporte, tu solicitud será enviada a nuestro sistema de validación. 
+                    La póliza se activará automáticamente en un plazo no mayor a 24 horas hábiles. 
+                    Recibirás actualizaciones por correo electrónico en cada paso del proceso.
+                </p>
+            </div>
+
+            <!-- Coverage Section -->
+            <div class="mb-0">
+                <h2 class="text-4xl font-bold text-utpl-blue mb-8 text-center">
+                    ¿Qué incluye tu póliza de vida?
+                </h2>
+                <div class="bg-gradient-to-br from-gray-50 to-blue-50 p-8 rounded-xl border-l-6 border-l-utpl-gold">
+                    <ul class="space-y-4">
+                        <li class="flex items-center text-gray-700 text-lg font-medium">
+                            <span class="text-utpl-gold text-2xl font-bold mr-4">✓</span>
+                            Cobertura de vida accidental completa
+                        </li>
+                        <li class="flex items-center text-gray-700 text-lg font-medium">
+                            <span class="text-utpl-gold text-2xl font-bold mr-4">✓</span>
+                            Asistencia médica de emergencia 24/7
+                        </li>
+                        <li class="flex items-center text-gray-700 text-lg font-medium">
+                            <span class="text-utpl-gold text-2xl font-bold mr-4">✓</span>
+                            Repatriación en caso necesario
+                        </li>
+                        <li class="flex items-center text-gray-700 text-lg font-medium">
+                            <span class="text-utpl-gold text-2xl font-bold mr-4">✓</span>
+                            Cobertura familiar ampliada
+                        </li>
+                        <li class="flex items-center text-gray-700 text-lg font-medium">
+                            <span class="text-utpl-gold text-2xl font-bold mr-4">✓</span>
+                            Beneficios adicionales para dependientes
+                        </li>
+                        <li class="flex items-center text-gray-700 text-lg font-medium">
+                            <span class="text-utpl-gold text-2xl font-bold mr-4">✓</span>
+                            Soporte legal durante el proceso
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="bg-gradient-to-b from-gray-100 to-gray-200 px-8 py-12 md:px-12 md:py-16 text-center border-t border-gray-300">
+            <p class="text-gray-800 text-lg font-bold mb-6">
+                ¿Tienes dudas o necesitas asistencia?
+            </p>
+            <div class="space-y-3 text-gray-700 text-base mb-8">
+                <p>
+                    📞 Teléfono: <a href="tel:+593726582940" class="text-utpl-gold font-bold hover:text-yellow-600 transition-colors">+593 7 2658-2940</a>
+                </p>
+                <p>
+                    📧 Correo: <a href="mailto:vitalink@utpl.edu.ec" class="text-utpl-gold font-bold hover:text-yellow-600 transition-colors">vitalink@utpl.edu.ec</a>
+                </p>
+                <p>
+                    🌐 Portal: <a href="https://www.utpl.edu.ec" target="_blank" class="text-utpl-gold font-bold hover:text-yellow-600 transition-colors">www.utpl.edu.ec</a>
+                </p>
+            </div>
+            <p class="text-sm text-gray-600">
+                VitaLink © 2026 - Universidad Técnica Particular de Loja<br>
+                Sistema de Gestión Integral de Pólizas de Vida para Estudiantes
+            </p>
+        </div>
+    </div>
+
+    <style>
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade-up {
+            animation: fadeUp 0.6s ease-out;
+        }
+    </style>
+
+    <script>
+        function reportarSiniestro() {
+            alert('Redirigiendo al formulario de reporte de eventos y activación de póliza...\n\nEsta funcionalidad estará disponible próximamente.');
+            // window.location.href = '/siniestros/reportar/';
+        }
+    </script>
+</body>
+</html>
