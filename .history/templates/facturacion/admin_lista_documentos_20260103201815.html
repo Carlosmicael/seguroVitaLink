@@ -1,0 +1,72 @@
+{% extends 'master/base.html' %}
+{% load static %}
+
+{% block title %}Documentos de Facturación{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Documentos de Facturación</h1>
+        <a href="{% url 'facturacion:admin_subir_documento' %}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300">
+            Subir Nuevo Documento
+        </a>
+    </div>
+
+    {% if documentos %}
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Póliza</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Subida</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subido Por</th>
+                    <th scope="col" class="relative px-6 py-3"><span class="sr-only">Acciones</span></th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for documento in documentos %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ documento.codigo_documento }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ documento.poliza.numero }} - {{ documento.poliza.estudiante.nombre_completo }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ documento.fecha_subida|date:"d M Y H:i" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ documento.subido_por.username }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <a href="{% url 'facturacion:admin_detalle_documento' pk=documento.pk %}" class="text-indigo-600 hover:text-indigo-900">Ver Detalle</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if is_paginated %}
+    <div class="flex justify-center mt-4">
+        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                Anterior
+            </a>
+            {% endif %}
+
+            {% for i in paginator.page_range %}
+                <a href="?page={{ i }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium {% if page_obj.number == i %}bg-indigo-50 border-indigo-500 text-indigo-600{% else %}text-gray-700 hover:bg-gray-50{% endif %}">
+                    {{ i }}
+                </a>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                Siguiente
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <p class="text-center text-gray-600 mt-8">No hay documentos de facturación para mostrar.</p>
+    {% endif %}
+</div>
+{% endblock %}
+

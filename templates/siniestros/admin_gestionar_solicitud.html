@@ -1,0 +1,27 @@
+{% extends "master/base.html" %}
+{% load static %}
+
+{% block title %}Gestionar Solicitud | VitaLink{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-2xl font-bold text-gray-800 mb-4">Gestionar Solicitud #{{ solicitud.id }}</h1>
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="mt-6 flex gap-4">
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                        Guardar
+                    </button>
+                    <a href="{% url 'siniestros:admin_detalle_solicitud' solicitud.pk %}" class="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

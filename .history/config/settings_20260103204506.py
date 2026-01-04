@@ -212,10 +212,6 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Media files (uploaded files)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
 # reCAPTCHA keys (se leen de variables de entorno / .env)
 # Keep legacy names and provide keys expected by the installed package
 RECAPTCHA_SITE_KEY = os.environ.get('RECAPTCHA_SITE_KEY', '')

@@ -28,7 +28,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-ox^*=q_6a+8+k1&gsh%u9jarpxyj=shy$x$%b46%^9smv#uurz'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
+
 ALLOWED_HOSTS = []
 
 
@@ -211,10 +212,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Media files (uploaded files)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
 
 # reCAPTCHA keys (se leen de variables de entorno / .env)
 # Keep legacy names and provide keys expected by the installed package

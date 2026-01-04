@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Beneficiario | VitaLink</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'utpl-blue': '#1a3a52',
+                        'utpl-gold': '#d4af37',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-utpl-blue to-blue-800 min-h-screen flex items-center justify-center p-5">
+    <div class="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-br from-utpl-blue to-blue-700 text-white px-8 py-12 text-center">
+            <h1 class="text-4xl font-black mb-2">VitaLink</h1>
+            <p class="text-lg font-light">Acceso para Beneficiarios</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="px-8 py-10">
+            <!-- Información UTPL -->
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-lg mb-8">
+                <h3 class="text-lg font-bold text-blue-900 mb-3">📋 Información Importante</h3>
+                <p class="text-sm text-blue-800 mb-3">
+                    Las credenciales de acceso (usuario y contraseña) deben haber sido proporcionadas por la Universidad Técnica Particular de Loja (UTPL).
+                </p>
+                <p class="text-sm text-blue-800">
+                    Si no has recibido tus credenciales o tienes problemas para acceder, por favor contáctanos utilizando la información de asistencia que aparece a continuación.
+                </p>
+            </div>
+
+            <!-- Formulario de Login -->
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+                        {% for error in form.non_field_errors %}
+                            <p class="text-red-700 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div>
+                    <label for="{{ form.username.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        {{ form.username.label }}
+                        <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="text-red-500 text-sm mt-2">
+                            {{ form.username.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.password.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        {{ form.password.label }}
+                        <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        <div class="text-red-500 text-sm mt-2">
+                            {{ form.password.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-utpl-blue to-blue-700 text-white py-3 px-6 rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition duration-300 shadow-lg hover:shadow-xl">
+                    Iniciar Sesión
+                </button>
+            </form>
+
+            <!-- Información de Contacto -->
+            <div class="mt-8 bg-gray-50 border border-gray-200 rounded-lg p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">📞 Información de Contacto y Asistencia</h3>
+                <div class="space-y-3 text-sm text-gray-700">
+                    <p>
+                        <strong>📞 Teléfono:</strong> 
+                        <a href="tel:+593726582940" class="text-utpl-blue font-semibold hover:text-blue-700">
+                            +593 7 2658-2940
+                        </a>
+                    </p>
+                    <p>
+                        <strong>📧 Correo Electrónico:</strong> 
+                        <a href="mailto:vitalink@utpl.edu.ec" class="text-utpl-blue font-semibold hover:text-blue-700">
+                            vitalink@utpl.edu.ec
+                        </a>
+                    </p>
+                    <p>
+                        <strong>🕐 Horario de Atención:</strong> Lunes a Viernes 8:00 AM - 5:00 PM
+                    </p>
+                </div>
+            </div>
+
+            <!-- Botón Volver -->
+            <div class="mt-6 text-center">
+                <a href="{% url 'siniestros:inicio' %}" class="text-utpl-blue hover:text-blue-700 font-semibold">
+                    ← Volver al inicio
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

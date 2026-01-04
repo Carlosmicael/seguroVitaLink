@@ -29,6 +29,7 @@ SECRET_KEY = 'django-insecure-ox^*=q_6a+8+k1&gsh%u9jarpxyj=shy$x$%b46%^9smv#uurz
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
 ALLOWED_HOSTS = []
 
 
@@ -46,8 +47,6 @@ INSTALLED_APPS = [
     # app siniestros creada por kriss
     'apps.siniestros',
     'django_recaptcha',
-    'apps.Facturacion.apps.FacturacionConfig',
-    'django.contrib.humanize',
 ]
 
 JAZZMIN_SETTINGS = {
@@ -61,7 +60,7 @@ JAZZMIN_SETTINGS = {
     "site_brand": "VitaLink Admin",
 
     # Logo para la barra de navegación
-    "site_logo": "/static/img/logoVitalink.png", # Ruta actualizada para el logo
+    "site_logo": "/static/img/utpl-logo.png", # Asegúrate de tener un logo aquí
 
     # URL de inicio para el sitio (ej. "/admin/")
     "welcome_sign": "Bienvenido al administrador de VitaLink",
@@ -79,13 +78,6 @@ JAZZMIN_SETTINGS = {
     "ui_builder": True,
 
     "theme": "cerulean", # Un tema base azul
-    "topmenu_links": [
-        {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
-
-        # apps
-        {"app": "siniestros", "icon": "fas fa-file-invoice"},
-        {"app": "Facturacion", "icon": "fas fa-money-bill-wave"},
-    ],
 }
 
 JAZZMIN_UI_TWEAKS = {
@@ -210,11 +202,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Media files (uploaded files)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
 
 # reCAPTCHA keys (se leen de variables de entorno / .env)
 # Keep legacy names and provide keys expected by the installed package

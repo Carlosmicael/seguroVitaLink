@@ -1,0 +1,95 @@
+{% extends 'master/base.html' %}
+{% load static %}
+
+{% block title %}Detalle de Documento de Facturación{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4 max-w-3xl">
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Detalle del Documento</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+            <div>
+                <p><strong class="font-semibold">Código de Documento:</strong> {{ documento.codigo_documento }}</p>
+                <p><strong class="font-semibold">Póliza Asociada:</strong> {{ documento.poliza.numero }} ({{ documento.poliza.estudiante.nombre_completo }})</p>
+                <p><strong class="font-semibold">Fecha de Subida:</strong> {{ documento.fecha_subida|date:"d M Y H:i" }}</p>
+                <p><strong class="font-semibold">Subido Por:</strong> {{ documento.subido_por.username }}</p>
+            </div>
+            <div class="md:col-span-2">
+                <p><strong class="font-semibold">Comentarios:</strong></p>
+                <p class="bg-gray-100 p-3 rounded-md">{% if documento.comentarios %}{{ documento.comentarios }}{% else %}Sin comentarios{% endif %}</p>
+            </div>
+            <div class="md:col-span-2 mt-4">
+                <strong class="font-semibold block mb-2">Documento:</strong>
+                {% if documento.documento %}
+                    <div class="space-y-3">
+                        <!-- Botones de acción -->
+                        <div class="flex flex-wrap gap-3">
+                            <a href="{{ documento.documento.url }}" target="_blank" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300 flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                Ver en Nueva Pestaña
+                            </a>
+
+                            <a href="{{ documento.documento.url }}" download class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-300 flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Descargar
+                            </a>
+                        </div>
+
+                        <!-- Información del archivo -->
+                        <div class="bg-gray-50 p-3 rounded-md text-sm text-gray-600">
+                            <strong>Información del archivo:</strong><br>
+                            Nombre: {{ documento.documento.name|slice:"19:" }}<br>
+                            Tamaño: {% load humanize %}{{ documento.documento.size|filesizeformat }}<br>
+                            Tipo: {% if documento.documento.name|slice:"-4:"|lower == ".pdf" %}PDF{% elif documento.documento.name|slice:"-4:"|lower == ".jpg" or documento.documento.name|slice:"-5:"|lower == ".jpeg" or documento.documento.name|slice:"-4:"|lower == ".png" %}Imagen{% else %}Documento{% endif %}
+                        </div>
+
+                        <!-- Previsualización -->
+                        {% with ext=documento.documento.name|slice:"-4:"|lower %}
+                        {% if ext == ".jpg" or ext == ".jpeg" or ext == ".png" or ext == ".gif" %}
+                        <!-- Previsualización de imagen -->
+                        <div class="border border-gray-200 rounded-lg p-4 bg-white">
+                            <h4 class="font-semibold text-gray-800 mb-3">Previsualización de Imagen:</h4>
+                            <img src="{{ documento.documento.url }}" alt="Previsualización del documento" class="max-w-full h-auto rounded-lg shadow-md" style="max-height: 400px;">
+                        </div>
+                        {% elif ext == ".pdf" %}
+                        <!-- Previsualización de PDF -->
+                        <div class="border border-gray-200 rounded-lg p-4 bg-white">
+                            <h4 class="font-semibold text-gray-800 mb-3">Previsualización de PDF:</h4>
+                            <embed src="{{ documento.documento.url }}" type="application/pdf" width="100%" height="400px" class="rounded-lg shadow-md">
+                            <p>Tu navegador no puede mostrar PDFs. <a href="{{ documento.documento.url }}" target="_blank" class="text-blue-600 hover:underline">Haz clic aquí para ver el PDF</a></p>
+                        </div>
+                        {% else %}
+                        <!-- Para otros tipos de archivo -->
+                        <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                            <div class="flex items-center">
+                                <svg class="w-12 h-12 text-gray-400 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <div>
+                                    <p class="text-gray-700 font-medium">Tipo de archivo: Documento</p>
+                                    <p class="text-gray-500 text-sm">Para ver este archivo, utiliza los botones de arriba</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-500">No hay documento adjunto.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="flex justify-end mt-8">
+            <a href="{% url 'facturacion:admin_lista_documentos' %}" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-300">Volver a la Lista</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

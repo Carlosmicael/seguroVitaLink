@@ -1,0 +1,180 @@
+{% extends "master/base.html" %}
+{% load static %}
+
+{% block title %}Administración de Solicitudes | VitaLink{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border-t-4 border-blue-600">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Gestión de Solicitudes</h1>
+            <p class="text-gray-600">Administra y cataloga las solicitudes de activación de pólizas</p>
+        </div>
+
+        <!-- Lista de Solicitudes -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                ID
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Fecha Creación
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Plazo (4 días)
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Tipo Evento
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Estudiante
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Estado
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Acciones
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for item in solicitudes_con_plazo %}
+                        <tr class="hover:bg-gray-50 {% if item.vencido %}bg-red-50{% elif item.por_vencer %}bg-yellow-50{% endif %}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                #{{ item.solicitud.id }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ item.solicitud.fecha_reporte|date:"d/m/Y H:i" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if item.vencido %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        ⚠️ Vencido ({{ item.dias_restantes|abs }} días)
+                                    </span>
+                                {% elif item.por_vencer %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        ⏰ Por vencer ({{ item.dias_restantes }} día{{ item.dias_restantes|pluralize }})
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        ✅ {{ item.dias_restantes }} día{{ item.dias_restantes|pluralize }} restantes
+                                    </span>
+                                {% endif %}
+                                <div class="text-xs text-gray-500 mt-1" id="countdown-{{ item.solicitud.id }}">
+                                    Cargando...
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {% if item.solicitud.tipo %}
+                                    {{ item.solicitud.get_tipo_display }}
+                                {% else %}
+                                    <span class="text-gray-400 italic">Pendiente asignación</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {% if item.solicitud.poliza and item.solicitud.poliza.numero != 'TEMP-PENDIENTE' %}
+                                    {{ item.solicitud.poliza.estudiante.nombre_completo }} ({{ item.solicitud.poliza.estudiante.codigo_estudiante }})
+                                {% else %}
+                                    <span class="text-gray-400 italic">Pendiente asignación</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                    {% if item.solicitud.estado == 'pendiente' %}bg-yellow-100 text-yellow-800
+                                    {% elif item.solicitud.estado == 'aprobado' %}bg-green-100 text-green-800
+                                    {% elif item.solicitud.estado == 'rechazado' %}bg-red-100 text-red-800
+                                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                    {{ item.solicitud.get_estado_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="{% url 'siniestros:admin_detalle_solicitud' item.solicitud.pk %}" 
+                                   class="text-blue-600 hover:text-blue-900 font-semibold">
+                                    Ver Detalles →
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                                No hay solicitudes registradas
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Script para actualizar countdown en tiempo real
+document.addEventListener('DOMContentLoaded', function() {
+    function updateCountdowns() {
+        {% for item in solicitudes_con_plazo %}
+        (function(fechaVencimientoStr, countdownId) {
+            const fechaVencimiento = new Date(fechaVencimientoStr);
+            const countdownElement = document.getElementById(countdownId);
+            if (countdownElement) {
+                const ahora = new Date();
+                const diff = fechaVencimiento - ahora;
+                
+                if (diff <= 0) {
+                    countdownElement.textContent = 'Vencido';
+                    countdownElement.className = 'text-xs text-red-600 font-bold mt-1';
+                } else {
+                    const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    
+                    countdownElement.textContent = `${dias}d ${horas}h ${minutos}m`;
+                    if (dias <= 1) {
+                        countdownElement.className = 'text-xs text-yellow-600 font-bold mt-1';
+                    } else {
+                        countdownElement.className = 'text-xs text-gray-500 mt-1';
+                    }
+                }
+            }
+        })('{{ item.fecha_vencimiento|date:"c" }}', 'countdown-{{ item.solicitud.id }}');
+        {% endfor %}
+    }
+
+        })('{{ item.fecha_vencimiento|date:"c" }}', 'countdown-{{ item.solicitud.id }}');
+        {% endfor %}
+    }
+            if (countdownElement) {
+                const ahora = new Date();
+                const diff = fechaVencimiento - ahora;
+                
+                if (diff <= 0) {
+                    countdownElement.textContent = 'Vencido';
+                    countdownElement.className = 'text-xs text-red-600 font-bold mt-1';
+                } else {
+                    const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    
+                    countdownElement.textContent = `${dias}d ${horas}h ${minutos}m`;
+                    if (dias <= 1) {
+                        countdownElement.className = 'text-xs text-yellow-600 font-bold mt-1';
+                    } else {
+                        countdownElement.className = 'text-xs text-gray-500 mt-1';
+                    }
+                }
+            }
+        })();
+        {% endfor %}
+    }
+    
+    // Actualizar cada minuto
+    updateCountdowns();
+    setInterval(updateCountdowns, 60000);
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,53 @@
+{% extends 'master/base.html' %}
+{% load static %}
+
+{% block title %}Subir Documento de Facturación{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4 max-w-2xl">
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Subir Nuevo Documento de Facturación</h1>
+        <form method="post" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+
+            <div>
+                <label for="id_poliza" class="block text-sm font-medium text-gray-700">Póliza</label>
+                {{ form.poliza }}
+                {% if form.poliza.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.poliza.errors }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="id_documento" class="block text-sm font-medium text-gray-700">Documento</label>
+                {{ form.documento }}
+                {% if form.documento.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.documento.errors }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="id_codigo_documento" class="block text-sm font-medium text-gray-700">Código de Documento</label>
+                {{ form.codigo_documento }}
+                {% if form.codigo_documento.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.codigo_documento.errors }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="id_comentarios" class="block text-sm font-medium text-gray-700">Comentarios (Opcional)</label>
+                {{ form.comentarios }}
+                {% if form.comentarios.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.comentarios.errors }}</p>
+                {% endif %}
+            </div>
+
+            <div class="flex justify-end space-x-3 mt-6">
+                <a href="{% url 'facturacion:admin_lista_documentos' %}" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-300">Cancelar</a>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300">Subir Documento</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
