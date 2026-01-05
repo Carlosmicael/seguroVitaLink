@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import Poliza, Siniestro
-
+from .models import Poliza, Siniestro, Factura, Pago
 
 @admin.register(Poliza)
 class PolizaAdmin(admin.ModelAdmin):
@@ -18,3 +17,14 @@ class SiniestroAdmin(admin.ModelAdmin):
     search_fields = ('poliza__numero', 'descripcion', 'nombre_beneficiario')
     date_hierarchy = 'fecha_reporte'
     readonly_fields = ('fecha_reporte', 'fecha_actualizacion')
+
+@admin.register(Factura)
+class FacturaAdmin(admin.ModelAdmin):
+    list_display = ('id', 'poliza', 'monto', 'fecha_vencimiento', 'pagada')
+    list_filter = ('pagada', 'fecha_vencimiento')
+    search_fields = ('poliza__numero',)
+
+@admin.register(Pago)
+class PagoAdmin(admin.ModelAdmin):
+    list_display = ('id', 'factura', 'monto', 'fecha_pago', 'metodo_pago')
+    list_filter = ('fecha_pago', 'metodo_pago')

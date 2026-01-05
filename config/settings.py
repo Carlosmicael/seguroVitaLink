@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'siniestros',
+    'configuracion',
 ]
 
 MIDDLEWARE = [
@@ -79,7 +80,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'seguros_personas',
         'USER': 'root',
-        'PASSWORD': 'password',
+        'PASSWORD': 'UTPL2023',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -123,3 +124,5 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+AUTH_USER_MODEL = 'core.CustomUser'

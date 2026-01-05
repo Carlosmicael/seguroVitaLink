@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
+from configuracion.models import Aseguradora
 
 
 class Poliza(models.Model):
@@ -11,8 +13,24 @@ class Poliza(models.Model):
         ('vencida', 'Vencida'),
     ]
     
+    TIPO_ESTUDIANTE_CHOICES = [
+        ('GRADO', 'Grado'),
+        ('POSTGRADO', 'Postgrado'),
+    ]
+
+    MODALIDAD_CHOICES = [
+        ('PRESENCIAL', 'Presencial'),
+        ('DISTANCIA', 'Distancia'),
+    ]
+
     numero = models.CharField(max_length=50, unique=True)
-    usuario = models.OneToOneField(User, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    aseguradora = models.ForeignKey(Aseguradora, on_delete=models.PROTECT, null=True, blank=True)
+    tipo_estudiante = models.CharField(max_length=20, choices=TIPO_ESTUDIANTE_CHOICES, default='GRADO')
+    modalidad = models.CharField(max_length=20, choices=MODALIDAD_CHOICES, default='PRESENCIAL')
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='inactiva')
     monto_cobertura = models.DecimalField(max_digits=10, decimal_places=2, default=10000)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
@@ -56,7 +74,7 @@ class Siniestro(models.Model):
     parentesco = models.CharField(max_length=50, blank=True)
     
     # Auditoría
-    revisado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, 
+    revisado_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, 
                                     blank=True, related_name='siniestros_revisados')
     comentarios = models.TextField(blank=True)
     
@@ -65,3 +83,26 @@ class Siniestro(models.Model):
     
     def __str__(self):
         return f"Siniestro {self.id} - Póliza {self.poliza.numero}"
+
+
+class Factura(models.Model):
+    poliza = models.ForeignKey(Poliza, on_delete=models.CASCADE, related_name='facturas')
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    fecha_emision = models.DateField()
+    fecha_vencimiento = models.DateField() 
+    pagada = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Factura {self.id} - ${self.monto}"
+
+class Pago(models.Model):
+    factura = models.ForeignKey(Factura, on_delete=models.CASCADE, related_name='pagos')
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    fecha_pago = models.DateField()
+    metodo_pago = models.CharField(
+        max_length=50, 
+        choices=[('TRANSFERENCIA', 'Transferencia'), ('TARJETA', 'Tarjeta')]
+    )
+
+    def __str__(self):
+        return f"Pago {self.id} - ${self.monto}"
