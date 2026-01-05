@@ -58,11 +58,64 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-bold text-gray-700 mb-4">Resumen de Actividad</h3>
-        <div class="h-64 bg-gray-50 flex items-center justify-center border-2 border-dashed border-gray-300 rounded">
-            <p class="text-gray-400">Aquí irán los gráficos (Chart.js) en el siguiente paso.</p>
+    <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
+        <h3 class="text-lg font-bold text-gray-700 mb-4">Tendencia de Ingresos Mensuales</h3>
+        
+        <div class="relative w-full h-80">
+            <canvas id="graficoPagos"></canvas>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Obtenemos los datos que envió Django (usamos |safe para que JS entienda la lista)
+        const labels = {{ labels_grafico|safe }};
+        const data = {{ data_grafico|safe }};
+
+        const ctx = document.getElementById('graficoPagos').getContext('2d');
+        
+        new Chart(ctx, {
+            type: 'bar', // Tipo de gráfico: Barras
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Monto Cobrado ($)',
+                    data: data,
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)', // Azul semitransparente
+                    borderColor: 'rgba(59, 130, 246, 1)',      // Borde azul
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            // Agrega el signo $ al eje Y
+                            callback: function(value) { return '$' + value; }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false // Ocultamos la leyenda si solo hay una serie
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Cobrado: $' + context.raw;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}

@@ -5,6 +5,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
 from django.utils import timezone
 from .models import Poliza, Siniestro, Factura, Pago
+from django.db.models.functions import TruncMonth
+from django.views.generic import TemplateView
+import json
 
 
 class SiniestrosInicioView(TemplateView):
@@ -21,32 +24,37 @@ class DashboardAsesorView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        # Obtener fecha actual para filtros de mes
         hoy = timezone.now()
-
-        # 1. Total Pólizas Activas (Asumiendo que no tienen fecha de fin o es futura)
-        context['total_polizas'] = Poliza.objects.filter(
-            fecha_vencimiento__gte=hoy
-        ).count()
-
-        # 2. Siniestros en Proceso (Ajusta el estado según tus choices del modelo)
-        context['siniestros_pendientes'] = Siniestro.objects.filter(
-            estado__in=['PENDIENTE', 'EN_PROCESO'] 
-        ).count()
-
-        # 3. Facturas Pendientes de Pago
-        context['facturas_pendientes'] = Factura.objects.filter(
-            pagada=False
-        ).count()
-
-        # 4. Monto Total Pagado en el Mes Actual
-        total_mes = Pago.objects.filter(
-            fecha_pago__month=hoy.month,
-            fecha_pago__year=hoy.year
-        ).aggregate(Sum('monto'))['monto__sum']
         
-        # Si no hay pagos, devuelve 0 en lugar de None
+        context['total_polizas'] = Poliza.objects.filter(fecha_vencimiento__gte=hoy).count()
+        context['siniestros_pendientes'] = Siniestro.objects.exclude(estado='CERRADO').count()
+        context['facturas_pendientes'] = Factura.objects.filter(pagada=False).count()
+        
+        total_mes = Pago.objects.filter(fecha_pago__month=hoy.month, fecha_pago__year=hoy.year).aggregate(Sum('monto'))['monto__sum']
         context['dinero_mes'] = total_mes if total_mes else 0
+        
+        # 1. Agrupar pagos por mes
+        pagos_historicos = Pago.objects.annotate(
+            mes=TruncMonth('fecha_pago')
+        ).values('mes').annotate(
+            total=Sum('monto')
+        ).order_by('mes')
 
+        # 2. Crear listas puras de Python
+        labels = []
+        data = []
+
+        for p in pagos_historicos:
+            # Fechas a string
+            labels.append(p['mes'].strftime("%b %Y"))
+            
+            # Montos: Validamos que no sea None y convertimos a float (JSON no entiende Decimal)
+            monto = p['total'] if p['total'] else 0
+            data.append(float(monto))
+
+        # 3. SERIALIZAR A JSON
+        # Convertimos las listas a Strings de texto formato JSON: '["Ene", "Feb"]'
+        context['labels_grafico'] = json.dumps(labels) 
+        context['data_grafico'] = json.dumps(data)
+        
         return context
