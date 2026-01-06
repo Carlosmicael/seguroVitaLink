@@ -2,11 +2,23 @@
 
 {% block content %}
 <div class="p-6">
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">Dashboard del Asesor</h1>
-        <p class="text-gray-600">Resumen de gestión y métricas clave.</p>
-    </div>
+    <div class="mb-8 flex justify-between items-center border-2 border-red-500">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Dashboard del Asesor</h1>
+            <p class="text-gray-600">Resumen de gestión y métricas clave.</p>
+        </div>
 
+        <a href="{% url 'siniestros:exportar_siniestros' %}" 
+           style="background-color: #16a34a; color: white; padding: 0.5rem 1rem; border-radius: 0.25rem; display: inline-flex; align-items: center; text-decoration: none;"
+           class="shadow hover:bg-green-700 transition duration-150">
+           
+            <svg style="width: 1rem; height: 1rem; margin-right: 0.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            
+            <span>Descargar Reporte</span>
+        </a>
+    </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         
         <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
@@ -97,7 +109,7 @@
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            // Agrega el signo $ al eje Y
+                           
                             callback: function(value) { return '$' + value; }
                         }
                     }

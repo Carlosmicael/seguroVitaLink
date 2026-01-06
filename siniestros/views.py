@@ -8,6 +8,8 @@ from .models import Poliza, Siniestro, Factura, Pago
 from django.db.models.functions import TruncMonth
 from django.views.generic import TemplateView
 import json
+import openpyxl 
+from django.http import HttpResponse
 
 
 class SiniestrosInicioView(TemplateView):
@@ -58,3 +60,43 @@ class DashboardAsesorView(LoginRequiredMixin, TemplateView):
         context['data_grafico'] = json.dumps(data)
         
         return context
+    
+    
+    # Exportar siniestros pendientes a Excel -------- #
+    
+def exportar_siniestros_excel(request):
+    # 1. Crear el libro de Excel y la hoja
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Siniestros Pendientes"
+
+    # 2. Escribir los Encabezados (La primera fila)
+    headers = ["ID", "Póliza", "Descripción", "Fecha Siniestro", "Estado", "Monto Estimado"]
+    ws.append(headers)
+
+    # 3. Consultar los datos (Siniestros NO cerrados)
+    siniestros = Siniestro.objects.exclude(estado='CERRADO')
+
+    # 4. Escribir los datos fila por fila
+    for s in siniestros:
+        # Nota: Asegúrate de que fecha_siniestro no sea None para evitar error
+        fecha = s.fecha_siniestro.strftime("%d/%m/%Y") if s.fecha_siniestro else "Sin fecha"
+        
+        ws.append([
+            s.id,
+            str(s.poliza),      # Convertimos a texto por si acaso
+            s.descripcion,
+            fecha,
+            s.estado,
+            s.monto_estimado
+        ])
+
+    # 5. Preparar la respuesta HTTP para descarga
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="Reporte_Siniestros.xlsx"'
+
+    # 6. Guardar el libro en la respuesta
+    wb.save(response)
+    return response
