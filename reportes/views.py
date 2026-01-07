@@ -9,6 +9,9 @@ from django.shortcuts import render
 from django.db.models import Count
 from siniestros.models import Poliza
 import json
+from django.db.models import Sum, Count, Q
+from django.utils import timezone
+from siniestros.models import Siniestro
 
 # Create your views here.
 
@@ -99,3 +102,48 @@ def exportar_estudiantes_csv(request):
         writer.writerow([p.numero, p.usuario.username, p.tipo_estudiante, p.modalidad, p.estado, p.monto_cobertura])
 
     return response
+
+# SINIESTROS ATENDIDOS ---- #
+
+def reporte_siniestros(request):
+    # 1. Obtener año actual o el seleccionado
+    anio_actual = timezone.now().year
+    anio_seleccionado = request.GET.get('anio', anio_actual)
+
+    # 2. Filtrar Siniestros por esa vigencia (Año)
+    siniestros = Siniestro.objects.filter(fecha_reporte__year=anio_seleccionado)
+
+    # 3. Calcular KPIs Generales (Tarjetas Superiores)
+    # Total de casos en el año
+    total_siniestros = siniestros.count()
+    
+    # Pendientes (estado 'pendiente')
+    pendientes = siniestros.filter(estado='pendiente').count()
+    
+    # Monto Pagado: Suma de la cobertura de pólizas en siniestros con estado 'pagado'
+    # (Usamos monto_cobertura como proxy del pago, ya que no hay campo 'monto_pagado' en Siniestro)
+    monto_pagado = siniestros.filter(estado='pagado').aggregate(
+        total=Sum('poliza__monto_cobertura')
+    )['total'] or 0
+
+    # 4. Desglose por Tipo (La "Separación" que pediste)
+    # Agrupa por el campo 'tipo' (Accidente, Fallecimiento, Enfermedad, etc.)
+    desglose_tipos = siniestros.values('tipo').annotate(
+        cantidad=Count('id'),
+        monto_total=Sum('poliza__monto_cobertura')
+    ).order_by('-cantidad')
+
+    # 5. Listado de años para el filtro
+    anios_disponibles = Siniestro.objects.dates('fecha_reporte', 'year')
+
+    context = {
+        'anio_seleccionado': int(anio_seleccionado),
+        'anios_disponibles': anios_disponibles,
+        'total_siniestros': total_siniestros,
+        'pendientes': pendientes,
+        'monto_pagado': monto_pagado,
+        'desglose_tipos': desglose_tipos,
+        # Pasamos los siniestros individuales por si quieres mostrar la tabla detalle abajo
+        'lista_siniestros': siniestros.select_related('poliza', 'poliza__usuario'),
+    }
+    return render(request, 'reportes/siniestros_atendidos.html', context)

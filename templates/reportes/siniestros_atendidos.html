@@ -1,0 +1,92 @@
+{% extends 'master/sideBar/base.html' %}
+
+{% block content %}
+<div class="p-6 bg-gray-50 min-h-screen">
+    
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Tablero de Siniestros Atendidos</h1>
+            <p class="text-gray-500">Resumen de gestión y pagos por vigencia.</p>
+        </div>
+        
+        <form method="GET" class="bg-white p-2 rounded shadow flex items-center gap-2">
+            <label class="text-sm font-bold text-gray-600">Vigencia:</label>
+            <select name="anio" onchange="this.form.submit()" class="border-none text-sm font-bold text-emerald-600 focus:ring-0 cursor-pointer">
+                {% for fecha in anios_disponibles %}
+                    <option value="{{ fecha|date:'Y' }}" {% if anio_seleccionado == fecha.year %}selected{% endif %}>
+                        {{ fecha|date:'Y' }}
+                    </option>
+                {% empty %}
+                    <option value="{{ anio_seleccionado }}">{{ anio_seleccionado }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
+            <p class="text-sm text-gray-500 uppercase font-bold">Total Siniestros</p>
+            <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_siniestros }}</p>
+            <p class="text-xs text-gray-400 mt-1">Registrados en {{ anio_seleccionado }}</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
+            <p class="text-sm text-gray-500 uppercase font-bold">Monto Total Pagado</p>
+            <p class="text-3xl font-bold text-emerald-600 mt-2">${{ monto_pagado|floatformat:2 }}</p>
+            <p class="text-xs text-gray-400 mt-1">Suma de coberturas ejecutadas</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-yellow-500">
+            <p class="text-sm text-gray-500 uppercase font-bold">Casos Pendientes</p>
+            <p class="text-3xl font-bold text-yellow-600 mt-2">{{ pendientes }}</p>
+            <p class="text-xs text-gray-400 mt-1">Requieren atención inmediata</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow mb-8 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h3 class="font-bold text-gray-700">Desglose por Clasificación de Causa</h3>
+        </div>
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Tipo de Siniestro</th>
+                    <th class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase">Cantidad Casos</th>
+                    <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase">Impacto Financiero (Monto)</th>
+                    <th class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase">% del Total</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for item in desglose_tipos %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold 
+                            {% if item.tipo == 'fallecimiento' %}bg-gray-900 text-white
+                            {% elif item.tipo == 'accidente' %}bg-red-100 text-red-800
+                            {% elif item.tipo == 'enfermedad' %}bg-blue-100 text-blue-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ item.tipo|title }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-900">
+                        {{ item.cantidad }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-600">
+                        ${{ item.monto_total|floatformat:2 }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-400">
+                        {% widthratio item.cantidad total_siniestros 100 %}%
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                        No hay datos registrados en esta vigencia.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
