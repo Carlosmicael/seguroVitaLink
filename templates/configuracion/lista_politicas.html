@@ -1,0 +1,70 @@
+{% extends 'master/sideBar/base.html' %}
+
+{% block content %}
+<div class="p-6 bg-gray-50 min-h-screen">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Gestión de Documentos y Políticas</h1>
+        <a href="{% url 'subir_politica' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+            Subir Nueva Política
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Documento / Versión</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Aseguradora</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Vigencia</th>
+                    <th class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase">Estado</th>
+                    <th class="px-6 py-3 text-right text-xs font-bold text-gray-600 uppercase">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for doc in documentos %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">
+                        <div class="font-medium text-gray-900">{{ doc.titulo }}</div>
+                        <div class="text-xs text-gray-500">Versión: {{ doc.version }}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-700">
+                        {{ doc.aseguradora.nombre }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500">
+                        {{ doc.fecha_vigencia|date:"d M Y" }}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        {% if doc.activo %}
+                            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-semibold">Vigente</span>
+                        {% else %}
+                            <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">Histórico</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-right space-x-2">
+                        {% if doc.archivo_pdf %}
+                            <a href="{{ doc.archivo_pdf.url }}" target="_blank" class="text-red-600 hover:text-red-800 text-sm font-medium">Ver PDF</a>
+                        {% endif %}
+                        <a href="{% url 'ver_terminos_publico' doc.aseguradora.id %}" class="text-blue-600 hover:text-blue-900 text-sm font-medium">Vista Previa</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-10 text-center text-gray-500">
+                        No se han cargado documentos de políticas aún.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

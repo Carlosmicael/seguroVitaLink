@@ -22,3 +22,24 @@ class Aseguradora(models.Model):
     class Meta:
         verbose_name = "Aseguradora"
         verbose_name_plural = "Aseguradoras"
+
+# Nueva clase para Documentos de Políticas asociadas a una Aseguradora ---------- # 
+
+class DocumentoPolitica(models.Model):
+    aseguradora = models.ForeignKey(Aseguradora, on_delete=models.CASCADE, related_name='documentos')
+    titulo = models.CharField(max_length=200, help_text="Ej: Políticas 2026 - Versión 1")
+    
+    # Upload de PDF
+    archivo_pdf = models.FileField(upload_to='politicas_pdfs/', verbose_name="Documento PDF")
+    
+    # Texto para visualización web rápida
+    terminos_texto = models.TextField(verbose_name="Términos y Condiciones (Texto)")
+    
+    # Control de versiones
+    version = models.CharField(max_length=20, default="1.0")
+    fecha_vigencia = models.DateField()
+    activo = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.titulo} - {self.aseguradora.nombre}"
