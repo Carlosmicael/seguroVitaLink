@@ -65,38 +65,43 @@ class DashboardAsesorView(LoginRequiredMixin, TemplateView):
     # Exportar siniestros pendientes a Excel -------- #
     
 def exportar_siniestros_excel(request):
-    # 1. Crear el libro de Excel y la hoja
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Siniestros Pendientes"
 
-    # 2. Escribir los Encabezados (La primera fila)
-    headers = ["ID", "Póliza", "Descripción", "Fecha Siniestro", "Estado", "Monto Estimado"]
+    headers = ["ID", "Póliza", "Descripción", "Fecha Evento", "Estado", "Monto Estimado"]
     ws.append(headers)
 
-    # 3. Consultar los datos (Siniestros NO cerrados)
     siniestros = Siniestro.objects.exclude(estado='CERRADO')
 
-    # 4. Escribir los datos fila por fila
     for s in siniestros:
-        # Nota: Asegúrate de que fecha_siniestro no sea None para evitar error
-        fecha = s.fecha_siniestro.strftime("%d/%m/%Y") if s.fecha_siniestro else "Sin fecha"
+        # CORREGIDO: Usamos 's.fecha_evento' aquí también
+        fecha = s.fecha_evento.strftime("%d/%m/%Y") if s.fecha_evento else "Sin fecha"
         
         ws.append([
             s.id,
-            str(s.poliza),      # Convertimos a texto por si acaso
+            str(s.poliza),
             s.descripcion,
             fecha,
             s.estado,
             s.monto_estimado
         ])
 
-    # 5. Preparar la respuesta HTTP para descarga
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
     response['Content-Disposition'] = 'attachment; filename="Reporte_Siniestros.xlsx"'
-
-    # 6. Guardar el libro en la respuesta
     wb.save(response)
+    
     return response
+
+class SiniestroListView(LoginRequiredMixin, ListView):
+    model = Siniestro
+    template_name = "siniestros/siniestro_list.html"
+    context_object_name = "siniestros"
+    paginate_by = 10
+
+    def get_queryset(self):
+        # CORREGIDO: Usamos 'fecha_evento' en lugar de 'fecha_siniestro'
+        return Siniestro.objects.all().order_by('-fecha_evento')
+    
