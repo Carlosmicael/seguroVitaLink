@@ -12,6 +12,8 @@ import json
 from django.db.models import Sum, Count, Q
 from django.utils import timezone
 from siniestros.models import Siniestro
+from django.utils import timezone
+from siniestros.models import Factura
 
 # Create your views here.
 
@@ -147,3 +149,37 @@ def reporte_siniestros(request):
         'lista_siniestros': siniestros.select_related('poliza', 'poliza__usuario'),
     }
     return render(request, 'reportes/siniestros_atendidos.html', context)
+
+
+# FACTURAS PENDIENTES ---- #
+
+def reporte_facturas_pendientes(request):
+    # 1. Obtener todas las facturas NO pagadas
+    facturas = Factura.objects.filter(pagada=False).select_related('poliza', 'poliza__usuario')
+
+    # 2. Lógica de Vencimiento y Totales
+    hoy = timezone.now().date()
+    total_pendiente = 0
+    cantidad_vencidas = 0
+
+    # Iteramos para calcular totales y marcar las vencidas
+    # (Nota: En proyectos grandes esto se hace con annotations de DB, pero así es más claro para aprender)
+    for f in facturas:
+        total_pendiente += f.monto
+        # Agregamos un atributo temporal al objeto para usarlo en el HTML
+        f.esta_vencida = f.fecha_vencimiento < hoy
+        if f.esta_vencida:
+            cantidad_vencidas += 1
+
+    # 3. Filtros opcionales (Mes/Año de emisión)
+    mes = request.GET.get('mes')
+    if mes:
+        facturas = facturas.filter(fecha_emision__month=mes)
+
+    context = {
+        'facturas': facturas,
+        'total_pendiente': total_pendiente,
+        'cantidad_vencidas': cantidad_vencidas,
+        'hoy': hoy, # Para comparar en el template si hace falta
+    }
+    return render(request, 'reportes/facturas_pendientes.html', context)
