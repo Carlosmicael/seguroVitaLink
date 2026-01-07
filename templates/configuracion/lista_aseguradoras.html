@@ -1,0 +1,64 @@
+{% extends 'master/sideBar/base.html' %}
+
+{% block content %}
+<div class="p-6 bg-gray-50 min-h-screen">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Gestión de Aseguradoras</h1>
+        <a href="{% url 'crear_aseguradora' %}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded shadow">
+            + Nueva Aseguradora
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="p-4 mb-4 text-sm rounded-lg {% if message.tags == 'warning' %}bg-orange-100 text-orange-800{% else %}bg-green-100 text-green-700{% endif %}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Aseguradora</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Contacto / RUC</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Políticas</th>
+                    <th class="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase">Estado</th>
+                    <th class="px-6 py-3 text-right text-xs font-bold text-gray-600 uppercase">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for a in aseguradoras %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">
+                        <div class="font-medium text-gray-900">{{ a.nombre }}</div>
+                        <div class="text-xs text-gray-400">Creada: {{ a.created_at|date:"d/m/Y" }}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500">
+                        RUC: {{ a.ruc }}<br>
+                        <span class="text-xs">{{ a.email }}</span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                        {{ a.politicas|default:"Sin políticas definidas"|truncatechars:50 }}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        {% if a.activa %}
+                            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Activa</span>
+                        {% else %}
+                            <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">Histórico (Inactiva)</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-right space-x-2">
+                        <a href="{% url 'editar_aseguradora' a.id %}" class="text-blue-600 hover:text-blue-900 font-medium text-sm">Editar</a>
+                        <a href="{% url 'eliminar_aseguradora' a.id %}" onclick="return confirm('¿Desea eliminar esta aseguradora? Si tiene historial, pasará a inactiva.');" class="text-red-600 hover:text-red-900 font-medium text-sm">Eliminar</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="px-6 py-10 text-center text-gray-500">No hay aseguradoras registradas.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

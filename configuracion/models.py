@@ -10,6 +10,11 @@ class Aseguradora(models.Model):
     activa = models.BooleanField(default=True, help_text="Marcar si la aseguradora sigue operando con nosotros")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    ruc = models.CharField("RUC", max_length=20, blank=True, null=True, unique=True)
+    politicas = models.TextField(blank=True, null=True, verbose_name="Políticas y Condiciones")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.nombre
