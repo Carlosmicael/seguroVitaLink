@@ -24,6 +24,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
     path('siniestros/', include('siniestros.urls')),
+
+    #Ronal
     path('reportes/', include('reportes.urls')),
     path('configuracion/', include('configuracion.urls')),
 ]
