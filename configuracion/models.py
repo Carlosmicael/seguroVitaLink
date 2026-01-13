@@ -13,6 +13,12 @@ class Aseguradora(models.Model):
     ruc = models.CharField("RUC", max_length=20, blank=True, null=True, unique=True)
     politicas = models.TextField(blank=True, null=True, verbose_name="Políticas y Condiciones")
 
+    dias_maximos_reporte = models.PositiveIntegerField(
+        default=30, 
+        verbose_name="Días máximos para reportar",
+        help_text="Límite de días tras el evento para aceptar el reclamo."
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -7,7 +7,7 @@ from .models import DocumentoPolitica
 class AseguradoraForm(forms.ModelForm):
     class Meta:
         model = Aseguradora
-        fields = ['nombre', 'ruc', 'direccion', 'telefono', 'email', 'politicas', 'activa']
+        fields = ['nombre', 'ruc', 'direccion', 'telefono', 'email', 'politicas', 'dias_maximos_reporte', 'activa']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'w-full border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500'}),
             'ruc': forms.TextInput(attrs={'class': 'w-full border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500'}),
@@ -16,6 +16,7 @@ class AseguradoraForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'w-full border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500'}),
             'politicas': forms.Textarea(attrs={'rows': 4, 'class': 'w-full border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500'}),
             'activa': forms.CheckboxInput(attrs={'class': 'rounded text-emerald-600 focus:ring-emerald-500 h-5 w-5'}),
+            'dias_maximos_reporte': forms.NumberInput(attrs={'class': 'w-1/3 border-gray-300 rounded-md shadow-sm p-2'}),
         }
 
 # Nueva forma para Documentos de Políticas ---------- #
