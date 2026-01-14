@@ -11,4 +11,6 @@ urlpatterns = [
     path('politicas/', views.gestionar_politicas, name='gestionar_politicas'),
     path('politicas/nueva/', views.subir_politica, name='subir_politica'),
     path('terminos/<int:id_aseguradora>/', views.ver_terminos_publico, name='ver_terminos_publico'),
+    path('requisitos/', views.gestionar_requisitos, name='gestionar_requisitos'),
+    path('requisitos/eliminar/<int:id>/', views.eliminar_requisito, name='eliminar_requisito'),
 ]

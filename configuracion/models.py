@@ -49,3 +49,28 @@ class DocumentoPolitica(models.Model):
 
     def __str__(self):
         return f"{self.titulo} - {self.aseguradora.nombre}"
+    
+
+# En configuracion/models.py
+
+class RequisitoSiniestro(models.Model):
+    # USAMOS EXACTAMENTE TUS OPCIONES DE SINIESTRO
+    TIPOS_SINIESTRO = [
+        ('accidente', 'Accidente'),
+        ('enfermedad', 'Enfermedad grave'),
+        ('hospitalizacion', 'Hospitalización'),
+        ('fallecimiento', 'Fallecimiento'),
+        ('otro', 'Otro'),
+    ]
+
+    aseguradora = models.ForeignKey(Aseguradora, on_delete=models.CASCADE, related_name='requisitos')
+    nombre_documento = models.CharField(max_length=200, verbose_name="Nombre del Documento (Ej: Acta Defunción)")
+    
+    # Aquí usamos tu lista corregida
+    tipo_siniestro = models.CharField(max_length=20, choices=TIPOS_SINIESTRO, verbose_name="Aplica para")
+    
+    obligatorio = models.BooleanField(default=True, verbose_name="¿Es obligatorio?")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.nombre_documento} ({self.get_tipo_siniestro_display()})"  

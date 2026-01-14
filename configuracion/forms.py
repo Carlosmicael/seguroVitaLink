@@ -1,6 +1,6 @@
 from django import forms
 from .models import Aseguradora
-from .models import DocumentoPolitica
+from .models import DocumentoPolitica, RequisitoSiniestro
 
 # Forma para Aseguradora ---------- #
 
@@ -17,6 +17,17 @@ class AseguradoraForm(forms.ModelForm):
             'politicas': forms.Textarea(attrs={'rows': 4, 'class': 'w-full border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500'}),
             'activa': forms.CheckboxInput(attrs={'class': 'rounded text-emerald-600 focus:ring-emerald-500 h-5 w-5'}),
             'dias_maximos_reporte': forms.NumberInput(attrs={'class': 'w-1/3 border-gray-300 rounded-md shadow-sm p-2'}),
+        }
+
+class RequisitoSiniestroForm(forms.ModelForm):
+    class Meta:
+        model = RequisitoSiniestro
+        fields = ['aseguradora', 'tipo_siniestro', 'nombre_documento', 'obligatorio']
+        widgets = {
+            'aseguradora': forms.Select(attrs={'class': 'w-full border-gray-300 rounded p-2 focus:ring-blue-500 focus:border-blue-500'}),
+            'tipo_siniestro': forms.Select(attrs={'class': 'w-full border-gray-300 rounded p-2 focus:ring-blue-500 focus:border-blue-500'}),
+            'nombre_documento': forms.TextInput(attrs={'class': 'w-full border-gray-300 rounded p-2 focus:ring-blue-500 focus:border-blue-500', 'placeholder': 'Ej: Informe Policial Legalizado'}),
+            'obligatorio': forms.CheckboxInput(attrs={'class': 'h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500'}),
         }
 
 # Nueva forma para Documentos de Políticas ---------- #

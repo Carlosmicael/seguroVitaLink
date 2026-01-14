@@ -5,6 +5,8 @@ from .models import Aseguradora
 from .forms import AseguradoraForm
 from .forms import DocumentoPoliticaForm
 from .models import DocumentoPolitica
+from .models import RequisitoSiniestro
+from .forms import RequisitoSiniestroForm
 
 # 1. LISTAR (Read)
 def lista_aseguradoras(request):
@@ -89,3 +91,26 @@ def ver_terminos_publico(request, id_aseguradora):
         'aseguradora': aseguradora,
         'documento': documento
     })
+
+def gestionar_requisitos(request):
+    requisitos = RequisitoSiniestro.objects.all().order_by('aseguradora', 'tipo_siniestro')
+    
+    if request.method == 'POST':
+        form = RequisitoSiniestroForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Requisito documental agregado correctamente.')
+            return redirect('gestionar_requisitos')
+    else:
+        form = RequisitoSiniestroForm()
+    
+    return render(request, 'configuracion/gestionar_requisitos.html', {
+        'requisitos': requisitos,
+        'form': form
+    })
+
+def eliminar_requisito(request, id):
+    req = get_object_or_404(RequisitoSiniestro, id=id)
+    req.delete()
+    messages.success(request, 'Requisito eliminado.')
+    return redirect('gestionar_requisitos')

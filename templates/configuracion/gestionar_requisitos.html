@@ -1,0 +1,92 @@
+{% extends 'master/sideBar/base.html' %}
+
+{% block content %}
+<div class="p-6 bg-gray-50 min-h-screen">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Matriz de Requisitos Documentales</h1>
+        <p class="text-gray-500">Configura qué documentos debe subir el estudiante según el tipo de siniestro.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="bg-white p-6 rounded-lg shadow h-fit">
+            <h2 class="text-lg font-bold text-blue-800 mb-4 border-b pb-2">Agregar Nuevo Requisito</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700">Aseguradora</label>
+                        {{ form.aseguradora }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700">Tipo de Siniestro</label>
+                        {{ form.tipo_siniestro }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700">Nombre del Documento</label>
+                        {{ form.nombre_documento }}
+                    </div>
+                    <div class="flex items-center gap-2 pt-2 bg-gray-50 p-2 rounded border border-gray-100">
+                        {{ form.obligatorio }}
+                        <label class="text-sm font-medium text-gray-700">¿Es Obligatorio?</label>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded shadow hover:bg-blue-700 font-bold mt-2">
+                        + Agregar Regla
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="lg:col-span-2 space-y-4">
+            {% if not requisitos %}
+                <div class="bg-yellow-50 p-4 rounded text-yellow-700 border border-yellow-200">
+                    No hay requisitos configurados. Los estudiantes no sabrán qué documentos subir.
+                </div>
+            {% endif %}
+
+            {% regroup requisitos by aseguradora as aseguradora_list %}
+
+            {% for group in aseguradora_list %}
+                <div class="bg-white rounded-lg shadow overflow-hidden border-t-4 border-blue-500">
+                    <div class="bg-gray-100 p-3 font-bold text-gray-800 flex justify-between">
+                        <span>🏢 {{ group.grouper.nombre }}</span>
+                    </div>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Caso (Siniestro)</th>
+                                <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Documento Requerido</th>
+                                <th class="px-4 py-2 text-center text-xs font-bold text-gray-500 uppercase">¿Obligatorio?</th>
+                                <th class="px-4 py-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for item in group.list %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-2 text-sm font-medium text-gray-900">
+                                    {% if item.tipo_siniestro == 'natural' %}🦠 Muerte Natural
+                                    {% elif item.tipo_siniestro == 'accidente' %}🚗 Accidente
+                                    {% elif item.tipo_siniestro == 'suicidio' %}🥀 Suicidio
+                                    {% else %}{{ item.get_tipo_siniestro_display }}{% endif %}
+                                </td>
+                                <td class="px-4 py-2 text-sm text-gray-600">{{ item.nombre_documento }}</td>
+                                <td class="px-4 py-2 text-center">
+                                    {% if item.obligatorio %}
+                                        <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full font-bold">Sí</span>
+                                    {% else %}
+                                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Opcional</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-2 text-right">
+                                    <a href="{% url 'eliminar_requisito' item.id %}" class="text-red-500 hover:text-red-700 font-bold">×</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
