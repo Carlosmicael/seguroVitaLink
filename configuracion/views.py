@@ -7,6 +7,8 @@ from .forms import DocumentoPoliticaForm
 from .models import DocumentoPolitica
 from .models import RequisitoSiniestro
 from .forms import RequisitoSiniestroForm
+from siniestros.models import Poliza
+from .forms import MigracionAseguradoraForm
 
 # 1. LISTAR (Read)
 def lista_aseguradoras(request):
@@ -114,3 +116,33 @@ def eliminar_requisito(request, id):
     req.delete()
     messages.success(request, 'Requisito eliminado.')
     return redirect('gestionar_requisitos')
+
+def migracion_masiva(request):
+    if request.method == 'POST':
+        form = MigracionAseguradoraForm(request.POST)
+        if form.is_valid():
+            origen = form.cleaned_data['aseguradora_origen']
+            destino = form.cleaned_data['aseguradora_destino']
+            
+            # LÓGICA DE MIGRACIÓN (HU-049)
+            # Buscamos todas las pólizas vinculadas a la aseguradora vieja
+            polizas_a_migrar = Poliza.objects.filter(aseguradora=origen)
+            cantidad = polizas_a_migrar.count()
+            
+            if cantidad > 0:
+                # Actualizamos masivamente (UPDATE SQL)
+                polizas_a_migrar.update(aseguradora=destino)
+                
+                # Opcional: Podríamos desactivar la aseguradora vieja
+                # origen.activa = False
+                # origen.save()
+                
+                messages.success(request, f'¡Migración completada! Se transfirieron {cantidad} estudiantes de {origen.nombre} a {destino.nombre}.')
+            else:
+                messages.warning(request, f'No se encontraron estudiantes activos en {origen.nombre} para migrar.')
+                
+            return redirect('lista_aseguradoras')
+    else:
+        form = MigracionAseguradoraForm()
+    
+    return render(request, 'configuracion/form_migracion.html', {'form': form})

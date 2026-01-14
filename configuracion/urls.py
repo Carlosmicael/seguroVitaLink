@@ -13,4 +13,5 @@ urlpatterns = [
     path('terminos/<int:id_aseguradora>/', views.ver_terminos_publico, name='ver_terminos_publico'),
     path('requisitos/', views.gestionar_requisitos, name='gestionar_requisitos'),
     path('requisitos/eliminar/<int:id>/', views.eliminar_requisito, name='eliminar_requisito'),
+    path('migracion/', views.migracion_masiva, name='migracion_masiva'),
 ]

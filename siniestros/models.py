@@ -106,3 +106,17 @@ class Pago(models.Model):
 
     def __str__(self):
         return f"Pago {self.id} - ${self.monto}"
+    
+
+class DocumentoSiniestro(models.Model):
+    """
+    Almacena los archivos de evidencia (PDFs, Imágenes) que sube el estudiante
+    para justificar un siniestro.
+    """
+    siniestro = models.ForeignKey(Siniestro, on_delete=models.CASCADE, related_name='documentos')
+    nombre = models.CharField(max_length=200) # Ej: Informe Policial
+    archivo = models.FileField(upload_to='evidencias_siniestros/%Y/%m/')
+    fecha_subida = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Doc {self.nombre} para Siniestro {self.siniestro.id}"

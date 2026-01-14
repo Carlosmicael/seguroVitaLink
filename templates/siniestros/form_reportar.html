@@ -31,7 +31,7 @@
                 </div>
             </div>
 
-            <form class="space-y-6" method="POST">
+            <form method="POST" class="space-y-6" enctype="multipart/form-data">
                 {% csrf_token %}
 
                 {% if form.non_field_errors %}
@@ -76,6 +76,53 @@
                     <a href="{% url 'dashboard' %}" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                         Cancelar
                     </a>
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-6">
+                    <h3 class="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Documentación Requerida
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">Según tu aseguradora <strong>{{ poliza.aseguradora.nombre }}</strong>, debes preparar los siguientes documentos según el caso:</p>
+                    
+                    <div class="space-y-3" id="lista-requisitos">
+                        {% for req in requisitos %}
+                        <div class="flex items-start p-3 bg-white rounded border border-gray-100 shadow-sm" data-tipo="{{ req.tipo_siniestro }}">
+                            <div class="flex-1">
+                                <span class="text-xs font-bold uppercase text-blue-500 mb-1 block">
+                                    CASO: {{ req.get_tipo_siniestro_display }}
+                                </span>
+                                <p class="font-medium text-gray-800">{{ req.nombre_documento }}</p>
+                                {% if req.obligatorio %}
+                                    <span class="text-xs text-red-500 font-bold">* Obligatorio</span>
+                                {% else %}
+                                    <span class="text-xs text-gray-400">Opcional</span>
+                                {% endif %}
+                            </div>
+                            <div class="ml-4">
+                                <input type="file" name="{{ req.nombre_documento }}" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-sm text-gray-500 italic">No hay requisitos específicos configurados.</p>
+                        {% endfor %}
+                    </div>
+                    
+                    <script>
+                        document.getElementById('id_tipo').addEventListener('change', function() {
+                            let tipoSeleccionado = this.value;
+                            let items = document.querySelectorAll('#lista-requisitos > div');
+                            
+                            items.forEach(item => {
+                                // Mostramos solo los requisitos que coinciden con el tipo seleccionado
+                                if(item.dataset.tipo === tipoSeleccionado) {
+                                    item.style.display = 'flex';
+                                    item.style.backgroundColor = '#eff6ff'; // Azulito para resaltar
+                                } else {
+                                    item.style.display = 'none';
+                                }
+                            });
+                        });
+                    </script>
+                </div>
                     <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                         Enviar Reporte
                     </button>

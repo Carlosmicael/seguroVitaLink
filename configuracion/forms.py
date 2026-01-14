@@ -45,3 +45,30 @@ class DocumentoPoliticaForm(forms.ModelForm):
             'terminos_texto': forms.Textarea(attrs={'rows': 5, 'class': 'w-full border-gray-300 rounded-md shadow-sm p-2'}),
             'activo': forms.CheckboxInput(attrs={'class': 'h-5 w-5 text-emerald-600 rounded'}),
         }
+
+
+class MigracionAseguradoraForm(forms.Form):
+    aseguradora_origen = forms.ModelChoiceField(
+        queryset=Aseguradora.objects.filter(activa=True),
+        label="Aseguradora Actual (Origen)",
+        widget=forms.Select(attrs={'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm'})
+    )
+    aseguradora_destino = forms.ModelChoiceField(
+        queryset=Aseguradora.objects.filter(activa=True),
+        label="Nueva Aseguradora (Destino)",
+        widget=forms.Select(attrs={'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm'})
+    )
+    
+    confirmacion = forms.BooleanField(
+        required=True,
+        label="Confirmo que deseo migrar todas las pólizas activas.",
+        widget=forms.CheckboxInput(attrs={'class': 'h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded'})
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        origen = cleaned_data.get("aseguradora_origen")
+        destino = cleaned_data.get("aseguradora_destino")
+
+        if origen and destino and origen == destino:
+            raise forms.ValidationError("La aseguradora de destino debe ser diferente a la de origen.")
