@@ -13,4 +13,5 @@ urlpatterns = [
     #Ronal
     path('exportar-siniestros/', exportar_siniestros_excel, name='exportar_siniestros'),
     path('lista/', SiniestroListView.as_view(), name='siniestro_list'),
+    path('reportar/', views.reportar_siniestro, name='reportar_siniestro'),
 ]

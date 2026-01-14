@@ -1,15 +1,19 @@
 from django.shortcuts import render
-from django.views.generic import TemplateView
 from django.views.generic import TemplateView, ListView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
 from django.utils import timezone
 from .models import Poliza, Siniestro, Factura, Pago
 from django.db.models.functions import TruncMonth
-from django.views.generic import TemplateView
 import json
 import openpyxl 
 from django.http import HttpResponse
+from .forms import SiniestroForm
+from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+
+
 
 
 class SiniestrosInicioView(TemplateView):
@@ -105,3 +109,35 @@ class SiniestroListView(LoginRequiredMixin, ListView):
         # CORREGIDO: Usamos 'fecha_evento' en lugar de 'fecha_siniestro'
         return Siniestro.objects.all().order_by('-fecha_evento')
     
+@login_required(login_url='/admin/login/') # <--- 2. Proteger la vista
+def reportar_siniestro(request):
+    # 3. BUSCAR LA PÓLIZA DEL USUARIO CONECTADO
+    # Filtramos por el usuario que hace la petición (request.user)
+    poliza = Poliza.objects.filter(usuario=request.user).first()
+    
+    # 4. VALIDACIÓN DE ACCESO
+    # Si el usuario no tiene póliza (ej. es el Admin o un usuario nuevo sin datos)
+    if not poliza:
+        messages.error(request, "No tienes una póliza registrada para reportar siniestros.")
+        # Lo mandamos al admin o al home para que no vea un error feo
+        return redirect('admin:index') 
+
+    if request.method == 'POST':
+        form = SiniestroForm(request.POST)
+        # Asignamos la póliza encontrada (la del usuario) al formulario
+        form.instance.poliza = poliza 
+        
+        if form.is_valid():
+            siniestro = form.save(commit=False)
+            siniestro.poliza = poliza
+            siniestro.estado = 'pendiente'
+            siniestro.save()
+            messages.success(request, f'Siniestro reportado a {poliza.aseguradora.nombre} correctamente.')
+            return redirect('admin:index') # O redirige a una lista de siniestros si tienes
+    else:
+        form = SiniestroForm()
+
+    return render(request, 'siniestros/form_reportar.html', {
+        'form': form, 
+        'poliza': poliza
+    })
