@@ -1,0 +1,837 @@
+{% extends 'master/sideBar/sidebar_solicitante.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Estilos principales */
+    .mis-solicitudes-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+        padding: 1.5rem;
+    }
+
+    /* Header */
+    .header-container {
+        margin-bottom: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    @media (min-width: 640px) {
+        .header-container {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+    }
+
+    .header-title {
+        font-size: 2.25rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #0d9488, #0f766e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .header-subtitle {
+        color: #4b5563;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .header-icon {
+        width: 1.25rem;
+        height: 1.25rem;
+        color: #0d9488;
+    }
+
+    /* Botón nueva solicitud */
+    .btn-nueva-solicitud {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(90deg, #0d9488, #0f766e);
+        color: white;
+        font-weight: 600;
+        border-radius: 0.75rem;
+        text-decoration: none;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .btn-nueva-solicitud:hover {
+        background: linear-gradient(90deg, #0f766e, #115e59);
+        transform: translateY(-2px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-icon {
+        width: 1.25rem;
+        height: 1.25rem;
+        transition: transform 0.3s;
+    }
+
+    .btn-nueva-solicitud:hover .btn-icon {
+        transform: rotate(90deg);
+    }
+
+    /* Contenedor tabla */
+    .tabla-container {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+    }
+
+    .tabla-wrapper {
+        overflow-x: auto;
+        padding: 1.5rem;
+    }
+
+    /* Tabla */
+    #tablaSolicitudes {
+        width: 100%;
+        border-collapse: collapse;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    #tablaSolicitudes.loaded {
+        opacity: 1;
+    }
+
+    /* Encabezado tabla */
+    #tablaSolicitudes thead {
+        background: linear-gradient(90deg, #0d9488, #0f766e);
+    }
+
+    #tablaSolicitudes th {
+        padding: 1rem 1.5rem;
+        text-align: center;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        vertical-align: middle;
+    }
+
+    /* Filas tabla */
+    #tablaSolicitudes tbody tr {
+        border-bottom: 1px solid #f3f4f6;
+        transition: background-color 0.2s ease;
+    }
+
+    #tablaSolicitudes tbody tr:hover {
+        background-color: #f0fdfa;
+    }
+
+    #tablaSolicitudes td {
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    /* Celdas específicas */
+    .celda-id {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #0f766e;
+    }
+
+    .celda-tipo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .tipo-icon {
+        width: 1.25rem;
+        height: 1.25rem;
+        color: #0d9488;
+    }
+
+    .celda-monto {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .celda-fecha {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: #4b5563;
+    }
+
+    .fecha-icon {
+        width: 1rem;
+        height: 1rem;
+        color: #9ca3af;
+    }
+
+    /* Badges de estado */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.875rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .badge-pendiente {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        color: #92400e;
+        box-shadow: 0 1px 3px rgba(251, 191, 36, 0.3);
+    }
+
+    .badge-aprobada {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        color: #065f46;
+        box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-rechazada {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #991b1b;
+        box-shadow: 0 1px 3px rgba(239, 68, 68, 0.3);
+    }
+
+    .badge-proceso {
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        color: #1e40af;
+        box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3);
+    }
+
+    .badge-icon {
+        width: 0.75rem;
+        height: 0.75rem;
+    }
+
+    /* Botón ver detalle */
+    .btn-detalle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(90deg, #14b8a6, #0d9488);
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-detalle:hover {
+        background: linear-gradient(90deg, #0d9488, #0f766e);
+        transform: scale(1.05);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .detalle-icon {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    /* Estado vacío */
+    .estado-vacio {
+        text-align: center;
+        padding: 4rem 1.5rem;
+    }
+
+    .estado-vacio-icono {
+        width: 6rem;
+        height: 6rem;
+        background: linear-gradient(135deg, #ccfbf1, #a7f3d0);
+        border-radius: 9999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+    }
+
+    .estado-vacio-icono svg {
+        width: 3rem;
+        height: 3rem;
+        color: #0f766e;
+    }
+
+    .estado-vacio-titulo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+
+    .estado-vacio-texto {
+        color: #6b7280;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 50;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .modal-container {
+        background: white;
+        border-radius: 1.5rem;
+        max-width: 56rem;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        animation: slideUp 0.3s ease-out;
+    }
+
+    .modal-header {
+        background: linear-gradient(90deg, #0d9488, #0f766e);
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-radius: 1.5rem 1.5rem 0 0;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .modal-title svg {
+        width: 1.75rem;
+        height: 1.75rem;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: white;
+        padding: 0.5rem;
+        border-radius: 9999px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .modal-close:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-content {
+        padding: 2rem;
+    }
+
+    /* Secciones del modal */
+    .modal-section {
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid;
+    }
+
+    .modal-section-estudiante {
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        border-left-color: #3b82f6;
+    }
+
+    .modal-section-solicitud {
+        background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+        border-left-color: #14b8a6;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        background: #3b82f6;
+        border-radius: 9999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .section-icon svg {
+        width: 1.5rem;
+        height: 1.5rem;
+        color: white;
+    }
+
+    .section-icon-teal {
+        background: #14b8a6;
+    }
+
+    /* Grid del modal */
+    .modal-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    @media (min-width: 768px) {
+        .modal-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .modal-grid-item {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .grid-full {
+        grid-column: 1 / -1;
+    }
+
+    .grid-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #3b82f6;
+        margin-bottom: 0.25rem;
+    }
+
+    .grid-label-teal {
+        color: #14b8a6;
+    }
+
+    .grid-value {
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .grid-value-teal {
+        color: #0f766e;
+        font-size: 1.125rem;
+    }
+
+    /* Animaciones */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* === MEJORAS EN DATATABLES === */
+    .dataTables_wrapper {
+        padding: 0 !important;
+        background: transparent;
+    }
+
+    .dataTables_length,
+    .dataTables_filter,
+    .dataTables_info,
+    .dataTables_paginate {
+        padding: 0 1.5rem 1rem;
+    }
+
+    .dataTables_length select,
+    .dataTables_filter input {
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .dataTables_filter input:focus,
+    .dataTables_length select:focus {
+        outline: none;
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+    }
+
+    .dataTables_filter label,
+    .dataTables_length label {
+        font-weight: 600;
+        color: #374151;
+        margin-right: 0.75rem;
+    }
+
+    .dataTables_filter input {
+        width: auto;
+        min-width: 200px;
+    }
+
+    .dataTables_info {
+        color: #6b7280;
+        font-size: 0.875rem;
+        padding-top: 0 !important;
+    }
+
+    /* Paginación mejorada */
+    .dataTables_paginate .paginate_button {
+        padding: 0.5rem 1rem !important;
+        margin: 0 0.25rem !important;
+        border-radius: 0.5rem !important;
+        border: none !important;
+        background: #f9fafb !important;
+        color: #4b5563 !important;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .dataTables_paginate .paginate_button:hover {
+        background: #e5e7eb !important;
+        color: #0f766e !important;
+        transform: translateY(-1px);
+    }
+
+    .dataTables_paginate .paginate_button.current {
+        background: linear-gradient(90deg, #0d9488, #0f766e) !important;
+        color: white !important;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+
+    /* Responsive extra para móviles */
+    @media (max-width: 768px) {
+        #tablaSolicitudes {
+            min-width: 600px;
+        }
+        .celda-tipo,
+        .celda-fecha {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+    }
+</style>
+
+<div class="mis-solicitudes-container">
+    <!-- Header -->
+    <div class="header-container">
+        <div>
+            <h1 class="header-title">Mis Solicitudes</h1>
+            <p class="header-subtitle">
+                <svg class="header-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                Administra y consulta todas tus solicitudes de pólizas
+            </p>
+        </div>
+        
+        <a href="{% url 'crear_solicitud' %}" class="btn-nueva-solicitud">
+            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Nueva Solicitud
+        </a>
+    </div>
+
+    <!-- Tabla -->
+    <div class="tabla-container">
+        <div class="tabla-wrapper">
+            <table id="tablaSolicitudes" class="display">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tipo de Póliza</th>
+                        <th>Monto</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for solicitud in solicitudes %}
+                    <tr>
+                        <td class="celda-id">#{{ solicitud.id }}</td>
+                        <td class="celda-tipo">
+                            <svg class="tipo-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            {{ solicitud.tipo_poliza }}
+                        </td>
+                        <td class="celda-monto">${{ solicitud.monto_solicitado|floatformat:2 }}</td>
+                        <td>
+                            {% if solicitud.estado == 'pendiente' %}
+                            <span class="badge badge-pendiente">
+                                <svg class="badge-icon" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                </svg>
+                                Pendiente
+                            </span>
+                            {% elif solicitud.estado == 'aprobada' %}
+                            <span class="badge badge-aprobada">
+                                <svg class="badge-icon" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                Aprobada
+                            </span>
+                            {% elif solicitud.estado == 'rechazada' %}
+                            <span class="badge badge-rechazada">
+                                <svg class="badge-icon" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                </svg>
+                                Rechazada
+                            </span>
+                            {% else %}
+                            <span class="badge badge-proceso">
+                                <svg class="badge-icon" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
+                                </svg>
+                                En Proceso
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="celda-fecha">
+                            <svg class="fecha-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            {{ solicitud.fecha_solicitud|date:"d/m/Y" }}
+                        </td>
+                        <td>
+                            <button onclick="verDetalle({{ solicitud.id }})" class="btn-detalle">
+                                <svg class="detalle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                Ver Detalle
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="estado-vacio">
+                                <div class="estado-vacio-icono">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </div>
+                                <p class="estado-vacio-titulo">No tienes solicitudes aún</p>
+                                <p class="estado-vacio-texto">Crea tu primera solicitud para comenzar</p>
+                                <a href="{% url 'crear_solicitud' %}" class="btn-nueva-solicitud">
+                                    Crear Primera Solicitud
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="modalDetalle" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Detalle de Solicitud
+            </h3>
+            <button onclick="cerrarModal()" class="modal-close">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div id="contenidoDetalle" class="modal-content">
+            <!-- Contenido dinámico -->
+        </div>
+    </div>
+</div>
+
+<!-- DataTables CSS & JS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    const $tabla = $('#tablaSolicitudes');
+    const hasData = $tabla.find('tbody tr').length > 0 && !$tabla.find('tbody tr td[colspan]').length;
+
+    if (hasData) {
+        $tabla.DataTable({
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+            },
+            order: [[0, 'desc']],
+            pageLength: 10,
+            responsive: false,
+            autoWidth: false,
+            columnDefs: [
+                { 
+                    orderable: false, 
+                    targets: 5
+                },
+                {
+                    targets: '_all',
+                    className: 'dt-head-center dt-body-center'
+                }
+            ],
+            initComplete: function() {
+                $tabla.addClass('loaded');
+            }
+        });
+    } else {
+        // Mostrar directamente si no hay datos
+        $tabla.addClass('loaded');
+    }
+});
+
+function verDetalle(solicitudId) {
+    fetch(`/solicitudes/${solicitudId}/`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const contenido = `
+            <div class="modal-grid">
+                <div class="modal-section modal-section-estudiante grid-full">
+                    <h4 class="section-title">
+                        <div class="section-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                        </div>
+                        Información del Estudiante
+                    </h4>
+                    <div class="modal-grid">
+                        <div class="modal-grid-item">
+                            <p class="grid-label">Nombre Completo</p>
+                            <p class="grid-value">${data.estudiante_nombre || 'No disponible'}</p>
+                        </div>
+                        <div class="modal-grid-item">
+                            <p class="grid-label">Cédula</p>
+                            <p class="grid-value">${data.estudiante_cedula || 'No disponible'}</p>
+                        </div>
+                        <div class="modal-grid-item grid-full">
+                            <p class="grid-label">Correo Electrónico</p>
+                            <p class="grid-value">${data.estudiante_correo || 'No disponible'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-section modal-section-solicitud grid-full">
+                    <h4 class="section-title">
+                        <div class="section-icon section-icon-teal">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        Detalles de la Solicitud
+                    </h4>
+                    <div class="modal-grid">
+                        <div class="modal-grid-item">
+                            <p class="grid-label grid-label-teal">ID Solicitud</p>
+                            <p class="grid-value">#${data.id || 'N/A'}</p>
+                        </div>
+                        <div class="modal-grid-item">
+                            <p class="grid-label grid-label-teal">Estado</p>
+                            <p class="grid-value">${data.estado || 'No disponible'}</p>
+                        </div>
+                        <div class="modal-grid-item">
+                            <p class="grid-label grid-label-teal">Tipo de Póliza</p>
+                            <p class="grid-value">${data.tipo_poliza || 'No disponible'}</p>
+                        </div>
+                        <div class="modal-grid-item">
+                            <p class="grid-label grid-label-teal">Monto Solicitado</p>
+                            <p class="grid-value grid-value-teal">$${parseFloat(data.monto_solicitado || 0).toFixed(2)}</p>
+                        </div>
+                        <div class="modal-grid-item">
+                            <p class="grid-label grid-label-teal">Documento</p>
+                            <p class="grid-value">${data.documento_identidad || 'No disponible'}</p>
+                        </div>
+                        <div class="modal-grid-item">
+                            <p class="grid-label grid-label-teal">Teléfono</p>
+                            <p class="grid-value">${data.telefono || 'No disponible'}</p>
+                        </div>
+                        <div class="modal-grid-item grid-full">
+                            <p class="grid-label grid-label-teal">Dirección</p>
+                            <p class="grid-value">${data.direccion || 'No disponible'}</p>
+                        </div>
+                        <div class="modal-grid-item grid-full">
+                            <p class="grid-label grid-label-teal">Motivo de Solicitud</p>
+                            <p class="grid-value">${data.motivo || 'No especificado'}</p>
+                        </div>
+                        <div class="modal-grid-item grid-full">
+                            <p class="grid-label grid-label-teal">Fecha de Solicitud</p>
+                            <p class="grid-value">${data.fecha_solicitud || 'No disponible'}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('contenidoDetalle').innerHTML = contenido;
+        document.getElementById('modalDetalle').style.display = 'flex';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al cargar los detalles de la solicitud.');
+    });
+}
+
+function cerrarModal() {
+    document.getElementById('modalDetalle').style.display = 'none';
+}
+
+document.getElementById('modalDetalle').addEventListener('click', function(e) {
+    if (e.target === this) cerrarModal();
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') cerrarModal();
+});
+</script>
+{% endblock %}

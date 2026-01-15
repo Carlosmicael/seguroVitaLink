@@ -62,3 +62,12 @@ npx tailwindcss -i ./input.css -o ./static/css/output.css --minify
 
 
  npm install -D tailwindcss@3 postcss autoprefixer
+
+ mysql.server start
+ mysql.server stop
+ mysql -u root
+ brew services start redis
+ brew services stop redis
+ redis-server
+ redis-cli ping
+ celery -A config worker --loglevel=info

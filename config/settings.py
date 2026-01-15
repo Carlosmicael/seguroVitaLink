@@ -11,9 +11,15 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / ".env")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -78,7 +84,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'seguros_personas',
         'USER': 'root',
-        'PASSWORD': 'root',
+        'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -106,15 +112,16 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
+# https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Guayaquil'
 
 USE_I18N = True
 
 USE_TZ = True
+
 
 
 # Static files (CSS, JavaScript, Images)
@@ -122,3 +129,35 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+
+
+# Aquí le decimos a Celery que use Redis.
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
+#Pusher
+
+PUSHER_APP_ID = "2028408"
+PUSHER_KEY = "3e0fb7f926cfffecfe16"
+PUSHER_SECRET = "0f37afa61a6ead39c961"
+PUSHER_CLUSTER = "us2"
+
+import pusher
+
+pusher_client = pusher.Pusher(app_id=PUSHER_APP_ID,key=PUSHER_KEY,secret=PUSHER_SECRET,cluster=PUSHER_CLUSTER,ssl=True)
+
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  
+EMAIL_PORT = 587 
+EMAIL_USE_TLS = True  
+EMAIL_HOST_USER = 'carlosmlo381@gmail.com' 
+EMAIL_HOST_PASSWORD = 'sraj uiwt xzpf llvu' 
+
+
+
+
+
+

@@ -1,0 +1,508 @@
+{% extends 'master/sideBar/sidebar_solicitante.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .animate-slide-in-right {
+        animation: slideInRight 0.6s ease-out;
+    }
+
+    .animate-slide-in-left {
+        animation: slideInLeft 0.6s ease-out;
+    }
+
+    .input-group {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #0f766e;
+        pointer-events: none;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 0.875rem 1rem 0.875rem 3rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #ffffff;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+    }
+
+    .input-field::placeholder {
+        color: #9ca3af;
+    }
+
+    textarea.input-field {
+        resize: vertical;
+        min-height: 100px;
+        padding-top: 1rem;
+    }
+
+    /* ESTILOS NUEVOS PARA REEMPLAZAR TAILWIND */
+    .container {
+        min-height: 100vh;
+        background-color: #f9fafb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 1rem;
+    }
+
+    .form-wrapper {
+        width: 100%;
+        max-width: 1200px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0;
+        background-color: white;
+        border-radius: 1.5rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+    }
+
+    @media (min-width: 1024px) {
+        .form-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    .welcome-panel {
+        background: linear-gradient(135deg, #14b8a6, #0f766e, #115e59);
+        padding: 3rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .welcome-bg-circle1 {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 16rem;
+        height: 16rem;
+        background-color: white;
+        opacity: 0.05;
+        border-radius: 50%;
+        margin-right: -8rem;
+        margin-top: -8rem;
+    }
+
+    .welcome-bg-circle2 {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 12rem;
+        height: 12rem;
+        background-color: white;
+        opacity: 0.05;
+        border-radius: 50%;
+        margin-left: -6rem;
+        margin-bottom: -6rem;
+    }
+
+    .logo {
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .logo-shapes {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    .logo-shape {
+        width: 0.75rem;
+        height: 2rem;
+        background-color: #a7f3d0;
+        border-radius: 0.125rem;
+        transform: skew(-12deg);
+    }
+
+    .logo-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        letter-spacing: 0.025em;
+    }
+
+    .welcome-title {
+        font-size: 2.25rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    .welcome-text {
+        color: #ccfbf1;
+        font-size: 1.125rem;
+        line-height: 1.75;
+        max-width: 28rem;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    .illustration {
+        position: relative;
+        z-index: 10;
+        margin-top: 2rem;
+    }
+
+    .illustration-box {
+        width: 12rem;
+        height: 12rem;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .illustration-icon {
+        width: 6rem;
+        height: 6rem;
+        color: white;
+    }
+
+    .welcome-info {
+        margin-top: 3rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    .info-text {
+        font-size: 0.875rem;
+        color: #ccfbf1;
+    }
+
+    .view-requests-btn {
+        display: inline-block;
+        margin-top: 0.75rem;
+        padding: 0.5rem 1.5rem;
+        background-color: white;
+        color: #0f766e;
+        border-radius: 9999px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .view-requests-btn:hover {
+        background-color: #f0fdfa;
+        transform: scale(1.05);
+    }
+
+    .form-panel {
+        padding: 3rem;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .form-title {
+        font-size: 1.875rem;
+        font-weight: bold;
+        color: #111827;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-subtitle {
+        color: #4b5563;
+    }
+
+    .social-icons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .social-icon {
+        width: 2rem;
+        height: 2rem;
+        background-color: #f3f4f6;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .social-icon:hover {
+        background-color: #f0fdfa;
+    }
+
+    .social-icon svg {
+        width: 1rem;
+        height: 1rem;
+        color: #4b5563;
+    }
+
+    .submit-btn {
+        width: 100%;
+        background: linear-gradient(to right, #14b8a6, #0d9488);
+        color: white;
+        font-weight: bold;
+        padding: 0.875rem 1.5rem;
+        border-radius: 0.75rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .submit-btn:hover {
+        background: linear-gradient(to right, #0d9488, #0f766e);
+        transform: scale(1.02);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-footer {
+        text-align: center;
+        font-size: 0.875rem;
+        color: #4b5563;
+        margin-top: 1.5rem;
+    }
+
+    .help-link {
+        color: #0d9488;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .help-link:hover {
+        text-decoration: underline;
+    }
+
+    /* Para iconos específicos en textarea */
+    .textarea-icon {
+        top: 1.25rem;
+        transform: none;
+    }
+</style>
+
+<div class="container">
+    <div class="form-wrapper">
+        <div class="form-grid">
+            
+            <!-- Panel Izquierdo - Bienvenida -->
+            <div class="welcome-panel animate-slide-in-left">
+                <div class="welcome-bg-circle1"></div>
+                <div class="welcome-bg-circle2"></div>
+                
+                <!-- Logo -->
+                <div class="logo">
+                    <div class="logo-shapes">
+                        <div class="logo-shape"></div>
+                        <div class="logo-shape" style="background-color: #5eead4;"></div>
+                    </div>
+                    <h3 class="logo-name">VitaLink</h3>
+                </div>
+
+                <!-- Título -->
+                <div class="welcome-content">
+                    <h1 class="welcome-title">¡Bienvenido!</h1>
+                    <p class="welcome-text">
+                        Estás a un paso de solicitar tu póliza de seguro. Completa el formulario con tus datos.
+                    </p>
+                </div>
+
+                <!-- Ilustración -->
+                <div class="illustration">
+                    <div class="illustration-box">
+                        <svg class="illustration-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Información adicional -->
+                <div class="welcome-info">
+                    <p class="info-text">
+                        ¿Ya tienes solicitudes?
+                    </p>
+                    <a href="{% url 'lista_solicitudes' %}" class="view-requests-btn">
+                        Ver Solicitudes
+                    </a>
+                </div>
+            </div>
+
+            <!-- Panel Derecho - Formulario -->
+            <div class="form-panel animate-slide-in-right">
+                <!-- Encabezado -->
+                <div class="form-header">
+                    <h2 class="form-title">Crear Solicitud</h2>
+                    <p class="form-subtitle">Complete sus datos personales</p>
+                    
+                    <!-- Iconos sociales -->
+                    <div class="social-icons">
+                        <div class="social-icon">
+                            <svg fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
+                            </svg>
+                        </div>
+                        <div class="social-icon">
+                            <svg fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </div>
+                        <div class="social-icon">
+                            <svg fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulario -->
+                <form id="formSolicitud" method="POST" action="{% url 'crear_solicitud' %}">
+                    {% csrf_token %}
+                    
+                    <div class="input-group">
+                        <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.25rem; height: 1.25rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <input type="text" name="tipo_poliza" class="input-field" placeholder="Tipo de Póliza" required>
+                    </div>
+
+                    <div class="input-group">
+                        <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.25rem; height: 1.25rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <input type="number" step="0.01" name="monto_solicitado" class="input-field" placeholder="Monto Solicitado" required>
+                    </div>
+
+                    <div class="input-group">
+                        <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.25rem; height: 1.25rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
+                        </svg>
+                        <input type="text" name="documento_identidad" class="input-field" placeholder="Documento de Identidad" required>
+                    </div>
+
+                    <div class="input-group">
+                        <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.25rem; height: 1.25rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                        </svg>
+                        <input type="tel" name="telefono" class="input-field" placeholder="Teléfono" required>
+                    </div>
+
+                    <div class="input-group">
+                        <svg class="input-icon textarea-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.25rem; height: 1.25rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <textarea name="direccion" class="input-field" placeholder="Dirección" required></textarea>
+                    </div>
+
+                    <div class="input-group">
+                        <svg class="input-icon textarea-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.25rem; height: 1.25rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                        </svg>
+                        <textarea name="motivo" class="input-field" placeholder="Motivo de la solicitud" required></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        Enviar Solicitud
+                    </button>
+                </form>
+
+                <!-- Link inferior -->
+                <p class="form-footer">
+                    ¿Necesitas ayuda? <a href="#" class="help-link">Contactar soporte</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('formSolicitud').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    // Usamos el nombre de la URL de Django entre comillas
+    fetch("{% url 'crear_solicitud' %}", { 
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token }}' // Es buena práctica enviarlo aquí también
+        }
+    })
+    .then(response => {
+        // Verificamos si la respuesta es JSON antes de procesar
+        if (!response.ok) {
+            throw new Error('Error en el servidor');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success === false) {
+            alert('Error: ' + JSON.stringify(data.errors));
+        } else {
+            // Si la vista hace un redirect normal, a veces el fetch no lo sigue.
+            // Es mejor que la vista responda JsonResponse({'success': True})
+            window.location.href = "{% url 'lista_solicitudes' %}";
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Si el formulario se guardó pero la respuesta no fue JSON, 
+        // redirigimos igual para ver el mensaje de éxito (messages.success)
+        window.location.href = "{% url 'lista_solicitudes' %}";
+    });
+});
+</script>
+{% endblock %}

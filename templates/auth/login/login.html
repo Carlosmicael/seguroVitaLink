@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - UTPL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .wave-shape {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 80%);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-900 via-blue-700 to-blue-600 flex items-center justify-center p-4">
+    <div class="w-full max-w-6xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[600px]">
+        
+        <!-- Left Side - Illustration with wave -->
+        <div style="background-image: url('https://image.slidesharecdn.com/primeraoutpl-170127232741/75/Primer-ano-utpl-1-2048.jpg');background-size: cover;background-position: center;" class="md:w-1/2 bg-gradient-to-br from-gray-50 to-teal-50 relative">
+
+        </div>
+
+
+
+
+
+        <!-- Right Side - Login Form -->
+        <div class="md:w-1/2 bg-gradient-to-br from-blue-800 via-blue-700 to-blue-900 p-12 flex items-center justify-center">
+            <div class="w-full max-w-sm">
+                <h2 class="text-5xl font-bold text-white mb-12">Login</h2>
+                
+                <form method="POST" action="" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Username Field -->
+                    <div>
+                        <label for="username" class="block text-gray-200 text-sm font-medium mb-2">Username</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            placeholder="Enter your username" 
+                            required
+                            class="w-full px-5 py-3.5 bg-blue-900/40 border-none rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                    </div>
+
+                    <!-- Password Field -->
+                    <div>
+                        <label for="password" class="block text-gray-200 text-sm font-medium mb-2">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            placeholder="Enter your password" 
+                            required
+                            class="w-full px-5 py-3.5 bg-blue-900/40 border-none rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                    </div>
+
+                    <!-- Forgot Password Link -->
+                    <div class="text-right">
+                        <a href="#" class="text-blue-300 hover:text-blue-200 text-sm transition">Forgot Password?</a>
+                    </div>
+
+                    <!-- Error Message -->
+                    {% if error %}
+                    <div class="bg-red-500/20 border border-red-400 text-red-100 px-4 py-3 rounded-xl">
+                        {{ error }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Login Button -->
+                    <button 
+                        type="submit" 
+                        class="w-full bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-300 hover:to-blue-400 text-white font-bold py-3.5 px-4 rounded-xl transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-lg">
+                        Login 
+                    </button>
+
+                    <button 
+                        class="w-full bg-gradient-to-r from-red-400 to-red-500 hover:from-red-300 hover:to-red-400 text-white font-bold py-3.5 px-4 rounded-xl transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-lg">
+                        Reportar Siniestro
+                    </button>
+
+                    <!-- Register Link -->
+                    <div class="text-center mt-6">
+                        <p class="text-gray-300 text-sm">
+                            Don't have an account? 
+                            <a href="#" class="text-blue-300 hover:text-blue-200 font-semibold underline transition">Register Now</a>
+                        </p>
+                    </div>
+                </form>
+
+                <!-- Terms Footer -->
+                <div class="mt-12 text-center">
+                    <a href="#" class="text-blue-400 hover:text-blue-300 text-xs transition">Terms and Services</a>
+                </div>
+                
+                <!-- Contact Info -->
+                <div class="mt-8 text-right">
+                    <p class="text-xs text-gray-400">Have a problem? Contact us at</p>
+                    <a href="#" class="text-xs text-blue-400 hover:text-blue-300">NOC@maranatha.edu</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
