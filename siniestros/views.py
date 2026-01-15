@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import TemplateView, ListView, CreateView
+from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
@@ -7,6 +7,10 @@ from django.utils import timezone
 from django.db.models.functions import TruncMonth
 from django.http import HttpResponse
 from django.contrib import messages
+import json
+import openpyxl
+
+from django.urls import reverse_lazy 
 import json
 import openpyxl
 
@@ -166,3 +170,26 @@ def reportar_siniestro(request):
         'poliza': poliza,
         'requisitos': requisitos_configurados
     })
+
+# --- NUEVAS VISTAS AGREGADAS PARA BOTONES VER/EDITAR ---
+
+# 1. VISTA PARA VER DETALLE (Y los archivos)
+class SiniestroDetailView(LoginRequiredMixin, DetailView):
+    model = Siniestro
+    template_name = 'siniestros/siniestro_detail.html'
+    context_object_name = 'siniestro'
+
+# 2. VISTA PARA EDITAR (Solo campos de texto, reutiliza el form)
+class SiniestroUpdateView(LoginRequiredMixin, UpdateView):
+    model = Siniestro
+    form_class = SiniestroForm
+    template_name = 'siniestros/form_reportar.html' 
+    success_url = reverse_lazy('lista_siniestros')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Pasamos estos datos porque el template 'form_reportar.html' los espera
+        context['poliza'] = self.object.poliza
+        context['titulo'] = 'Editar Siniestro'
+        context['requisitos'] = RequisitoSiniestro.objects.filter(aseguradora=self.object.poliza.aseguradora)
+        return context

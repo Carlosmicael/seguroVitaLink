@@ -1,83 +1,120 @@
 {% extends 'master/sideBar/base.html' %}
 
 {% block content %}
+
 <div class="p-6">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Listado de Siniestros</h1>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Listado de Siniestros</h1>
+            <a href="{% url 'siniestros:dashboard_asesor' %}" class="text-sm text-gray-500 hover:text-blue-600 flex items-center mt-1 transition">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Volver al Dashboard Principal
+            </a>
+        </div>
         
-        <a href="#" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition">
-            + Nuevo Siniestro
-        </a>
+        <div class="flex gap-3">
+            <a href="{% url 'siniestros:exportar_siniestros' %}" class="flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded shadow-sm hover:bg-gray-50 hover:text-green-600 transition text-sm font-bold">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Excel
+            </a>
+            
+            <a href="{% url 'siniestros:reportar_siniestro' %}" class="flex items-center px-4 py-2 bg-slate-800 text-white rounded shadow hover:bg-slate-700 transition text-sm font-bold">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Nuevo Siniestro
+            </a>
+        </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
         <table class="min-w-full leading-normal">
             <thead>
                 <tr>
-                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        ID
-                    </th>
-                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Póliza
-                    </th>
-                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Fecha
-                    </th>
-                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Estado
-                    </th>
-                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Monto Est.
-                    </th>
-                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Acciones
-                    </th>
+                    <th class="px-5 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
+                    <th class="px-5 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Póliza / Detalle</th>
+                    <th class="px-5 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha</th>
+                    <th class="px-5 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+                    <th class="px-5 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Monto</th>
+                    <th class="px-5 py-3 border-b border-gray-200 bg-gray-50 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-200">
                 {% for siniestro in siniestros %}
-                <tr>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap">#{{ siniestro.id }}</p>
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">
+                        #{{ siniestro.id }}
                     </td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap font-bold">{{ siniestro.poliza }}</p>
-                        <p class="text-gray-400 text-xs">{{ siniestro.descripcion|truncatechars:30 }}</p>
+                    <td class="px-5 py-4 text-sm">
+                        <div class="font-medium text-gray-900">{{ siniestro.poliza.numero }}</div>
+                        <div class="text-xs text-gray-500">{{ siniestro.poliza.aseguradora }}</div>
+                        <div class="text-xs text-blue-600 font-bold mt-1 uppercase tracking-wide">{{ siniestro.get_tipo_display }}</div>
                     </td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap">{{ siniestro.fecha_evento|date:"d M Y" }}</p>
+                    <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ siniestro.fecha_evento|date:"d M Y" }}
                     </td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <span class="relative inline-block px-3 py-1 font-semibold leading-tight">
-                            {% if siniestro.estado == 'PENDIENTE' %}
-                                <span aria-hidden="true" class="absolute inset-0 bg-red-200 opacity-50 rounded-full"></span>
-                                <span class="relative text-red-900">{{ siniestro.estado }}</span>
-                            {% elif siniestro.estado == 'EN_PROCESO' %}
-                                <span aria-hidden="true" class="absolute inset-0 bg-yellow-200 opacity-50 rounded-full"></span>
-                                <span class="relative text-yellow-900">{{ siniestro.estado }}</span>
-                            {% else %}
-                                <span aria-hidden="true" class="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span>
-                                <span class="relative text-green-900">{{ siniestro.estado }}</span>
-                            {% endif %}
+                    <td class="px-5 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                            {% if siniestro.estado == 'pendiente' %} bg-yellow-100 text-yellow-800
+                            {% elif siniestro.estado == 'aprobado' %} bg-green-100 text-green-800
+                            {% elif siniestro.estado == 'rechazado' %} bg-red-100 text-red-800
+                            {% else %} bg-gray-100 text-gray-800 {% endif %}">
+                            
+                            <span class="w-2 h-2 mr-1 rounded-full 
+                                {% if siniestro.estado == 'pendiente' %} bg-yellow-400
+                                {% elif siniestro.estado == 'aprobado' %} bg-green-400
+                                {% elif siniestro.estado == 'rechazado' %} bg-red-400
+                                {% else %} bg-gray-400 {% endif %}"></span>
+                            
+                            {{ siniestro.get_estado_display }}
                         </span>
                     </td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap">${{ siniestro.monto_estimado }}</p>
+                    <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${{ siniestro.monto_estimado|default:"0.00" }}
                     </td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <a href="#" class="text-blue-600 hover:text-blue-900 mr-3">Ver</a>
-                        <a href="#" class="text-indigo-600 hover:text-indigo-900">Editar</a>
+                    <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div class="flex justify-end gap-3">
+                            <a href="{% url 'siniestros:detalle_siniestro' siniestro.id %}" class="text-blue-600 hover:text-blue-900 flex items-center gap-1" title="Ver Expediente">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            </a>
+
+                            {% if siniestro.estado == 'pendiente' %}
+                                <a href="{% url 'siniestros:editar_siniestro' siniestro.id %}" class="text-amber-600 hover:text-amber-900 flex items-center gap-1" title="Editar / Gestionar">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </a>
+                            {% else %}
+                                <span class="w-5 h-5 inline-block"></span>
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center text-gray-500">
-                        No hay siniestros registrados aún.
+                    <td colspan="6" class="px-5 py-12 text-center">
+                        <div class="text-gray-500">
+                            <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">No hay siniestros</h3>
+                            <p class="mt-1 text-sm text-gray-500">Comienza creando un nuevo registro.</p>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+
+        {% if is_paginated %}
+        <div class="px-5 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+            <span class="text-sm text-gray-700">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </span>
+            <div class="flex gap-2">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50">Anterior</a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50">Siguiente</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
