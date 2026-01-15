@@ -1,0 +1,291 @@
+{% extends "master/sideBar/base.html" %}
+
+{% block title %}Gestión de Estudiantes{% endblock %}
+
+{% block content %}
+
+<style>
+/* Fondo degradado general */
+body {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Contenedor principal */
+.flex {
+    display: flex;
+}
+.justify-between {
+    justify-content: space-between;
+}
+.items-center {
+    align-items: center;
+}
+.mb-6 {
+    margin-bottom: 1.5rem;
+}
+
+/* Título */
+h1.text-2xl {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 1px 1px 5px rgba(0,0,0,0.3);
+}
+
+/* Botón Nuevo Estudiante */
+a.px-5 {
+    padding: 10px 20px;
+    font-weight: 600;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #12c2e9 0%, #c471ed 50%, #f64f59 100%);
+    color: white;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+}
+a.px-5:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* Buscador */
+#searchInput {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 15px;
+    border-radius: 12px;
+    border: none;
+    outline: none;
+    font-size: 0.95rem;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+/* Tabla */
+.bg-white {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    overflow-x: auto;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+thead {
+    background: linear-gradient(90deg, #12c2e9 0%, #c471ed 50%, #f64f59 100%);
+    color: white;
+}
+thead th {
+    padding: 12px 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+tbody td {
+    padding: 12px 15px;
+    font-size: 0.9rem;
+    color: #333;
+}
+tbody tr {
+    transition: background 0.2s, transform 0.2s;
+}
+tbody tr:hover {
+    background: rgba(196,196,196,0.2);
+    transform: scale(1.01);
+}
+
+/* Select estado y fecha defunción */
+.estado-selector,
+.fecha-defuncion {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+.estado-selector:hover,
+.fecha-defuncion:hover {
+    border-color: #2575fc;
+    box-shadow: 0 2px 8px rgba(37,117,252,0.3);
+}
+
+/* Tiempo transcurrido y póliza */
+.tiempo-transcurrido {
+    text-align: center;
+    font-weight: 500;
+}
+</style>
+
+<!-- HEADER -->
+<div class="flex justify-between items-center mb-6 ">
+    <h1 class="text-2xl font-bold text-gray-800">
+        Gestión de Estudiantes
+    </h1>
+
+    <a href="{% url 'panel_asesor:registrar_estudiante' %}" class="px-5 py-2">
+        + Nuevo Estudiante
+    </a>
+</div>
+
+<!-- BUSCADOR -->
+<div class="mb-6">
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Buscar por cédula, nombre o apellido"
+    />
+</div>
+
+<!-- TABLA -->
+<div class="bg-white rounded-xl shadow overflow-x-auto">
+    <table class="min-w-full text-sm text-left">
+        <thead>
+            <tr>
+                <th class="px-6 py-3">Cédula</th>
+                <th class="px-6 py-3">Nombres</th>
+                <th class="px-6 py-3">Apellidos</th>
+                <th class="px-6 py-3">Carrera</th>
+                <th class="px-6 py-3">Nivel</th>
+                <th class="px-6 py-3">Modalidad</th>
+                <th class="px-6 py-3">Periodo</th>
+                <th class="px-6 py-3">Estado</th>
+                <th class="px-6 py-3">Fecha Defunción</th> 
+                <th class="px-6 py-3">Tiempo transcurrido</th> 
+                <th class="px-6 py-3">Póliza</th>
+            </tr>
+        </thead>
+
+        <tbody id="tabla-estudiantes" class="divide-y">
+            {% for estudiante in estudiantes %}
+            <tr class="hover:bg-gray-50" data-id="{{ estudiante.id }}">
+                <td class="px-6 py-3">{{ estudiante.cedula }}</td>
+                <td class="px-6 py-3">{{ estudiante.nombres }}</td>
+                <td class="px-6 py-3">{{ estudiante.apellidos }}</td>
+                <td class="px-6 py-3">{{ estudiante.carrera }}</td>
+                <td class="px-6 py-3">{{ estudiante.get_nivel_display }}</td>
+                <td class="px-6 py-3">{{ estudiante.get_modalidad_display }}</td>
+                <td class="px-6 py-3">{{ estudiante.periodo_academico }}</td>
+                
+                <!-- Selector de Estado -->
+                <td class="px-6 py-3">
+                    <select class="border rounded px-2 py-1 text-sm estado-selector" onchange="actualizarEstado(this)">
+                        <option value="Activo" {% if estudiante.estado == 'Activo' %}selected{% endif %}>Activo</option>
+                        <option value="fallecido" {% if estudiante.estado == 'fallecido' %}selected{% endif %}>Fallecido</option>
+                    </select>
+                </td>
+
+                <!-- Fecha defunción editable -->
+                <td class="px-6 py-3">
+                    <input type="date"
+                        class="border rounded px-2 py-1 text-sm fecha-defuncion"
+                        value="{{ estudiante.fecha_defuncion|date:'Y-m-d' }}"
+                        {% if estudiante.estado != 'fallecido' %}disabled{% endif %}>
+                </td>
+
+                <!-- Tiempo transcurrido -->
+                <td class="px-6 py-3 tiempo-transcurrido">
+                    {{ estudiante.dias_transcurridos|default:'-' }}
+                </td>
+
+                <td class="px-6 py-3">
+                    {% if estudiante.poliza %}
+                        {{ estudiante.poliza.get_estado_display }}
+                    {% else %}
+                        <span class="text-gray-400 text-xs">Sin póliza</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- JS AJAX -->
+<script>
+const input = document.getElementById('searchInput');
+const tbody = document.getElementById('tabla-estudiantes');
+
+let timeout = null;
+
+input.addEventListener('input', () => {
+    clearTimeout(timeout);
+
+    timeout = setTimeout(() => {
+        fetch("{% url 'panel_asesor:buscar_estudiantes' %}?q=" + input.value)
+            .then(response => response.json())
+            .then(data => {
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="11" class="px-6 py-6 text-center text-gray-500">
+                                No hay resultados
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                data.forEach(e => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-3">${e.cedula}</td>
+                            <td class="px-6 py-3">${e.nombres}</td>
+                            <td class="px-6 py-3">${e.apellidos}</td>
+                            <td class="px-6 py-3">${e.carrera}</td>
+                            <td class="px-6 py-3">${e.nivel}</td>
+                            <td class="px-6 py-3">${e.modalidad}</td>
+                            <td class="px-6 py-3">${e.periodo}</td>
+                            <td class="px-6 py-3">${e.estado}</td>
+                            <td class="px-6 py-3">${e.fecha_defuncion}</td>
+                            <td class="px-6 py-3">${e.dias_transcurridos}</td>
+                            <td class="px-6 py-3">${e.poliza}</td>
+                        </tr>
+                    `;
+                });
+            });
+    }, 300);
+});
+
+// Función para actualizar estado/fecha
+function actualizarEstado(select){
+    const fila = select.closest('tr');
+    const id = fila.dataset.id;
+    const estado = select.value;
+    const fechaInput = fila.querySelector('.fecha-defuncion');
+    const diasTd = fila.querySelector('.tiempo-transcurrido');
+
+    fechaInput.disabled = (estado !== 'fallecido');
+    const fecha = fechaInput.value;
+
+    fetch(`/panel-asesor/estudiantes/${id}/fallecido/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `estado=${estado}&fecha_defuncion=${fecha}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.ok){
+            diasTd.textContent = data.dias_transcurridos ?? '-';
+        } else {
+            alert(data.error);
+        }
+    });
+}
+
+// Actualizar al cambiar fecha
+document.addEventListener('change', function(e){
+    if(e.target.classList.contains('fecha-defuncion')){
+        const fila = e.target.closest('tr');
+        const select = fila.querySelector('.estado-selector');
+        actualizarEstado(select);
+    }
+});
+</script>
+
+{% endblock %}

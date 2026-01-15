@@ -1,0 +1,122 @@
+{% extends "master/sideBar/base.html" %}
+
+{% block title %}Registrar Beneficiario{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Contenedor */
+    .page-container {
+        padding: 25px;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* Tarjeta del formulario */
+    .form-card {
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 520px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Título principal */
+    .page-title {
+        font-size: 32px;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 10px;
+        background: linear-gradient(90deg, #7c3aed, #e49fe5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .page-subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 30px;
+    }
+
+    /* Secciones */
+    .section-title {
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: #5b21b6;
+        border-left: 4px solid #a855f7;
+        padding-left: 10px;
+    }
+
+    /* Inputs */
+    input, select, textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 14px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        font-size: 14px;
+        transition: border 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #a855f7;
+        box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25);
+    }
+
+    /* Botón */
+    .btn-submit {
+        width: 100%;
+        padding: 12px;
+        margin-top: 20px;
+        font-size: 16px;
+        font-weight: 600;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        background: linear-gradient(90deg, #7c3aed, #f6abf6);
+        box-shadow: 0 6px 15px rgba(124, 58, 237, 0.4);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(124, 58, 237, 0.55);
+    }
+</style>
+
+<div class="page-container">
+    <div class="form-card">
+
+        <h2 class="page-title">Registrar Beneficiario</h2>
+        <p class="page-subtitle">
+            Complete la información requerida para crear un nuevo beneficiario
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- DATOS DEL USUARIO -->
+            <div class="section-title">Datos del Usuario</div>
+
+            <input type="text" name="first_name" placeholder="Nombre" required>
+            <input type="text" name="last_name" placeholder="Apellido" required>
+            <input type="email" name="email" placeholder="Correo electrónico" required>
+
+            <!-- DATOS DEL BENEFICIARIO -->
+            <div class="section-title">Datos del Beneficiario</div>
+
+            {{ form.as_p }}
+
+            <button type="submit" class="btn-submit">
+                💾 Registrar Beneficiario
+            </button>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

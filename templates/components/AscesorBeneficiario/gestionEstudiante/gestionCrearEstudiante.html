@@ -1,0 +1,158 @@
+{% extends "master/sideBar/base.html" %}
+
+{% block title %}Registrar Estudiante{% endblock %}
+
+{% block content %}
+
+<style>
+/* ===== FONDO ===== */
+body {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ===== CONTENEDOR ===== */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.95);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+/* ===== TITULO ===== */
+h2 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+/* ===== MENSAJES ===== */
+.alert {
+    padding: 12px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    background: linear-gradient(90deg, #12c2e9 0%, #c471ed 50%, #f64f59 100%);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* ===== FORM ===== */
+form .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+/* ===== CAMPOS ===== */
+form .col-md-6 {
+    flex: 0 0 48%;
+}
+form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #333;
+}
+form input, form select {
+    width: 100%;
+    padding: 10px 15px;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    outline: none;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+form input:focus, form select:focus {
+    border-color: #2575fc;
+    box-shadow: 0 2px 8px rgba(37,117,252,0.3);
+}
+
+/* ===== BOTON ===== */
+button.btn-primary {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #12c2e9 0%, #c471ed 50%, #f64f59 100%);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 20px;
+}
+button.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+</style>
+
+<div class="container mt-4">
+    <h2>Registro de Estudiante</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.cedula.label_tag }}
+                {{ form.cedula }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                {{ form.correo.label_tag }}
+                {{ form.correo }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                {{ form.nombres.label_tag }}
+                {{ form.nombres }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                {{ form.apellidos.label_tag }}
+                {{ form.apellidos }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                {{ form.modalidad.label_tag }}
+                {{ form.modalidad }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                {{ form.nivel.label_tag }}
+                {{ form.nivel }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                {{ form.carrera.label_tag }}
+                {{ form.carrera }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                {{ form.periodo_academico.label_tag }}
+                {{ form.periodo_academico }}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Registrar Estudiante
+        </button>
+    </form>
+</div>
+
+{% endblock %}

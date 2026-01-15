@@ -1,0 +1,179 @@
+{% extends "master/sideBar/base.html" %}
+
+{% block title %}Beneficiario Creado{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Contenedor principal */
+    .page-container {
+        padding: 25px;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* Tarjeta principal */
+    .success-card {
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 18px;
+        width: 100%;
+        max-width: 520px;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+    }
+
+    /* Título */
+    .page-title {
+        font-size: 32px;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 8px;
+        background: linear-gradient(90deg, #16a34a, #22c55e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .page-subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 25px;
+    }
+
+    /* Información */
+    .info-item {
+        font-size: 15px;
+        margin-bottom: 8px;
+    }
+
+    .info-item b {
+        color: #166534;
+    }
+
+    /* Credenciales */
+    /* Credenciales mejoradas */
+    .credentials-box {
+        margin-top: 25px;
+        padding: 22px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #ecfdf5, #bbf7d0);
+        border-left: 6px solid #16a34a;
+        box-shadow: inset 0 0 0 1px #86efac;
+    }
+
+    .credentials-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .credentials-header h3 {
+        font-weight: 800;
+        color: #14532d;
+        margin: 0;
+        font-size: 16px;
+    }
+
+    .credentials-warning {
+        font-size: 12px;
+        color: #166534;
+        margin-bottom: 14px;
+    }
+
+    .credential-item {
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px dashed #86efac;
+    }
+
+    .credential-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #166534;
+    }
+
+    .credential-value {
+        font-family: monospace;
+        font-size: 14px;
+        color: #065f46;
+        background: #ecfdf5;
+        padding: 4px 8px;
+        border-radius: 6px;
+    }
+
+    /* Botón */
+    .btn-back {
+        display: block;
+        margin-top: 25px;
+        padding: 12px;
+        text-align: center;
+        text-decoration: none;
+        color: white;
+        font-weight: 600;
+        border-radius: 12px;
+        background: linear-gradient(90deg, #16a34a, #22c55e);
+        box-shadow: 0 6px 15px rgba(22, 163, 74, 0.4);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(22, 163, 74, 0.55);
+    }
+</style>
+
+<div class="page-container">
+    <div class="success-card">
+
+        <h2 class="page-title">Beneficiario Creado</h2>
+        <p class="page-subtitle">
+            El beneficiario ha sido registrado correctamente en el sistema
+        </p>
+
+        <div class="info-item">
+            <b>Nombre:</b>
+            {{ beneficiario.profile.user.first_name }}
+            {{ beneficiario.profile.user.last_name }}
+        </div>
+
+        <div class="info-item">
+            <b>Correo:</b>
+            {{ beneficiario.profile.user.email }}
+        </div>
+
+        <div class="credentials-box">
+    <div class="credentials-header">
+        <span>🔐</span>
+        <h3>Credenciales de Acceso</h3>
+    </div>
+
+    <div class="credentials-warning">
+        ⚠️ Estas credenciales se mostrarán una sola vez. Guárdelas en un lugar seguro.
+    </div>
+
+    <div class="credential-item">
+        <span class="credential-label">Usuario</span>
+        <span class="credential-value">{{ credenciales.usuario }}</span>
+    </div>
+
+    <div class="credential-item">
+        <span class="credential-label">Contraseña</span>
+        <span class="credential-value">{{ credenciales.password }}</span>
+    </div>
+</div>
+
+        <a href="{% url 'panel_asesor:inicio' %}" class="btn-back">
+            ← Volver al listado
+        </a>
+
+    </div>
+</div>
+
+{% endblock %}
+

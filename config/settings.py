@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'siniestros',
+    'login',
+    'panel_asesor',
 ]
 
 MIDDLEWARE = [
@@ -78,12 +80,14 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'seguros_personas',
-        'USER': 'root',
-        'PASSWORD': 'password',
+        'USER': 'django_user',
+        'PASSWORD': 'lunallena',
         'HOST': 'localhost',
         'PORT': '3306',
     }
 }
+
+
 
 
 

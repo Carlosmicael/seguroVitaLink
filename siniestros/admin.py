@@ -4,7 +4,7 @@ from .models import Poliza, Siniestro
 
 @admin.register(Poliza)
 class PolizaAdmin(admin.ModelAdmin):
-    list_display = ('numero', 'usuario', 'estado', 'monto_cobertura', 'fecha_creacion')
+    list_display = ('numero', 'estudiante', 'estado', 'monto_cobertura', 'fecha_creacion')
     list_filter = ('estado', 'fecha_creacion')
     search_fields = ('numero', 'usuario__username', 'usuario__email')
     date_hierarchy = 'fecha_creacion'
