@@ -122,14 +122,6 @@ def listar_estudiantes(request):
     page_number = request.GET.get('page')
     estudiantes_page = paginator.get_page(page_number)
 
-    # calcular tiempo transcurrido
-    for e in estudiantes_page:
-        if e.estado == 'fallecido' and e.fecha_defuncion:
-            delta = relativedelta(date.today(), e.fecha_defuncion)
-            e.dias_transcurridos = f"{delta.months} meses {delta.days} días"
-        else:
-            e.dias_transcurridos = '-'
-
     return render(
         request,
         'components/AscesorBeneficiario/gestionEstudiante/gestionEstudiantes.html',
@@ -203,4 +195,35 @@ def cambiar_estado_estudiante(request):
 
     estudiante.save()
 
+    return JsonResponse({'success': True})
+
+@login_required
+def editar_estudiante(request, estudiante_id):
+    estudiante = get_object_or_404(Estudiante, id=estudiante_id)
+
+    if request.method == 'POST':
+        form = EstudianteForm(request.POST, instance=estudiante)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Estudiante actualizado correctamente.')
+            return redirect('panel_asesor:listar_estudiantes')
+    else:
+        form = EstudianteForm(instance=estudiante)
+
+    return render(
+        request,
+        'components/AscesorBeneficiario/gestionEstudiante/gestionEditarEstudiante.html',
+        {
+            'form': form,
+            'estudiante': estudiante
+        }
+    )
+
+@login_required
+@require_POST
+def eliminar_estudiante(request):
+    estudiante_id = request.POST.get('id')
+    estudiante = get_object_or_404(Estudiante, id=estudiante_id)
+    estudiante.delete()
     return JsonResponse({'success': True})

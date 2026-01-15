@@ -13,6 +13,7 @@ class Poliza(models.Model):
     ]
     
     numero = models.CharField(max_length=50, unique=True)
+    #----------------------lo cambie
     estudiante = models.OneToOneField(
         'panel_asesor.Estudiante',
         on_delete=models.CASCADE,
@@ -20,7 +21,7 @@ class Poliza(models.Model):
         null=True,      # 👈 temporal
         blank=True      # 👈 temporal
     )
-
+    #---------------------------------------
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='inactiva')
     monto_cobertura = models.DecimalField(max_digits=10, decimal_places=2, default=10000)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
@@ -31,7 +32,7 @@ class Poliza(models.Model):
         ordering = ['-fecha_creacion']
     
     def __str__(self):
-        return f"Póliza {self.numero} - {self.estudiante.cedula}"
+        return f"Póliza {self.numero} - {self.estudiante.cedula}" # 👈 aqui tambien cambie
 
 
 class Siniestro(models.Model):

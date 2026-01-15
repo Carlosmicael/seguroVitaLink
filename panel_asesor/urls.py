@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import registrar_beneficiario, registrar_estudiante, listar_estudiantes, buscar_estudiantes, inicio_asesor, cambiar_estado_estudiante
-
+from .views import registrar_beneficiario, registrar_estudiante, listar_estudiantes, buscar_estudiantes, inicio_asesor, cambiar_estado_estudiante, editar_estudiante , eliminar_estudiante
+from . import views
 app_name = 'panel_asesor'
 
 urlpatterns = [
@@ -14,6 +14,18 @@ urlpatterns = [
         cambiar_estado_estudiante,
         name='cambiar_estado_estudiante'
     ),
+    path(
+        'estudiantes/editar/<int:estudiante_id>/',
+        views.editar_estudiante,
+        name='editar_estudiante'
+    ),
+path(
+    'estudiantes/eliminar/',
+    views.eliminar_estudiante,
+    name='eliminar_estudiante'
+),
+
+
 
 ]
 
