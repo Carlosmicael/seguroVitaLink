@@ -8,6 +8,9 @@ from django.db import transaction
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404
+
 
 from .models import Beneficiario, Estudiante
 from .forms import BeneficiarioForm, EstudianteForm
@@ -169,40 +172,35 @@ def buscar_estudiantes(request):
         })
 
     return JsonResponse(data, safe=False)
-
 @login_required
-def marcar_fallecido(request, estudiante_id):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
-
+@require_POST
+def cambiar_estado_estudiante(request):
+    estudiante_id = request.POST.get('id')
+    nuevo_estado = request.POST.get('estado')
     fecha_defuncion = request.POST.get('fecha_defuncion')
-    estado = request.POST.get('estado')
 
-    try:
-        estudiante = Estudiante.objects.get(id=estudiante_id)
-    except Estudiante.DoesNotExist:
-        return JsonResponse({'error': 'Estudiante no encontrado'}, status=404)
+    estudiante = get_object_or_404(Estudiante, id=estudiante_id)
+    estudiante.estado = nuevo_estado
 
-    estudiante.estado = estado
-
-    if estado == 'fallecido':
+    if nuevo_estado == 'fallecido':
         if not fecha_defuncion:
-            return JsonResponse({'error': 'La fecha de defunción es obligatoria'}, status=400)
+            return JsonResponse({
+                'success': False,
+                'error': 'Fecha de defunción obligatoria'
+            })
 
-        # Convertir string a date
-        estudiante.fecha_defuncion = datetime.strptime(fecha_defuncion, "%Y-%m-%d").date()
+        fecha_def = date.fromisoformat(fecha_defuncion)
+        hoy = date.today()
 
-        # Calcular tiempo transcurrido usando relativedelta
-        delta = relativedelta(date.today(), estudiante.fecha_defuncion)
-        estudiante.dias_transcurridos = f"{delta.years*12 + delta.months} meses {delta.days} días"
+        delta = relativedelta(hoy, fecha_def)
+
+        estudiante.fecha_defuncion = fecha_def
+        estudiante.tiempo_transcurrido = f"{delta.months} meses {delta.days} días"
 
     else:
         estudiante.fecha_defuncion = None
-        estudiante.dias_transcurridos = None
+        estudiante.tiempo_transcurrido = None
 
     estudiante.save()
 
-    return JsonResponse({
-        'ok': True,
-        'dias_transcurridos': estudiante.dias_transcurridos or '-'
-    })
+    return JsonResponse({'success': True})

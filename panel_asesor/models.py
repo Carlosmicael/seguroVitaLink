@@ -73,7 +73,7 @@ class Estudiante(models.Model):
     )
 
     fecha_defuncion = models.DateField(null=True, blank=True)
-    tiempo_trancurrido = models.CharField(max_length=50, null=True, blank=True)
+    tiempo_transcurrido = models.CharField(max_length=50, null=True, blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -170,24 +170,33 @@ tbody tr:hover {
                 
                 <!-- Selector de Estado -->
                 <td class="px-6 py-3">
-                    <select class="border rounded px-2 py-1 text-sm estado-selector" onchange="actualizarEstado(this)">
-                        <option value="Activo" {% if estudiante.estado == 'Activo' %}selected{% endif %}>Activo</option>
+                    <select class="estado-selector" onchange="cambiarEstado(this)">
+                        <option value="activo" {% if estudiante.estado == 'activo' %}selected{% endif %}>Activo</option>
+                        <option value="inactivo" {% if estudiante.estado == 'inactivo' %}selected{% endif %}>Inactivo</option>
                         <option value="fallecido" {% if estudiante.estado == 'fallecido' %}selected{% endif %}>Fallecido</option>
                     </select>
+
                 </td>
 
                 <!-- Fecha defunción editable -->
                 <td class="px-6 py-3">
-                    <input type="date"
-                        class="border rounded px-2 py-1 text-sm fecha-defuncion"
+                    <input
+                        type="date"
+                        class="fecha-defuncion"
                         value="{{ estudiante.fecha_defuncion|date:'Y-m-d' }}"
-                        {% if estudiante.estado != 'fallecido' %}disabled{% endif %}>
+                        {% if estudiante.estado != 'fallecido' %}
+                            style="display:none"
+                        {% endif %}
+                        onchange="guardarFechaDefuncion(this)"
+                    >
                 </td>
+
 
                 <!-- Tiempo transcurrido -->
                 <td class="px-6 py-3 tiempo-transcurrido">
-                    {{ estudiante.dias_transcurridos|default:'-' }}
+                    {{ estudiante.tiempo_transcurrido|default:"-" }}
                 </td>
+
 
                 <td class="px-6 py-3">
                     {% if estudiante.poliza %}
@@ -240,7 +249,7 @@ input.addEventListener('input', () => {
                             <td class="px-6 py-3">${e.periodo}</td>
                             <td class="px-6 py-3">${e.estado}</td>
                             <td class="px-6 py-3">${e.fecha_defuncion}</td>
-                            <td class="px-6 py-3">${e.dias_transcurridos}</td>
+                            <td class="px-6 py-3">${e.tiempo_transcurrido}</td>
                             <td class="px-6 py-3">${e.poliza}</td>
                         </tr>
                     `;
@@ -248,44 +257,92 @@ input.addEventListener('input', () => {
             });
     }, 300);
 });
-
-// Función para actualizar estado/fecha
-function actualizarEstado(select){
+function cambiarEstado(select) {
     const fila = select.closest('tr');
-    const id = fila.dataset.id;
-    const estado = select.value;
-    const fechaInput = fila.querySelector('.fecha-defuncion');
-    const diasTd = fila.querySelector('.tiempo-transcurrido');
+    const estudianteId = fila.dataset.id;
+    const nuevoEstado = select.value;
+    const inputFecha = fila.querySelector('.fecha-defuncion');
+    const celdaTiempo = fila.querySelector('.tiempo-transcurrido');
 
-    fechaInput.disabled = (estado !== 'fallecido');
-    const fecha = fechaInput.value;
+    // 🔥 SI ES FALLECIDO
+    if (nuevoEstado === 'fallecido') {
+        inputFecha.style.display = 'inline-block';
+        inputFecha.required = true;
+        return; // NO guardamos aún
+    }
 
-    fetch(`/panel-asesor/estudiantes/${id}/fallecido/`, {
-        method: 'POST',
+    // 🔥 SI CAMBIA A ACTIVO O INACTIVO → LIMPIAR TODO
+    inputFecha.style.display = 'none';
+    inputFecha.required = false;
+    inputFecha.value = '';
+
+    // 🧹 LIMPIAR TIEMPO TRANSCURRIDO EN LA TABLA
+    celdaTiempo.textContent = '-';
+
+    // 🔁 Guardar cambio en backend
+    fetch("{% url 'panel_asesor:cambiar_estado_estudiante' %}", {
+        method: "POST",
         headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/x-www-form-urlencoded'
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": "{{ csrf_token }}"
         },
-        body: `estado=${estado}&fecha_defuncion=${fecha}`
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.ok){
-            diasTd.textContent = data.dias_transcurridos ?? '-';
-        } else {
-            alert(data.error);
-        }
+        body: `id=${estudianteId}&estado=${nuevoEstado}`
     });
 }
 
-// Actualizar al cambiar fecha
-document.addEventListener('change', function(e){
-    if(e.target.classList.contains('fecha-defuncion')){
-        const fila = e.target.closest('tr');
-        const select = fila.querySelector('.estado-selector');
-        actualizarEstado(select);
+
+function guardarFechaDefuncion(input) {
+    const fila = input.closest('tr');
+    const estudianteId = fila.dataset.id;
+    const celdaTiempo = fila.querySelector('.tiempo-transcurrido');
+
+    if (!input.value) {
+        alert("La fecha de defunción es obligatoria");
+        return;
     }
-});
+
+    // 🔥 CALCULAR Y MOSTRAR EN VIVO
+    const tiempo = calcularTiempoTranscurrido(input.value);
+    celdaTiempo.textContent = tiempo;
+
+    // 🔁 AHORA SÍ, guardar en backend
+    fetch("{% url 'panel_asesor:cambiar_estado_estudiante' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: `id=${estudianteId}&estado=fallecido&fecha_defuncion=${input.value}`
+    });
+}function calcularTiempoTranscurrido(fechaDefuncion) {
+    const [year, month, day] = fechaDefuncion.split('-').map(Number);
+
+    // 🔒 Fecha SIN zona horaria
+    const fecha = new Date(year, month - 1, day);
+    const hoy = new Date();
+
+    let years = hoy.getFullYear() - fecha.getFullYear();
+    let months = hoy.getMonth() - fecha.getMonth();
+    let days = hoy.getDate() - fecha.getDate();
+
+    if (days < 0) {
+        months--;
+        const ultimoMes = new Date(hoy.getFullYear(), hoy.getMonth(), 0).getDate();
+        days += ultimoMes;
+    }
+
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+
+    if (years > 0) {
+        return `${years} años ${months} meses ${days} días`;
+    }
+
+    return `${months} meses ${days} días`;
+}
+
 </script>
 
 {% endblock %}
