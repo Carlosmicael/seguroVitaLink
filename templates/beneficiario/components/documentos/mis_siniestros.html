@@ -1,0 +1,571 @@
+{% extends "master/sideBar/sidebar_beneficiario.html" %}
+
+{% block content %}
+<style>
+.table-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+
+.btn-action {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    color: white;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+    font-size: 14px;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.modal-overlay.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #115e59 0%, #0f766e 100%);
+    color: white;
+    padding: 24px 30px;
+    border-radius: 20px 20px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.modal-body {
+    padding: 30px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 11;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+.doc-card {
+    background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.doc-card:hover {
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    transform: translateX(4px);
+}
+
+.doc-info p {
+    margin: 6px 0;
+    color: #374151;
+    font-size: 14px;
+}
+
+.doc-info strong {
+    color: #115e59;
+    font-weight: 600;
+}
+
+.badge-obligatorio {
+    display: inline-block;
+    background: #fef3c7;
+    color: #92400e;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.upload-area {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 40px 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    border-color: #10b981;
+}
+
+.upload-area i {
+    font-size: 48px;
+    color: #10b981;
+    margin-bottom: 12px;
+}
+
+.btn-select-file {
+    background: white;
+    border: 1px solid #d1d5db;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-select-file:hover {
+    background: #f9fafb;
+    border-color: #10b981;
+    color: #10b981;
+}
+
+.btn-submit {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    color: white;
+    font-weight: 700;
+    padding: 12px 32px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.btn-cancel {
+    background: #e5e7eb;
+    color: #374151;
+    font-weight: 600;
+    padding: 12px 32px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: #d1d5db;
+}
+
+.file-selected {
+    background: #ecfdf5;
+    border: 1px solid #10b981;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #065f46;
+}
+
+.file-selected i {
+    color: #10b981;
+}
+
+/* DataTables custom styling */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 6px 12px;
+    margin: 0 4px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #374151;
+    transition: all 0.2s ease;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    color: white;
+    border-color: #10b981;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 8px 16px;
+    margin-left: 8px;
+}
+
+.dataTables_wrapper .dataTables_filter input:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+</style>
+
+<div style="padding: 40px; background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); min-height: 100vh;">
+    <div style="max-width: 1400px; margin: 0 auto;">
+        <!-- Header -->
+        <div style="margin-bottom: 32px;">
+            <h1 style="font-size: 32px; font-weight: 800; color: #115e59; margin-bottom: 8px;">
+                📋 Mis Siniestros
+            </h1>
+            <p style="color: #6b7280; font-size: 16px;">
+                Gestiona y revisa el estado de tus siniestros reportados
+            </p>
+        </div>
+
+        <!-- Table Container -->
+        <div class="table-container">
+            <table id="tablaSiniestros" style="width: 100%;">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #115e59 0%, #0f766e 100%); color: white;">
+                        <th style="padding: 16px; text-align: left; font-weight: 600;">ID</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600;">Beneficiario</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600;">Tipo</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600;">Descripción</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600;">Estado</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600;">Fecha Evento</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600;">Fecha Reporte</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600;">Póliza</th>
+                        <th style="padding: 16px; text-align: left; font-weight: 600;">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sin in siniestros %}
+                    <tr style="border-bottom: 1px solid #e5e7eb; transition: all 0.2s ease;" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='white'">
+                        <td style="padding: 16px; color: #374151; font-weight: 600;">{{ sin.id }}</td>
+                        <td style="padding: 16px; color: #374151;">{{ sin.beneficiario_nombre }}</td>
+                        <td style="padding: 16px; color: #374151;">{{ sin.tipo }}</td>
+                        <td style="padding: 16px; color: #6b7280; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ sin.descripcion }}</td>
+                        <td style="padding: 16px;">
+                            <span style="display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; background: #dbeafe; color: #1e40af;">
+                                {{ sin.estado }}
+                            </span>
+                        </td>
+                        <td style="padding: 16px; color: #6b7280;">{{ sin.fecha_evento }}</td>
+                        <td style="padding: 16px; color: #6b7280;">{{ sin.fecha_reporte }}</td>
+                        <td style="padding: 16px; color: #374151; font-weight: 600;">{{ sin.poliza_numero }}</td>
+                        <td style="padding: 16px;">
+                            <button class="abrirModal btn-action"
+                                    data-poliza="{{ sin.poliza_numero }}"
+                                    data-beneficiario="{{ sin.beneficiario_id }}">
+                                📄 Ver Documentos
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" style="padding: 40px; text-align: center; color: #9ca3af;">
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                                <svg style="width: 64px; height: 64px; color: #d1d5db;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span style="font-size: 18px; font-weight: 600; color: #6b7280;">No tienes siniestros registrados</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Documentos Requeridos -->
+<div id="modalSiniestro" class="modal-overlay hidden">
+    <div class="modal-content" style="width: 90%; max-width: 1000px;">
+        <div class="modal-header">
+            <button class="close-btn" id="cerrarModal">×</button>
+            <h2 style="font-size: 24px; font-weight: 700; margin: 0;">
+                📂 Documentos Requeridos
+            </h2>
+            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">
+                Revisa y carga los documentos necesarios para tu siniestro
+            </p>
+        </div>
+        <div class="modal-body">
+            <div id="documentosContainer">
+                <div style="text-align: center; padding: 40px; color: #6b7280;">
+                    <div style="width: 48px; height: 48px; border: 3px solid #10b981; border-top-color: transparent; border-radius: 50%; margin: 0 auto 16px; animation: spin 1s linear infinite;"></div>
+                    <p style="font-size: 16px;">Cargando documentos...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Subir Documento -->
+<div id="modalDocumento" class="modal-overlay hidden">
+    <div class="modal-content" style="width: 90%; max-width: 600px;">
+        <div class="modal-header">
+            <button class="close-btn" onclick="cerrarModal('modalDocumento')">×</button>
+            <h3 style="font-size: 22px; font-weight: 700; margin: 0;">
+                📤 Subir Documento
+            </h3>
+        </div>
+        <div class="modal-body">
+            <form id="formSubirDocumento" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="beneficiario_id" id="beneficiario_id">
+                <input type="hidden" name="doc_descripcion" id="doc_descripcion">
+
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; color: #374151; font-weight: 600; margin-bottom: 12px; font-size: 15px;">
+                        Selecciona tu archivo
+                    </label>
+                    <div class="upload-area" onclick="document.getElementById('archivoInput').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h4 style="color: #374151; font-size: 18px; font-weight: 600; margin: 12px 0 8px 0;">
+                            Arrastra aquí tu archivo
+                        </h4>
+                        <p style="color: #6b7280; font-size: 14px; margin-bottom: 16px;">
+                            o haz clic para seleccionar
+                        </p>
+                        <button type="button" class="btn-select-file">
+                            Seleccionar archivo
+                        </button>
+                    </div>
+                    <input type="file" id="archivoInput" name="archivo" style="display: none;" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
+                    <div id="archivoSeleccionado" class="file-selected" style="display: none;">
+                        <i class="fas fa-file-alt"></i>
+                        <span id="nombreArchivo" style="font-weight: 600;"></span>
+                    </div>
+                    <p style="color: #6b7280; font-size: 13px; margin-top: 12px;">
+                        Formatos aceptados: PDF, DOC, DOCX, JPG, PNG (Max. 10MB)
+                    </p>
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px;">
+                    <button type="button" class="btn-cancel" onclick="cerrarModal('modalDocumento')">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-upload"></i> Subir Documento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+</style>
+
+<!-- jQuery y DataTables -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+function cerrarModal(id) {
+    $('#' + id).addClass('hidden');
+}
+
+$(document).ready(function() {
+    $('#tablaSiniestros').DataTable({ 
+        pageLength: 10, 
+        order: [[0, "desc"]], 
+        responsive: true,
+        language: {
+            search: "Buscar:",
+            lengthMenu: "Mostrar _MENU_ registros",
+            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+            infoEmpty: "Mostrando 0 a 0 de 0 registros",
+            infoFiltered: "(filtrado de _MAX_ registros totales)",
+            paginate: {
+                first: "Primero",
+                last: "Último",
+                next: "Siguiente",
+                previous: "Anterior"
+            },
+            zeroRecords: "No se encontraron registros coincidentes"
+        }
+    });
+
+    // Abrir modal siniestro
+    $('.abrirModal').click(function() {
+        const polizaId = $(this).data('poliza');
+        const beneficiarioId = $(this).data('beneficiario');
+        $('#documentosContainer').html(`
+            <div style="text-align: center; padding: 40px; color: #6b7280;">
+                <div style="width: 48px; height: 48px; border: 3px solid #10b981; border-top-color: transparent; border-radius: 50%; margin: 0 auto 16px; animation: spin 1s linear infinite;"></div>
+                <p style="font-size: 16px;">Cargando documentos...</p>
+            </div>
+        `);
+        $('#modalSiniestro').removeClass('hidden');
+
+        fetch(`/api/documentos_aseguradora/${polizaId}/`)
+            .then(res => res.json())
+            .then(data => {
+                const container = $('#documentosContainer');
+                container.empty();
+                if (data.length === 0) {
+                    container.html(`
+                        <div style="text-align: center; padding: 40px; color: #6b7280;">
+                            <svg style="width: 64px; height: 64px; margin: 0 auto 16px; color: #d1d5db;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p style="font-size: 18px; font-weight: 600;">No hay documentos requeridos</p>
+                        </div>
+                    `);
+                    return;
+                }
+                data.forEach(doc => {
+                    const obligatorioHTML = doc.obligatorio 
+                        ? '<span class="badge-obligatorio">✓ Obligatorio</span>' 
+                        : '<span style="display: inline-block; background: #e5e7eb; color: #6b7280; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">Opcional</span>';
+                    
+                    const html = `
+                        <div class="doc-card">
+                            <div class="doc-info" style="flex: 1;">
+                                <p style="font-size: 16px; font-weight: 700; color: #115e59; margin-bottom: 8px;">
+                                    📄 ${doc.nombre_documento}
+                                </p>
+                                <p><strong>Tipo Siniestro:</strong> ${doc.siniestro_tipo}</p>
+                                <p><strong>Descripción:</strong> ${doc.descripcion || 'N/A'}</p>
+                                <p><strong>Estado:</strong> ${obligatorioHTML}</p>
+                                <p style="color: #6b7280; font-size: 13px;"><strong>Versión:</strong> ${doc.fecha_version}</p>
+                            </div>
+                            <button class="abrirModalSubir btn-action" 
+                                    data-descripcion="${doc.nombre_documento}" 
+                                    data-beneficiario="${beneficiarioId}">
+                                📤 Subir
+                            </button>
+                        </div>
+                    `;
+                    container.append(html);
+                });
+            })
+            .catch(err => {
+                $('#documentosContainer').html(`
+                    <div style="text-align: center; padding: 40px;">
+                        <svg style="width: 64px; height: 64px; margin: 0 auto 16px; color: #ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p style="color: #ef4444; font-size: 18px; font-weight: 600;">Error al cargar documentos</p>
+                        <p style="color: #6b7280; font-size: 14px; margin-top: 8px;">Por favor, intenta nuevamente</p>
+                    </div>
+                `);
+                console.error(err);
+            });
+    });
+
+    $(document).on('click', '.abrirModalSubir', function() {
+        const descripcion = $(this).data('descripcion');
+        const beneficiarioId = $(this).data('beneficiario');
+
+        $('#doc_descripcion').val(descripcion);
+        $('#beneficiario_id').val(beneficiarioId);
+        $('#modalDocumento').removeClass('hidden');
+        $('#archivoSeleccionado').hide();
+        $('#archivoInput').val('');
+    });
+
+    $('#cerrarModal').click(() => $('#modalSiniestro').addClass('hidden'));
+
+    $('#archivoInput').on('change', function() {
+        if (this.files.length > 0) {
+            const fileName = this.files[0].name;
+            $('#nombreArchivo').text(fileName);
+            $('#archivoSeleccionado').show();
+        }
+    });
+
+    $('#formSubirDocumento').submit(function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const submitBtn = $(this).find('button[type="submit"]');
+        const originalText = submitBtn.html();
+        
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Subiendo...');
+
+        fetch("{% url 'subir_documento_api' %}", {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert('Documento subido correctamente!');
+            cerrarModal('modalDocumento');
+            submitBtn.prop('disabled', false).html(originalText);
+            $('#formSubirDocumento')[0].reset();
+            $('#archivoSeleccionado').hide();
+        })
+        .catch(err => {
+            alert('Error al subir el documento. Por favor, intenta nuevamente.');
+            console.error(err);
+            submitBtn.prop('disabled', false).html(originalText);
+        });
+    });
+});
+</script>
+
+{% endblock %}

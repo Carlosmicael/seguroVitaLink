@@ -1,0 +1,1254 @@
+{% extends "master/sideBar/sidebar_asesor.html" %}
+
+{% block content %}
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #ffffff;
+    color: #1f2937;
+}
+
+.main-container {
+    min-height: 100vh;
+    padding: 24px;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.page-header {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.page-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+    color: #6b7280;
+    font-size: 15px;
+    font-weight: 400;
+}
+
+.table-wrapper {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+thead {
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+thead th {
+    padding: 14px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+tbody tr {
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.15s ease;
+}
+
+tbody tr:hover {
+    background: #f9fafb;
+}
+
+tbody tr:last-child {
+    border-bottom: none;
+}
+
+tbody td {
+    padding: 16px;
+    color: #374151;
+    vertical-align: middle;
+}
+
+.id-cell {
+    font-weight: 600;
+    color: #111827;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    font-size: 13px;
+}
+
+.description-cell {
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #6b7280;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #dbeafe;
+    color: #1e40af;
+    white-space: nowrap;
+}
+
+.date-cell {
+    color: #6b7280;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.policy-cell {
+    font-weight: 600;
+    color: #111827;
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 13px;
+}
+
+.btn-enter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #111827;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-enter:hover {
+    background: #1f2937;
+    transform: translateY(-1px);
+}
+
+.btn-enter:active {
+    transform: translateY(0);
+}
+
+.empty-state {
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    color: #d1d5db;
+}
+
+.empty-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.empty-text {
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+}
+
+.modal-overlay.hidden {
+    display: none;
+}
+
+.modal-container {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 1000px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: scale(0.95);
+    transition: transform 0.2s ease;
+}
+
+.modal-overlay.active .modal-container {
+    transform: scale(1);
+}
+
+.modal-header {
+    padding: 24px 28px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.modal-subtitle {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+.btn-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #f3f4f6;
+    border-radius: 8px;
+    color: #6b7280;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.btn-close:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.modal-body {
+    padding: 28px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Beneficiarios Cards */
+.beneficiarios-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.beneficiario-card {
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    transition: all 0.15s ease;
+    background: white;
+}
+
+.beneficiario-card:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.beneficiario-icon {
+    width: 48px;
+    height: 48px;
+    background: #f3f4f6;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.beneficiario-info {
+    flex: 1;
+}
+
+.beneficiario-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 10px;
+}
+
+.beneficiario-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #374151;
+}
+
+.btn-view-docs {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    background: #111827;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.btn-view-docs:hover {
+    background: #1f2937;
+}
+
+/* Documentos List */
+.documentos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.documento-item {
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.15s ease;
+    background: white;
+}
+
+.documento-item:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.documento-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.documento-icon.pdf {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    color: white;
+}
+
+.documento-icon.doc {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: white;
+}
+
+.documento-icon.img {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    color: white;
+}
+
+.documento-icon:not(.pdf):not(.doc):not(.img) {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.documento-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.documento-info h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 8px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.documento-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.documento-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.documento-meta i {
+    color: #9ca3af;
+}
+
+.documento-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.btn-documento {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: #f3f4f6;
+    color: #6b7280;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    font-size: 14px;
+}
+
+.btn-documento:hover {
+    background: #111827;
+    color: white;
+    transform: scale(1.05);
+}
+
+.btn-documento[title="Eliminar"]:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* Modal de visualización */
+.view-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.view-modal.active {
+    opacity: 1;
+}
+
+.view-modal.hidden {
+    display: none;
+}
+
+.view-modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 95%;
+    max-width: 1200px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+.view-modal-body {
+    flex: 1;
+    overflow: auto;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.view-modal-body img {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 8px;
+}
+
+#pdfViewer {
+    width: 100%;
+    height: 80vh;
+    overflow: auto;
+}
+
+#pdfViewer iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 8px;
+}
+
+.modal-footer {
+    padding: 20px 28px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.modal-close-btn {
+    padding: 10px 20px;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-close-btn:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.modal-close-btn i {
+    font-size: 16px;
+}
+
+/* Loader */
+#loader {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #111827;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-container {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.loading-spinner-large {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #111827;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    animation: spin 0.8s linear infinite;
+}
+
+/* DataTables Customization */
+.dataTables_wrapper {
+    padding: 20px;
+}
+
+.dataTables_filter {
+    margin-bottom: 20px;
+}
+
+.dataTables_filter label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.dataTables_filter input {
+    padding: 8px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-left: 10px;
+    transition: all 0.15s ease;
+}
+
+.dataTables_filter input:focus {
+    outline: none;
+    border-color: #111827;
+    box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
+}
+
+.dataTables_info {
+    padding-top: 20px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.dataTables_paginate {
+    padding-top: 20px;
+}
+
+.dataTables_paginate .paginate_button {
+    padding: 6px 12px;
+    margin: 0 2px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: white;
+    color: #374151;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.dataTables_paginate .paginate_button:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.dataTables_paginate .paginate_button.current {
+    background: #111827;
+    color: white;
+    border-color: #111827;
+}
+
+.dataTables_paginate .paginate_button.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        padding: 16px;
+    }
+    
+    .page-title {
+        font-size: 24px;
+    }
+    
+    .modal-container {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .beneficiario-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .beneficiario-details {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+</style>
+{% include "master/appBar/appBar.html" %}
+
+<div class="main-container">
+    <div class="page-header">
+        <h1 class="page-title">Todos los Siniestros</h1>
+        <p class="page-subtitle">Gestiona y revisa todos los siniestros reportados por los beneficiarios</p>
+    </div>
+
+    <div class="table-wrapper">
+        <div class="table-container">
+            <table id="tablaSiniestros">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tipo</th>
+                        <th>Descripción</th>
+                        <th>Estado</th>
+                        <th>Fecha Evento</th>
+                        <th>Fecha Reporte</th>
+                        <th>Póliza</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sin in siniestros %}
+                    <tr>
+                        <td class="id-cell">{{ sin.id }}</td>
+                        <td>{{ sin.tipo }}</td>
+                        <td class="description-cell">{{ sin.descripcion }}</td>
+                        <td>
+                            <span class="status-badge">{{ sin.estado }}</span>
+                        </td>
+                        <td class="date-cell">{{ sin.fecha_evento }}</td>
+                        <td class="date-cell">{{ sin.fecha_reporte }}</td>
+                        <td class="policy-cell">{{ sin.poliza.numero }}</td>
+                        <td>
+                            <button class="btn-enter abrirModalBeneficiarios" 
+                                    data-siniestro="{{ sin.id }}">
+                                <span>👥</span>
+                                <span>Ver Beneficiarios</span>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <div class="empty-title">No hay siniestros registrados</div>
+                                <div class="empty-text">Cuando se reporten siniestros, aparecerán aquí</div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Beneficiarios -->
+<div id="modalBeneficiarios" class="modal-overlay hidden">
+    <div class="modal-container">
+        <div class="modal-header">
+            <div>
+                <div class="modal-title">Beneficiarios del Siniestro</div>
+                <div class="modal-subtitle">Revisa los beneficiarios asociados a este siniestro</div>
+            </div>
+            <button class="btn-close" id="cerrarModalBeneficiarios">×</button>
+        </div>
+        <div class="modal-body">
+            <div id="beneficiariosContainer">
+                <div class="loading-container">
+                    <div class="loading-spinner-large"></div>
+                    <p style="color: #6b7280;">Cargando beneficiarios...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Documentos -->
+<div id="modalDocumentos" class="modal-overlay hidden">
+    <div class="modal-container">
+        <div class="modal-header">
+            <div>
+                <div class="modal-title">Documentos del Beneficiario</div>
+                <div class="modal-subtitle">Revisa y gestiona los documentos presentados</div>
+            </div>
+            <button class="btn-close" id="cerrarModalDocumentos">×</button>
+        </div>
+        <div class="modal-body">
+            <div id="documentosContainerBeneficiario">
+                <div class="loading-container">
+                    <div class="loading-spinner-large"></div>
+                    <p style="color: #6b7280;">Cargando documentos...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Visualizar documentos -->
+<div id="viewModal" class="view-modal hidden">
+    <div class="view-modal-content">
+        <div class="modal-header">
+            <div>
+                <div class="modal-title">Visualizar Documento</div>
+            </div>
+            <button class="btn-close" onclick="cerrarModalView()">×</button>
+        </div>
+        <div class="view-modal-body">
+            <img id="viewModalContent" src="" alt="" style="display: none;">
+            <div id="pdfViewer" style="display: none;"></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="modal-close-btn" onclick="cerrarModalView()">
+                <i class="fas fa-times-circle"></i> Cerrar
+            </button>
+            <button type="button" class="modal-close-btn" onclick="remplazarDocumento()" id="btnRemplazar" style="display: none;">
+                <i class="fas fa-save"></i> Guardar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Loader -->
+<div id="loader" style="display:none;">
+    <div class="spinner"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+// Variables globales para el documento actual
+let currentUrlPdf = null;
+let currentFilePath = null;
+let currentDocId = null;
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function cerrarModal(id) {
+    const modal = document.getElementById(id);
+    modal.classList.remove('active');
+    setTimeout(() => modal.classList.add('hidden'), 200);
+}
+
+function cerrarModalView() {
+    const modal = document.getElementById('viewModal');
+    modal.classList.remove('active');
+    setTimeout(() => modal.classList.add('hidden'), 200);
+    
+    // Limpiar contenido
+    document.getElementById('viewModalContent').style.display = 'none';
+    document.getElementById('pdfViewer').style.display = 'none';
+    document.getElementById('btnRemplazar').style.display = 'none';
+}
+
+function remplazarDocumento() {
+    if (!currentUrlPdf || !currentFilePath || !currentDocId) {
+        console.error("Faltan parámetros");
+        return;
+    }
+
+    fetch(`/documentos/${currentDocId}/remplazar/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: JSON.stringify({
+            url_pdf: currentUrlPdf,
+            file_path: currentFilePath
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log("Documento reemplazado:", data);
+        alert("Documento actualizado correctamente.");
+        cerrarModalView();
+    })
+    .catch(err => console.error("Error al reemplazar documento:", err));
+}
+
+$(document).ready(function() {
+    // Inicializar DataTable
+    $('#tablaSiniestros').DataTable({ 
+        pageLength: 10, 
+        order: [[0, "desc"]], 
+        responsive: true,
+        language: {
+            search: "Buscar:",
+            lengthMenu: "Mostrar _MENU_ registros",
+            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+            infoEmpty: "Mostrando 0 registros",
+            infoFiltered: "(filtrado de _MAX_ totales)",
+            paginate: {
+                first: "Primero",
+                last: "Último",
+                next: "Siguiente",
+                previous: "Anterior"
+            },
+            zeroRecords: "No se encontraron registros"
+        }
+    });
+
+    // Abrir modal beneficiarios
+    $('.abrirModalBeneficiarios').click(function() {
+        const siniestroId = $(this).data('siniestro');
+        const modal = $('#modalBeneficiarios');
+        
+        modal.removeClass('hidden');
+        setTimeout(() => modal.addClass('active'), 10);
+
+        $('#beneficiariosContainer').html(`
+            <div class="loading-container">
+                <div class="loading-spinner-large"></div>
+                <p style="color: #6b7280;">Cargando beneficiarios...</p>
+            </div>
+        `);
+
+        fetch(`/api/beneficiarios/${siniestroId}/`)
+            .then(res => res.json())
+            .then(data => {
+                const container = $('#beneficiariosContainer');
+                container.empty();
+                
+                if (data.length === 0) {
+                    container.html(`
+                        <div class="empty-state">
+                            <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            <div class="empty-title">No hay beneficiarios</div>
+                            <div class="empty-text">No se encontraron beneficiarios para este siniestro</div>
+                        </div>
+                    `);
+                    return;
+                }
+
+                const benList = $('<div class="beneficiarios-list"></div>');
+                data.forEach(ben => {
+                    const card = $(`
+                        <div class="beneficiario-card">
+                            <div class="beneficiario-icon">👤</div>
+                            <div class="beneficiario-info">
+                                <div class="beneficiario-name">${ben.nombre}</div>
+                                <div class="beneficiario-details">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Correo:</span>
+                                        <span>${ben.correo || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Teléfono:</span>
+                                        <span>${ben.telefono || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Cuenta:</span>
+                                        <span>${ben.numero_cuenta || 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn-view-docs abrirModalDocumentos" 
+                                    data-beneficiario="${ben.id_beneficiario}">
+                                <span>📄</span>
+                                <span>Ver Documentos</span>
+                            </button>
+                        </div>
+                    `);
+                    benList.append(card);
+                });
+                container.append(benList);
+            })
+            .catch(err => {
+                $('#beneficiariosContainer').html(`
+                    <div class="empty-state">
+                        <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #ef4444;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="empty-title" style="color: #ef4444;">Error al cargar beneficiarios</div>
+                        <div class="empty-text">Por favor, intenta nuevamente</div>
+                    </div>
+                `);
+                console.error(err);
+            });
+    });
+
+    // Abrir modal documentos con la lógica completa
+    $(document).on('click', '.abrirModalDocumentos', function() {
+        const beneficiarioId = $(this).data('beneficiario');
+        const modal = $('#modalDocumentos');
+        
+        modal.removeClass('hidden');
+        setTimeout(() => modal.addClass('active'), 10);
+
+        $('#documentosContainerBeneficiario').html(`
+            <div class="loading-container">
+                <div class="loading-spinner-large"></div>
+                <p style="color: #6b7280;">Cargando documentos...</p>
+            </div>
+        `);
+
+        fetch(`/api/documentos/${beneficiarioId}/`)
+            .then(res => res.json())
+            .then(data => {
+                const container = $('#documentosContainerBeneficiario');
+                container.empty();
+                
+                if (data.length === 0) {
+                    container.html(`
+                        <div class="empty-state">
+                            <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <div class="empty-title">No hay documentos</div>
+                            <div class="empty-text">No se encontraron documentos para este beneficiario</div>
+                        </div>
+                    `);
+                    return;
+                }
+
+                const docList = $('<div class="documentos-lista"></div>');
+                
+                data.forEach(doc => {
+                    let fileName = doc.doc_file.split("/").pop(); 
+                    let fileNameDoom = doc.doc_file.split("/").pop(); 
+
+                    if (fileNameDoom.length > 36) {
+                        fileNameDoom = fileNameDoom.substring(0, 36) + "...";
+                    }
+                    
+                    let iconClass = "";
+                    if (fileName.endsWith(".pdf")) {
+                        iconClass = `<div class="documento-icon pdf"><i class="fas fa-file-pdf"></i></div>`;
+                    } else if (fileName.endsWith(".doc") || fileName.endsWith(".docx")) {
+                        iconClass = `<div class="documento-icon doc"><i class="fas fa-file-word"></i></div>`;
+                    } else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png")) {
+                        iconClass = `<div class="documento-icon img"><i class="fas fa-image"></i></div>`;
+                    } else {
+                        iconClass = `<div class="documento-icon"><i class="fas fa-file"></i></div>`; 
+                    }
+
+                    let fechaEdit = doc.fecha_edit;
+                    let fechaEdicionFormateadaEdit = "";
+                    if (fechaEdit) {
+                        const fechaMod = new Date(fechaEdit);
+                        const opcionesEdit = {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true
+                        };
+                        fechaEdicionFormateadaEdit = fechaMod.toLocaleString("es-ES", opcionesEdit);
+                    } else {
+                        fechaEdicionFormateadaEdit = "—";
+                    }
+
+                    const fecha = new Date(doc.fec_creacion);
+                    const opciones = { year: "numeric", month: "short", day: "numeric" };
+                    const fechaFormateada = fecha.toLocaleDateString("es-ES", opciones);
+
+                    const itemHTML = `
+                        <div class="documento-item" data-docid="${doc.doc_cod_doc}">
+                            ${iconClass}
+                            <div class="documento-info">
+                                <h4>${fileNameDoom}</h4>
+                                <div class="documento-meta">
+                                    <span><i class="fas fa-calendar"></i> ${fechaFormateada}</span>
+                                    <span><i class="fas fa-weight-hanging"></i> ${(doc.doc_size / 1024 / 1024).toFixed(2)} MB</span>
+                                    <span>Última modificación: ${fechaEdicionFormateadaEdit}</span>
+                                </div>
+                            </div>
+                            <div class="documento-actions">
+                                <button class="btn-documento" title="Descargar">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button class="btn-documento" title="Ver">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn-documento" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    docList.append(itemHTML);
+                });
+                
+                container.append(docList);
+            })
+            .catch(err => {
+                $('#documentosContainerBeneficiario').html(`
+                    <div class="empty-state">
+                        <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #ef4444;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="empty-title" style="color: #ef4444;">Error al cargar documentos</div>
+                        <div class="empty-text">Por favor, intenta nuevamente</div>
+                    </div>
+                `);
+                console.error(err);
+            });
+    });
+
+    // Event delegation para botones de documentos
+    $(document).on('click', '.btn-documento', function(e) {
+        const btn = $(this);
+        const item = btn.closest('.documento-item');
+        const docId = item.data('docid');
+        const fileName = item.find('h4').text();
+
+        if (btn.attr('title') === 'Descargar') {
+            console.log("Descargando:", fileName, "ID:", docId);
+            window.open(`/documentos/${docId}/descargar/`, "_blank");
+
+        }
+
+        
+
+        if (btn.attr('title') === 'Ver') {
+            document.getElementById('loader').style.display = "flex";
+            
+            fetch(`/documentos/${docId}/view/`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Documento:", data);
+                    const url_pdf = data.doc_file_url;
+
+                    try {
+                        if (data.doc_file.endsWith(".pdf") || data.doc_file.endsWith(".doc") || data.doc_file.endsWith(".docx")) {
+                        document.getElementById('viewModalContent').style.display = "none";
+                        document.getElementById('btnRemplazar').style.display = "block";
+
+                        currentDocId = docId;
+                        currentFilePath = data.doc_file;
+                        currentUrlPdf = url_pdf;
+
+                        const pdfViewer = document.getElementById("pdfViewer");
+                        pdfViewer.innerHTML = `
+                            <iframe src="${url_pdf}" style="width:100%;height:100%;border:none;"></iframe>
+                        `;
+                        pdfViewer.style.display = "block";
+
+                        document.getElementById('loader').style.display = "none";
+                        
+                        const modal = document.getElementById('viewModal');
+                        modal.classList.remove('hidden');
+                        setTimeout(() => modal.classList.add('active'), 10);
+                    }
+                        
+                    } catch (error) {
+                        // Es una imagen
+                        document.getElementById('pdfViewer').style.display = "none";
+                        document.getElementById('btnRemplazar').style.display = "none";
+                        const img = document.getElementById('viewModalContent');
+
+                        fetch(data.doc_file_url)
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error("Error al cargar imagen");
+                                }
+                                return response.blob(); 
+                            })
+                            .then(blob => {
+                                const imageUrl = URL.createObjectURL(blob); 
+                                img.src = imageUrl;
+                                img.style.display = "block";
+                                document.getElementById('loader').style.display = "none";
+                                
+                                const modal = document.getElementById('viewModal');
+                                modal.classList.remove('hidden');
+                                setTimeout(() => modal.classList.add('active'), 10);
+                            })
+                            .catch(error => {
+                                console.error("Error mostrando imagen:", error);
+                                document.getElementById('loader').style.display = "none";
+                            });
+                        console.error("Error al procesar el documento:", error);
+
+                    }
+
+                    
+                })
+                .catch(error => {
+                    console.error("Error al obtener el documento:", error);
+                    document.getElementById('loader').style.display = "none";
+                });
+        }
+
+        if (btn.attr('title') === 'Eliminar') {
+            if (confirm(`¿Estás seguro de eliminar el documento "${fileName}"?`)) {
+                console.log("Eliminando:", fileName, "ID:", docId);
+                fetch(`/documentos/${docId}/eliminar/`, {
+                    method: "DELETE",
+                    headers: { "X-CSRFToken": getCookie("csrftoken") }
+                })
+                .then(res => {
+                    if (res.ok) {
+                        item.remove();
+                        alert("Documento eliminado correctamente");
+                    } else {
+                        alert("Error al eliminar el documento");
+                    }
+                })
+                .catch(err => {
+                    console.error("Error eliminando:", err);
+                    alert("Error al eliminar el documento");
+                });
+            }
+        }
+    });
+
+    // Cerrar modales
+    $('#cerrarModalBeneficiarios').click(() => cerrarModal('modalBeneficiarios'));
+    $('#cerrarModalDocumentos').click(() => cerrarModal('modalDocumentos'));
+});
+</script>
+
+{% endblock %}

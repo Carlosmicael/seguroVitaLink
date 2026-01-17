@@ -178,3 +178,34 @@ def marcar_notificaciones_leidas(request, user_id):
 
 
 
+
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from core.models import Siniestro, TcasDocumentos
+from django.contrib.auth.decorators import login_required
+
+@login_required(login_url='/login')
+def lista_siniestros(request):
+    # Traer todos los siniestros sin filtros
+    siniestros = Siniestro.objects.all().select_related('poliza').order_by('-fecha_reporte')
+    context = {
+        'siniestros': siniestros
+    }
+    return render(request, 'asesor/components/documentos/siniestros_lista.html', context)
+
+@login_required(login_url='/login')
+def obtener_beneficiarios_por_siniestro(request, siniestro_id):
+    siniestro = get_object_or_404(Siniestro, pk=siniestro_id)
+    beneficiarios = siniestro.beneficiarios.all().values(
+        'id_beneficiario', 'nombre', 'correo', 'telefono', 'numero_cuenta'
+    )
+    return JsonResponse(list(beneficiarios), safe=False)
+
+@login_required(login_url='/login')
+def obtener_documentos_por_beneficiario(request, beneficiario_id):
+    documentos = TcasDocumentos.objects.filter(beneficiario_id=beneficiario_id).values(
+        "doc_cod_doc", "doc_descripcion", "doc_file", "doc_size", "fec_creacion", "fecha_edit", "estado"
+    ).order_by('-fec_creacion')
+    return JsonResponse(list(documentos), safe=False)

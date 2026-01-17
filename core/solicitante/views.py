@@ -1,3 +1,4 @@
+import email
 from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
@@ -20,8 +21,8 @@ def solicitante_dashboard(request):
 @role_required(['solicitante'])
 def lista_solicitudes(request):
     try:
-        estudiante = Estudiante.objects.get(correo=request.user.email)
-        solicitudes = Solicitud.objects.filter(estudiante=estudiante)
+        profile = request.user.profile 
+        solicitudes = Solicitud.objects.filter(profile=profile) 
     except Estudiante.DoesNotExist:
         solicitudes = []
         messages.warning(request, 'No se encontró un perfil de estudiante asociado.')
@@ -39,35 +40,28 @@ def lista_solicitudes(request):
 @login_required(login_url='login')
 @role_required(['solicitante'])
 def crear_solicitud(request):
-    try:
-        estudiante = Estudiante.objects.get(correo=request.user.email)
-    except Estudiante.DoesNotExist:
-        messages.error(request, 'Debe tener un perfil de estudiante para crear una solicitud.')
-        return redirect('lista_solicitudes')
-    
+    estudiantes = Estudiante.objects.all()
+    profile = request.user.profile
+
     if request.method == 'POST':
         form = SolicitudForm(request.POST)
+
         if form.is_valid():
             solicitud = form.save(commit=False)
-            solicitud.estudiante = estudiante
+
+            solicitud.profile = profile
+            solicitud.estudiante = form.cleaned_data['estudiante']
+
             solicitud.save()
-            
-            # AQUÍ IRÁ LA LÓGICA DE NOTIFICACIÓN AL ASESOR
-            # solicitud.notificacion_enviada = True
-            # solicitud.save()
-            
-            messages.success(request, '¡Solicitud creada exitosamente!')
-            return redirect('lista_solicitudes')
+
+            return JsonResponse({'success': True})
         else:
-            errors = {field: error[0] for field, error in form.errors.items()}
-            return JsonResponse({'success': False, 'errors': errors})
-    else:
-        form = SolicitudForm()
-    
-    return render(request, 'solicitante/components/solicitudes/crear_solicitud.html', {
-        'form': form,
-        'estudiante': estudiante
-    })
+            return JsonResponse({
+                'success': False,
+                'errors': form.errors
+            })
+
+    return render(request,'solicitante/components/solicitudes/crear_solicitud.html',{'estudiantes': estudiantes})
 
 
 
@@ -80,7 +74,7 @@ def crear_solicitud(request):
 @role_required(['solicitante'])
 def detalle_solicitud(request, solicitud_id):
     try:
-        estudiante = Estudiante.objects.get(correo=request.user.email)
+        estudiante = Estudiante.objects.get(email=request.user.email)
         solicitud = get_object_or_404(Solicitud, id=solicitud_id, estudiante=estudiante)
     except Estudiante.DoesNotExist:
         messages.error(request, 'No autorizado.')
@@ -99,7 +93,7 @@ def detalle_solicitud(request, solicitud_id):
             'fecha_solicitud': solicitud.fecha_solicitud.strftime('%d/%m/%Y %H:%M'),
             'estudiante_nombre': f"{solicitud.estudiante.nombres} {solicitud.estudiante.apellidos}",
             'estudiante_cedula': solicitud.estudiante.cedula,
-            'estudiante_correo': solicitud.estudiante.correo,
+            'estudiante_correo': solicitud.estudiante.email,
         }
         return JsonResponse(data)
     

@@ -8,20 +8,36 @@ import datetime
 
 
 
+class Aseguradora(models.Model):
+    id_aseguradora = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=200)
+    direccion = models.TextField(blank=True, null=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+
+    def __str__(self):
+        return self.nombre
+
+
+
+
 
 class Poliza(models.Model):
     
-    ESTADO_CHOICES = [('pendiente', 'Pendiente'),('activa', 'Activa'),('vencida', 'Vencida'),('cancelada', 'Cancelada')]
+    ESTADO_CHOICES = [('pendiente', 'Pendiente'),('activa', 'Activa'),('vencida', 'Vencida'),('cancelada', 'Cancelada'),('inactiva', 'Inactiva'),('suspendida', 'Suspendida'),]
     
     TIPO_COBERTURA_CHOICES = [('basica', 'Cobertura Básica'),('ampliada', 'Cobertura Ampliada'),('completa', 'Cobertura Completa')]
     
-    estudiante = models.ForeignKey('Estudiante',on_delete=models.CASCADE,related_name='polizas',verbose_name="Estudiante",null=True,blank=True)
+    estudiante = models.ForeignKey('Estudiante',on_delete=models.CASCADE,related_name='poliza',verbose_name="Estudiante",null=True,blank=True)
+    aseguradora = models.ForeignKey(Aseguradora, on_delete=models.CASCADE, related_name='polizas' ,null=True,blank=True)
 
     numero_poliza = models.CharField(max_length=50,unique=True,verbose_name="Número de Póliza",help_text="Identificador único de la póliza")
+    numero = models.CharField(max_length=50, unique=True)
     estado = models.CharField(max_length=20,choices=ESTADO_CHOICES,default='pendiente',verbose_name="Estado")
+    monto_cobertura = models.DecimalField(max_digits=10, decimal_places=2, default=10000)
     tipo_cobertura = models.CharField(max_length=20,choices=TIPO_COBERTURA_CHOICES,default='basica',verbose_name="Tipo de Cobertura")
     fecha_inicio = models.DateField(verbose_name="Fecha de Inicio",help_text="Fecha en que la póliza entra en vigencia")
     fecha_fin = models.DateTimeField(verbose_name="Fecha de Fin",help_text="Fecha en que la póliza expira")
+    fecha_vencimiento = models.DateTimeField(null=True, blank=True)
     prima_neta = models.DecimalField(max_digits=10,decimal_places=2,validators=[MinValueValidator(0.01)],verbose_name="Prima Neta",help_text="Valor mensual de la prima")
     fecha_creacion = models.DateTimeField(auto_now_add=True,verbose_name="Fecha de Creación")
     fecha_actualizacion = models.DateTimeField(auto_now=True,verbose_name="Última Actualización")
@@ -112,22 +128,94 @@ class Poliza(models.Model):
 
 
 
+class Siniestro(models.Model):
+    """Modelo para registrar siniestros y activación de pólizas"""
+    TIPO_CHOICES = [
+        ('accidente', 'Accidente'),
+        ('enfermedad', 'Enfermedad grave'),
+        ('hospitalizacion', 'Hospitalización'),
+        ('fallecimiento', 'Fallecimiento'),
+        ('otro', 'Otro'),
+    ]
+    
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente de revisión'),
+        ('aprobado', 'Aprobado'),
+        ('rechazado', 'Rechazado'),
+        ('pagado', 'Pagado'),
+    ]
+    
+    poliza = models.ForeignKey(Poliza, on_delete=models.CASCADE, related_name='siniestros')
+    tipo = models.CharField(max_length=50, choices=TIPO_CHOICES, null=True, blank=True)
+    descripcion = models.TextField()
+    fecha_evento = models.DateField(null=True, blank=True)
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
+    fecha_reporte = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    # Información de solicitante
+    nombre_beneficiario = models.CharField(max_length=150, blank=True)
+    relacion_beneficiario = models.CharField(max_length=50, blank=True)
+    parentesco = models.CharField(max_length=50, blank=True)
+    
+    # Contacto
+    telefono_contacto = models.CharField(max_length=20, blank=True)
+    email_contacto = models.EmailField(blank=True)
+    
+    # Documentación
+    documento = models.FileField(upload_to='siniestros/', null=True, blank=True)
+    
+    # Auditoría
+    revisado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
+                                    blank=True, related_name='siniestros_revisados')
+    comentarios = models.TextField(blank=True)
+    
+    class Meta:
+        ordering = ['-fecha_reporte']
+    
+    def __str__(self):
+        if self.poliza:
+            return f"Siniestro {self.id} - Póliza {self.poliza.numero}"
+        return f"Siniestro {self.id} - Sin póliza asignada"
+
+
+
+
+
+
+
+
 
 class Estudiante(models.Model):
 
     TIPO_ESTUDIO_CHOICES = [('presencial', 'Presencial'),('distancia', 'Distancia')]
-    ESTADO_CHOICES = [('activo', 'Activo'),('inactivo', 'Inactivo'),('fallecido', 'Fallecido')]
+    ESTADO_CHOICES = [('activo', 'Activo'),('inactivo', 'Inactivo'),('fallecido', 'Fallecido'),
+    ('egresado', 'Egresado'),
+    ('suspendido', 'Suspendido'),
+    ('graduado', 'Graduado'),
+    ('retirado', 'Retirado'),
+]
 
     nombres = models.CharField(max_length=100)
     apellidos = models.CharField(max_length=100)
     cedula = models.CharField(max_length=20, unique=True)
-    correo = models.EmailField(unique=True)
+    codigo_estudiante = models.CharField(max_length=20, unique=True, verbose_name='Código de Estudiante')
+    email = models.EmailField(unique=True)
     estado = models.CharField(max_length=20,choices=ESTADO_CHOICES,default='activo')
     tipo_estudio = models.CharField(max_length=20,choices=TIPO_ESTUDIO_CHOICES)
     fecha_defuncion = models.DateField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    telefono = models.CharField(max_length=20, blank=True, verbose_name='Teléfono')
+    # Información académica
+    carrera = models.CharField(max_length=150, verbose_name='Carrera')
+    nivel = models.CharField(max_length=50, blank=True, verbose_name='Nivel/Semestre')
+
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    fecha_ingreso = models.DateField(null=True, blank=True) 
+
 
     def __str__(self):
         return f"{self.nombres} {self.apellidos} - {self.cedula}"
@@ -145,11 +233,39 @@ class Estudiante(models.Model):
     def obtener_polizas(self):
         return self.polizas.all()  
 
+    class Meta:
+        ordering = ['apellidos', 'nombres']
+        verbose_name = 'Estudiante'
+        verbose_name_plural = 'Estudiantes'
+    
+    def __str__(self):
+        return f"{self.codigo_estudiante} - {self.nombres} {self.apellidos}"
+    
+    @property
+    def nombre_completo(self):
+        """Retorna el nombre completo del estudiante"""
+        return f"{self.nombres} {self.apellidos}"
+
+
+
+
+class Profile(models.Model):
+
+    ROLE_CHOICES = (('asesor', 'Asesor'),('solicitante', 'Solicitante'),('beneficiario', 'Beneficiario'))
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    rol = models.CharField(max_length=20, choices=ROLE_CHOICES)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.rol}"
+
+
 
 class Solicitud(models.Model):
     ESTADO_CHOICES = [('pendiente', 'Pendiente'),('aprobada', 'Aprobada'),('rechazada', 'Rechazada'),('en_proceso', 'En Proceso'),]
     
     estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE, related_name='solicitudes')
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='solicitudes', null=True, blank=True)
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
     tipo_poliza = models.CharField(max_length=100)
     monto_solicitado = models.DecimalField(max_digits=10, decimal_places=2)
@@ -176,16 +292,6 @@ class Solicitud(models.Model):
 
 
 
-class Profile(models.Model):
-
-    ROLE_CHOICES = (('asesor', 'Asesor'),('solicitante', 'Solicitante'))
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    rol = models.CharField(max_length=20, choices=ROLE_CHOICES)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.rol}"
-
 
 
 
@@ -206,39 +312,36 @@ class Notificaciones(models.Model):
 
 
 
+class Beneficiario(models.Model):
+    id_beneficiario = models.AutoField(primary_key=True)
+    siniestro = models.ForeignKey(Siniestro, on_delete=models.CASCADE, related_name="beneficiarios")
+    nombre = models.CharField(max_length=200)
+    correo = models.EmailField()
+    numero_cuenta = models.CharField(max_length=50, blank=True, null=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="beneficiarios", blank=True, null=True)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    def __str__(self):
+        return self.nombre
 
 
 
 
 class TcasDocumentos(models.Model):
+    CHOICES_ESTADO = (
+        ("pendiente", "Pendiente"),
+        ("aprobado", "Aprobado"),
+        ("rechazado", "Rechazado"),
+    )
     doc_cod_doc = models.AutoField(primary_key=True)
     doc_descripcion = models.TextField()
     doc_file = models.FileField(upload_to="documentos/", null=True, blank=True)
     doc_size = models.PositiveIntegerField(null=True, blank=True) 
     fec_creacion = models.DateTimeField(auto_now_add=True,blank=True,null=True)
     fecha_edit = models.DateTimeField(blank=True,null=True)
+    estado = models.CharField(max_length=10, choices=CHOICES_ESTADO, default="pendiente",blank=True,null=True)
+    beneficiario = models.ForeignKey(Beneficiario, on_delete=models.CASCADE, related_name="documentos",blank=True,null=True)
 
 
     def save(self, *args, **kwargs):
@@ -252,6 +355,18 @@ class TcasDocumentos(models.Model):
 
 
 
+
+class DocumentosAseguradora(models.Model):
+    id_doc_req = models.AutoField(primary_key=True)
+    aseguradora = models.ForeignKey(Aseguradora, on_delete=models.CASCADE, related_name="documentos_requeridos" ,blank=True,null=True)
+    siniestro_tipo = models.CharField(max_length=100,blank=True,null=True)
+    nombre_documento = models.CharField(max_length=200)
+    descripcion = models.TextField(blank=True, null=True)
+    obligatorio = models.BooleanField(default=True)
+    fecha_version = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.nombre_documento} ({'Obligatorio' if self.obligatorio else 'Opcional'})"
 
 
 

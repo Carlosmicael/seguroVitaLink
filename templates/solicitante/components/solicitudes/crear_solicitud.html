@@ -452,6 +452,24 @@
                         <textarea name="motivo" class="input-field" placeholder="Motivo de la solicitud" required></textarea>
                     </div>
 
+                    <div class="input-group">
+                        <svg class="input-icon" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24" style="width: 1.25rem; height: 1.25rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a4 4 0 00-5-3.87M9 20H4v-2a4 4 0 015-3.87M16 3.13a4 4 0 110 7.75M8 3.13a4 4 0 110 7.75"/>
+                        </svg>
+
+                        <select name="estudiante" class="input-field" required>
+                            <option value="">Seleccione un estudiante</option>
+                            {% for est in estudiantes %}
+                                <option value="{{ est.id }}">
+                                    {{ est.nombres }} {{ est.apellidos }} - {{ est.email }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+
                     <button type="submit" class="submit-btn">
                         Enviar Solicitud
                     </button>
