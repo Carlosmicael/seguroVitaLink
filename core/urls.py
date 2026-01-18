@@ -34,6 +34,7 @@ urlpatterns = [
     path('asesor/polizas/', asesor_views.lista_polizas, name='lista_polizas'),
     #path('polizas/<int:poliza_id>/', views.detalle_poliza, name='detalle_poliza'),
     path('asesor/', asesor_views.asesor_dashboard, name='asesor_dashboard'),
+    path('asesor/dashboard/metrics/', asesor_views.asesor_dashboard_metrics, name='asesor_dashboard_metrics'),
     path('polizas/crear/', asesor_views.crear_poliza, name='crear_poliza'),
     path('polizas/generar-numero/', asesor_views.generar_numero_poliza, name='generar_numero_poliza'),
     path('trigger-event/<int:user_id>/', asesor_views.trigger_event, name='trigger_event'),

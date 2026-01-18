@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from core.decorators import role_required
-from core.models import Poliza, Estudiante, Profile, Notificaciones
+from core.models import Poliza, Estudiante, Profile, Notificaciones, Siniestro
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
@@ -15,6 +15,8 @@ from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequ
 import pusher
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Count, Sum
+from decimal import Decimal
 
 
 
@@ -25,10 +27,111 @@ logger = logging.getLogger(__name__)
 
 
 
+MONTH_LABELS = [
+    "Ene", "Feb", "Mar", "Abr", "May", "Jun",
+    "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
+]
+
+
+def _shift_month(year, month, delta):
+    total = year * 12 + (month - 1) + delta
+    return total // 12, total % 12 + 1
+
+
+def _month_sequence(count=6):
+    today = timezone.now().date()
+    months = []
+    for offset in range(-count + 1, 1):
+        year, month = _shift_month(today.year, today.month, offset)
+        months.append((year, month))
+    return months
+
+
+def _month_label(year, month):
+    return f"{MONTH_LABELS[month - 1]} {year}"
+
+
+def _series_for(qs, date_field, months):
+    start_year, start_month = months[0]
+    end_year, end_month = _shift_month(months[-1][0], months[-1][1], 1)
+    tz = timezone.get_current_timezone()
+    start = timezone.datetime(start_year, start_month, 1, tzinfo=tz)
+    end = timezone.datetime(end_year, end_month, 1, tzinfo=tz)
+
+    month_map = {}
+    date_values = qs.filter(**{f"{date_field}__gte": start, f"{date_field}__lt": end}).values_list(
+        date_field, flat=True
+    )
+    for value in date_values:
+        if value is None:
+            continue
+        if timezone.is_aware(value):
+            value = timezone.localtime(value)
+        key = (value.year, value.month)
+        month_map[key] = month_map.get(key, 0) + 1
+
+    return [month_map.get((year, month), 0) for year, month in months]
+
+
+def _current_month_range():
+    now = timezone.now()
+    start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    end_year, end_month = _shift_month(start.year, start.month, 1)
+    end = start.replace(year=end_year, month=end_month)
+    return start, end
+
+
+def _build_dashboard_metrics():
+    polizas_activas = Poliza.objects.filter(estado='activa').count()
+    siniestros_en_proceso = Siniestro.objects.filter(
+        estado__in=['pendiente', 'aprobado']
+    ).count()
+    facturas_pendientes = Siniestro.objects.filter(estado='aprobado').count()
+
+    start, end = _current_month_range()
+    total_pagado_mes = (
+        Siniestro.objects.filter(
+            estado='pagado',
+            fecha_actualizacion__gte=start,
+            fecha_actualizacion__lt=end,
+        )
+        .aggregate(total=Sum('poliza__monto_cobertura'))
+        .get('total')
+    )
+    if total_pagado_mes is None:
+        total_pagado_mes = Decimal('0.00')
+
+    months = _month_sequence(6)
+    labels = [_month_label(year, month) for year, month in months]
+    polizas_series = _series_for(Poliza.objects.all(), "fecha_creacion", months)
+    siniestros_series = _series_for(Siniestro.objects.all(), "fecha_reporte", months)
+
+    return {
+        "polizas_activas": polizas_activas,
+        "siniestros_en_proceso": siniestros_en_proceso,
+        "facturas_pendientes": facturas_pendientes,
+        "total_pagado_mes": total_pagado_mes,
+        "labels": labels,
+        "polizas_series": polizas_series,
+        "siniestros_series": siniestros_series,
+    }
+
+
 @login_required(login_url='login')
 @role_required(['asesor'])
 def asesor_dashboard(request):
-    return render(request, 'asesor/components/dashboard/dashboard.html')
+    dashboard_data = _build_dashboard_metrics()
+    return render(
+        request,
+        'asesor/components/dashboard/dashboard.html',
+        {"dashboard_data": dashboard_data},
+    )
+
+
+@login_required(login_url='login')
+@role_required(['asesor'])
+def asesor_dashboard_metrics(request):
+    return JsonResponse(_build_dashboard_metrics())
 
 
 
