@@ -14,8 +14,12 @@ from django.utils import timezone
 from siniestros.models import Siniestro
 from django.utils import timezone
 from siniestros.models import Factura
+from django.views.generic import TemplateView
 
 # Create your views here.
+
+class ReportesHubView(TemplateView):
+    template_name = 'reportes/hub_reportes.html'
 
 # PAGOS ----#
 
