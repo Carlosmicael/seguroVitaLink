@@ -11,7 +11,21 @@ class BeneficiarioForm(forms.ModelForm):
             'relacion',
             'cuenta_bancaria'
         ]
+class BeneficiarioEditForm(forms.ModelForm):
+    # Campos del User
+    first_name = forms.CharField(max_length=150, required=True, label="Nombre")
+    last_name = forms.CharField(max_length=150, required=True, label="Apellido")
+    email = forms.EmailField(required=True, label="Correo electrónico")
+    username = forms.CharField(max_length=150, required=True, label="Usuario")
 
+    class Meta:
+        model = Beneficiario
+        fields = [
+            'cedula',
+            'telefono',
+            'relacion',
+            'cuenta_bancaria',
+        ]
 class EstudianteForm(forms.ModelForm):
     class Meta:
         model = Estudiante
@@ -36,3 +50,8 @@ class EstudianteForm(forms.ModelForm):
             'carrera': forms.TextInput(attrs={'class': 'form-control'}),
             'periodo_academico': forms.Select(attrs={'class': 'form-control'}),
         }
+class ImportarEstudiantesForm(forms.Form):
+    archivo = forms.FileField(
+        label='Selecciona un archivo Excel',
+        widget=forms.ClearableFileInput(attrs={'accept': '.xlsx,.csv'})
+    )

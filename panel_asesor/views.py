@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from dateutil.relativedelta import relativedelta
-
+import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404
 
 
 from .models import Beneficiario, Estudiante
-from .forms import BeneficiarioForm, EstudianteForm
+from .forms import BeneficiarioForm, EstudianteForm, ImportarEstudiantesForm, BeneficiarioEditForm
 from .utils import generar_usuario, generar_password
 from login.models import Profile
 from datetime import datetime, date
@@ -91,6 +91,71 @@ def registrar_beneficiario(request):
         {'form': form}
     )
 
+@login_required
+def editar_beneficiario(request, beneficiario_id):
+    beneficiario = get_object_or_404(Beneficiario, id=beneficiario_id)
+    user = beneficiario.profile.user
+
+    # Limpiar credenciales temporales al iniciar GET (no POST)
+    if request.method == 'GET' and 'nuevas_credenciales' in request.session:
+        del request.session['nuevas_credenciales']
+        nuevas_credenciales = None
+    else:
+        nuevas_credenciales = request.session.get('nuevas_credenciales', None)
+
+    if request.method == 'POST':
+        form = BeneficiarioEditForm(request.POST, instance=beneficiario)
+
+        generar_nuevas = request.POST.get('generar_nuevas', None)
+
+        if generar_nuevas:
+            # Generar nueva contraseña sin cambiar el usuario
+            nuevas_credenciales = {
+                'usuario': user.username,  # usuario no cambia
+                'password': generar_password()
+            }
+            request.session['nuevas_credenciales'] = nuevas_credenciales
+
+        elif form.is_valid():
+            # Guardar cambios del Beneficiario
+            form.save()
+            user.first_name = request.POST.get('first_name')
+            user.last_name = request.POST.get('last_name')
+            user.email = request.POST.get('email')
+
+            # Aplicar nueva contraseña si fue generada
+            if nuevas_credenciales:
+                user.set_password(nuevas_credenciales['password'])
+                del request.session['nuevas_credenciales']  # limpiar sesión
+
+            user.save()
+            messages.success(request, "Beneficiario actualizado correctamente")
+            return redirect('panel_asesor:inicio')
+
+    else:
+        # Inicializar formulario con datos del usuario
+        initial = {
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'username': user.username
+        }
+        form = BeneficiarioEditForm(instance=beneficiario, initial=initial)
+
+    return render(request, 'components/AscesorBeneficiario/editarBeneficiario.html', {
+        'form': form,
+        'beneficiario': beneficiario,
+        'nuevas_credenciales': nuevas_credenciales
+    })
+
+
+@login_required
+@require_POST
+def eliminar_beneficiario(request, beneficiario_id):
+    beneficiario = get_object_or_404(Beneficiario, id=beneficiario_id)
+    beneficiario.delete()
+    messages.success(request, "Beneficiario eliminado correctamente")
+    return redirect('panel_asesor:inicio')
 
 
 @login_required
@@ -227,3 +292,43 @@ def eliminar_estudiante(request):
     estudiante = get_object_or_404(Estudiante, id=estudiante_id)
     estudiante.delete()
     return JsonResponse({'success': True})
+
+@login_required
+def listar_estudiantes(request):
+    estudiantes = Estudiante.objects.all().select_related('poliza')
+
+    # 🔹 Manejo de importación Excel en POST
+    if request.method == 'POST' and 'archivo' in request.FILES:
+        archivo = request.FILES['archivo']
+        try:
+            if archivo.name.endswith('.xlsx'):
+                df = pd.read_excel(archivo)
+            elif archivo.name.endswith('.csv'):
+                df = pd.read_csv(archivo)
+            else:
+                messages.error(request, 'Formato no soportado. Usa .xlsx o .csv')
+                return redirect('panel_asesor:listar_estudiantes')
+
+            with transaction.atomic():
+                for _, row in df.iterrows():
+                    Estudiante.objects.create(
+                        cedula=row['cedula'],
+                        nombres=row['nombres'],
+                        apellidos=row['apellidos'],
+                        correo=row['correo'],
+                        modalidad=row['modalidad'],
+                        nivel=row['nivel'],
+                        carrera=row['carrera'],
+                        periodo_academico=row['periodo_academico']
+                    )
+
+            messages.success(request, 'Estudiantes importados correctamente')
+            return redirect('panel_asesor:listar_estudiantes')
+
+        except Exception as e:
+            messages.error(request, f'Error al procesar el archivo: {e}')
+            return redirect('panel_asesor:listar_estudiantes')
+
+    return render(request, 'components/AscesorBeneficiario/gestionEstudiante/gestionEstudiantes.html', {
+        'estudiantes': estudiantes,
+    })

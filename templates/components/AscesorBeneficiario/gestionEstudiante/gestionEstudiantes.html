@@ -64,6 +64,25 @@ a.px-5:hover {
     box-shadow: 0 10px 25px rgba(0,0,0,0.35);
 }
 
+.btn-importar {
+    padding: 12px 22px;
+    font-weight: 600;
+    border-radius: 14px;
+    color: white;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    transition: all 0.3s ease;
+}
+
+.btn-importar:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+}
+
+
+
 /* Contenedor del buscador */
 .search-box {
     display: flex;
@@ -118,8 +137,6 @@ a.px-5:hover {
 
 /* Tabla */
 .bg-white {
-    background: white;
-    border-radius: 18px;
     overflow-x: auto;
     box-shadow: 0 12px 30px rgba(0,0,0,0.12);
 }
@@ -190,10 +207,28 @@ td.text-center button {
     <h1 class="text-2xl font-bold text-gray-800">
         Gestión de Estudiantes
     </h1>
+        <!-- FORMULARIO IMPORTAR EXCEL -->
+    <div class="mb-6">
+        <form method="post" enctype="multipart/form-data" id="form-importar">
+            {% csrf_token %}
+            <!-- input oculto -->
+            <input type="file" name="archivo" accept=".xlsx,.csv" required
+                id="input-archivo" style="display:none;">
+           <!-- botón visible -->
+            <button type="button" 
+                    class="btn-importar"
+                    onclick="document.getElementById('input-archivo').click();">
+                📥 Seleccionar Archivo
+            </button>
 
-    <a href="{% url 'panel_asesor:registrar_estudiante' %}" class="px-5 py-2">
-        + Nuevo Estudiante
-    </a>
+             <a href="{% url 'panel_asesor:registrar_estudiante' %}" class="px-5 py-2">
+                + Nuevo Estudiante
+            </a>
+        </form>
+    </div>
+
+
+   
 </div>
 
 
@@ -539,7 +574,15 @@ function eliminarEstudiante(button) {
         }
     });
 }
+    // Cuando se seleccione un archivo, enviar el formulario automáticamente
+    const inputArchivo = document.getElementById('input-archivo');
+    const formImportar = document.getElementById('form-importar');
 
+    inputArchivo.addEventListener('change', () => {
+        if(inputArchivo.files.length > 0){
+            formImportar.submit();
+        }
+    });
 </script>
 
 {% endblock %}

@@ -1,0 +1,165 @@
+{% extends "master/sideBar/base.html" %}
+
+{% block title %}Editar Beneficiario{% endblock %}
+
+{% block content %}
+<style>
+    /* Contenedor general */
+    .page-container {
+        padding: 25px;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* Título principal */
+    .page-title {
+        font-size: 32px;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 10px;
+        background: linear-gradient(90deg, #7c3aed, #e49fe5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .title-divider {
+        width: 100px;
+        height: 4px;
+        background: #7c3aed;
+        margin: 0 auto 20px auto;
+        border-radius: 2px;
+    }
+
+    /* Labels */
+    label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #5b21b6;
+    }
+
+    /* Inputs y selects */
+    input, select, textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 14px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        font-size: 14px;
+        transition: border 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #a855f7;
+        box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25);
+    }
+
+    /* Botones */
+    .btn {
+        width: 100%;
+        padding: 12px;
+        margin-top: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-success {
+        background: linear-gradient(90deg, #7c3aed, #f6abf6);
+        box-shadow: 0 6px 15px rgba(124, 58, 237, 0.4);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(124, 58, 237, 0.55);
+    }
+
+    .btn-warning {
+        background: linear-gradient(90deg, #f59e0b, #fcd34d);
+        box-shadow: 0 6px 15px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(245, 158, 11, 0.55);
+    }
+
+    .btn-danger {
+        background: linear-gradient(90deg, #ef4444, #fca5a5);
+        box-shadow: 0 6px 15px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.55);
+    }
+
+    /* Caja de credenciales */
+    .credentials-box {
+        background: #f3f4f6;
+        padding: 20px;
+        border-radius: 12px;
+        border-left: 4px solid #7c3aed;
+        margin-top: 20px;
+    }
+</style>
+
+<div class="page-container">
+    <div style="width:100%; max-width:520px;">
+        <h2 class="page-title">✏️ Editar Beneficiario</h2>
+        <div class="title-divider"></div>
+
+        <form method="post" action="{% url 'panel_asesor:editar' beneficiario.id %}">
+            {% csrf_token %}
+            <div>
+                <label>Nombre:</label>
+                {{ form.first_name }}
+            </div>
+            <div>
+                <label>Apellido:</label>
+                {{ form.last_name }}
+            </div>
+            <div>
+                <label>Correo:</label>
+                {{ form.email }}
+            </div>
+            <div>
+                <label>Usuario:</label>
+                {{ form.username }}
+            </div>
+            <div>
+                {{ form.as_p }}
+            </div>
+
+            <!-- Botón generar nuevas credenciales -->
+            <button type="submit" name="generar_nuevas" value="1" class="btn btn-warning">
+                🔑 Generar Nuevas Credenciales
+            </button>
+
+            <!-- Guardar cambios -->
+            <button type="submit" class="btn btn-success" onclick="return confirm('¿Desea guardar los cambios?')">
+                💾 Guardar Cambios
+            </button>
+
+            <!-- Cancelar -->
+            <a href="{% url 'panel_asesor:inicio' %}" class="btn btn-danger" onclick="return confirm('¿Desea cancelar los cambios?')">
+                ❌ Cancelar
+            </a>
+        </form>
+
+        {% if nuevas_credenciales %}
+        <div class="credentials-box">
+            <h3>Nuevas Credenciales</h3>
+            <p>⚠️ Estas credenciales se mostrarán solo una vez</p>
+            <div><b>Usuario:</b> {{ nuevas_credenciales.usuario }}</div>
+            <div><b>Contraseña:</b> {{ nuevas_credenciales.password }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

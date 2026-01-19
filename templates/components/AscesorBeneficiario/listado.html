@@ -110,6 +110,8 @@
                     <th>Cédula</th>
                     <th>Usuario</th>
                     <th>Correo</th>
+                    <th>Editar</th>
+                    <th>Eliminar</th>
                 </tr>
             </thead>
             <tbody>
@@ -119,6 +121,16 @@
                     <td>{{ b.cedula }}</td>
                     <td>{{ b.profile.user.username }}</td>
                     <td>{{ b.profile.user.email }}</td>
+                    <td><a href="{% url 'panel_asesor:editar' b.id %}" class="btn btn-primary">Editar</a></td>
+                    <td>
+                        <form method="post" action="{% url 'panel_asesor:eliminar' b.id %}" onsubmit="return confirm('¿Desea eliminar este beneficiario?');">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+</form>
+
+
+                    </td>
+
                 </tr>
                 {% empty %}
                 <tr>
