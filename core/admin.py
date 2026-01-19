@@ -1,5 +1,18 @@
 from django.contrib import admin
-from .models import Poliza, Profile, Estudiante , Notificaciones, Solicitud, TcasDocumentos, Siniestro, Aseguradora, Beneficiario, DocumentosAseguradora
+from .models import (
+    Poliza,
+    Profile,
+    Estudiante,
+    Notificaciones,
+    Solicitud,
+    TcasDocumentos,
+    Siniestro,
+    Aseguradora,
+    Beneficiario,
+    DocumentosAseguradora,
+    Factura,
+    Pago,
+)
 
 # Register your models here.
 admin.site.register(Profile)
@@ -9,6 +22,8 @@ admin.site.register(TcasDocumentos)
 admin.site.register(Aseguradora)
 admin.site.register(Beneficiario)
 admin.site.register(DocumentosAseguradora)
+admin.site.register(Factura)
+admin.site.register(Pago)
 
 
 

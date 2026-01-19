@@ -368,6 +368,35 @@ class DocumentosAseguradora(models.Model):
     def __str__(self):
         return f"{self.nombre_documento} ({'Obligatorio' if self.obligatorio else 'Opcional'})"
 
+## Factura y Pago Models - RONAL --------------------------------------
+
+class Factura(models.Model):
+    siniestro = models.OneToOneField(Siniestro, on_delete=models.CASCADE, related_name="factura")
+    numero_factura = models.CharField(max_length=50, verbose_name="Numero de Factura")
+    monto = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0.01)])
+    fecha = models.DateField()
+
+    def __str__(self):
+        return f"Factura {self.numero_factura} - Siniestro {self.siniestro_id}"
+
+
+class Pago(models.Model):
+    METODO_PAGO_CHOICES = [
+        ("transferencia", "Transferencia"),
+        ("cheque", "Cheque"),
+        ("efectivo", "Efectivo"),
+        ("tarjeta", "Tarjeta"),
+        ("otro", "Otro"),
+    ]
+
+    siniestro = models.ForeignKey(Siniestro, on_delete=models.CASCADE, related_name="pagos")
+    factura = models.ForeignKey(Factura, on_delete=models.SET_NULL, null=True, blank=True, related_name="pagos")
+    monto_pagado = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0.01)])
+    fecha_pago = models.DateField()
+    metodo_pago = models.CharField(max_length=20, choices=METODO_PAGO_CHOICES)
+
+    def __str__(self):
+        return f"Pago {self.id} - Siniestro {self.siniestro_id}"
 
 
 

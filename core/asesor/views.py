@@ -1,10 +1,10 @@
 from django.shortcuts import render
 from core.decorators import role_required
-from core.models import Poliza, Estudiante, Profile, Notificaciones, Siniestro
+from core.models import Poliza, Estudiante, Profile, Notificaciones, Siniestro, Factura, Pago
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from core.forms import PolizaForm
+from core.forms import PolizaForm, FacturaForm, PagoForm
 from django.contrib.auth.decorators import login_required
 from core.tasks import ejecutar_recordatorio
 from django.utils.timezone import make_aware
@@ -16,6 +16,8 @@ import pusher
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Count, Sum
+from django.db import transaction
+from django.contrib import messages
 from decimal import Decimal
 
 
@@ -86,16 +88,19 @@ def _build_dashboard_metrics():
     siniestros_en_proceso = Siniestro.objects.filter(
         estado__in=['pendiente', 'aprobado']
     ).count()
-    facturas_pendientes = Siniestro.objects.filter(estado='aprobado').count()
+    facturas_pendientes = (
+        Siniestro.objects.filter(estado='aprobado', pagos__isnull=True).distinct().count()
+    )
 
     start, end = _current_month_range()
+    start_date = start.date()
+    end_date = end.date()
     total_pagado_mes = (
-        Siniestro.objects.filter(
-            estado='pagado',
-            fecha_actualizacion__gte=start,
-            fecha_actualizacion__lt=end,
+        Pago.objects.filter(
+            fecha_pago__gte=start_date,
+            fecha_pago__lt=end_date,
         )
-        .aggregate(total=Sum('poliza__monto_cobertura'))
+        .aggregate(total=Sum('monto_pagado'))
         .get('total')
     )
     if total_pagado_mes is None:
@@ -312,3 +317,115 @@ def obtener_documentos_por_beneficiario(request, beneficiario_id):
         "doc_cod_doc", "doc_descripcion", "doc_file", "doc_size", "fec_creacion", "fecha_edit", "estado"
     ).order_by('-fec_creacion')
     return JsonResponse(list(documentos), safe=False)
+
+## Gestión de Liquidaciones - RONAL ----
+
+
+@login_required(login_url='/login')
+@role_required(['asesor'])
+def siniestros_pendientes_pago(request):
+    siniestros = (
+        Siniestro.objects.filter(estado='aprobado', pagos__isnull=True)
+        .select_related('poliza')
+        .order_by('-fecha_reporte')
+        .distinct()
+    )
+    return render(
+        request,
+        'asesor/components/liquidaciones/siniestros_pendientes.html',
+        {'siniestros': siniestros},
+    )
+
+
+@login_required(login_url='/login')
+@role_required(['asesor'])
+def registrar_liquidacion(request, siniestro_id):
+    siniestro = get_object_or_404(Siniestro, pk=siniestro_id)
+
+    if siniestro.estado == 'pagado':
+        messages.info(request, 'El siniestro ya fue liquidado.')
+        return redirect('siniestros_pendientes_pago')
+
+    if Factura.objects.filter(siniestro=siniestro).exists() or Pago.objects.filter(siniestro=siniestro).exists():
+        messages.warning(request, 'Ya existe una liquidacion registrada para este siniestro.')
+        return redirect('siniestros_pendientes_pago')
+
+    if request.method == 'POST':
+        factura_form = FacturaForm(request.POST, prefix='factura')
+        pago_form = PagoForm(request.POST, prefix='pago')
+
+        if factura_form.is_valid() and pago_form.is_valid():
+            monto_factura = factura_form.cleaned_data['monto']
+            monto_pagado = pago_form.cleaned_data['monto_pagado']
+
+            if monto_factura != monto_pagado:
+                pago_form.add_error(
+                    'monto_pagado',
+                    'El monto pagado debe coincidir con el monto facturado.',
+                )
+            else:
+                with transaction.atomic():
+                    factura = factura_form.save(commit=False)
+                    factura.siniestro = siniestro
+                    factura.save()
+
+                    pago = pago_form.save(commit=False)
+                    pago.siniestro = siniestro
+                    pago.factura = factura
+                    pago.save()
+
+                    if siniestro.estado != 'pagado':
+                        siniestro.estado = 'pagado'
+                        siniestro.save(update_fields=['estado'])
+
+                messages.success(request, 'Liquidacion registrada correctamente.')
+                return redirect('siniestros_pendientes_pago')
+    else:
+        factura_form = FacturaForm(prefix='factura')
+        pago_form = PagoForm(prefix='pago')
+
+    return render(
+        request,
+        'asesor/components/liquidaciones/registrar_liquidacion.html',
+        {
+            'siniestro': siniestro,
+            'factura_form': factura_form,
+            'pago_form': pago_form,
+        },
+    )
+
+
+@login_required(login_url='/login')
+@role_required(['asesor'])
+def reportes_liquidacion(request):
+    total_facturado = Factura.objects.aggregate(total=Sum('monto')).get('total') or Decimal('0.00')
+    total_pagado = Pago.objects.aggregate(total=Sum('monto_pagado')).get('total') or Decimal('0.00')
+
+    siniestros_liquidados = (
+        Siniestro.objects.filter(estado='pagado')
+        .select_related('poliza', 'factura')
+        .prefetch_related('pagos')
+        .order_by('-fecha_actualizacion')
+    )
+
+    liquidaciones = []
+    for siniestro in siniestros_liquidados:
+        factura = getattr(siniestro, 'factura', None)
+        pago = siniestro.pagos.order_by('-fecha_pago').first()
+        liquidaciones.append(
+            {
+                'siniestro': siniestro,
+                'factura': factura,
+                'pago': pago,
+            }
+        )
+
+    return render(
+        request,
+        'asesor/components/reportes/liquidaciones_reportes.html',
+        {
+            'total_facturado': total_facturado,
+            'total_pagado': total_pagado,
+            'liquidaciones': liquidaciones,
+        },
+    )

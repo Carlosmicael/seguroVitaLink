@@ -35,6 +35,11 @@ urlpatterns = [
     #path('polizas/<int:poliza_id>/', views.detalle_poliza, name='detalle_poliza'),
     path('asesor/', asesor_views.asesor_dashboard, name='asesor_dashboard'),
     path('asesor/dashboard/metrics/', asesor_views.asesor_dashboard_metrics, name='asesor_dashboard_metrics'),
+    # Ronal - Gestión de Liquidaciones
+    path('asesor/liquidaciones/', asesor_views.siniestros_pendientes_pago, name='siniestros_pendientes_pago'),
+    path('asesor/liquidaciones/<int:siniestro_id>/', asesor_views.registrar_liquidacion, name='registrar_liquidacion'),
+    path('asesor/reportes/liquidaciones/', asesor_views.reportes_liquidacion, name='reportes_liquidacion'),
+    # Ronal - Fin Gestión de Liquidaciones
     path('polizas/crear/', asesor_views.crear_poliza, name='crear_poliza'),
     path('polizas/generar-numero/', asesor_views.generar_numero_poliza, name='generar_numero_poliza'),
     path('trigger-event/<int:user_id>/', asesor_views.trigger_event, name='trigger_event'),

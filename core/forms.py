@@ -1,5 +1,5 @@
 from django import forms
-from .models import Poliza, Estudiante, Solicitud,TcasDocumentos
+from .models import Poliza, Estudiante, Solicitud, TcasDocumentos, Factura, Pago
 
 class PolizaForm(forms.ModelForm):
         
@@ -57,7 +57,29 @@ class TcasDocumentosForm(forms.ModelForm):
 
 
 
+# Formulario para la gestión de Factura y Pago - RONAL ----
 
+
+class FacturaForm(forms.ModelForm):
+    class Meta:
+        model = Factura
+        fields = ["numero_factura", "monto", "fecha"]
+        widgets = {
+            "numero_factura": forms.TextInput(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+            "monto": forms.NumberInput(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+            "fecha": forms.DateInput(attrs={"type": "date", "class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+        }
+
+
+class PagoForm(forms.ModelForm):
+    class Meta:
+        model = Pago
+        fields = ["monto_pagado", "fecha_pago", "metodo_pago"]
+        widgets = {
+            "monto_pagado": forms.NumberInput(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+            "fecha_pago": forms.DateInput(attrs={"type": "date", "class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+            "metodo_pago": forms.Select(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+        }
 
 
 from django import forms
