@@ -5,98 +5,63 @@
 {% block content %}
 {% include "master/appBar/appBar.html" %}
 
-<div class="p-6 bg-gray-50">
-    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-800">Dashboard del asesor</h1>
-            <p class="text-gray-600 mt-2">Metricas clave del sistema</p>
+<div class="min-h-screen bg-slate-50 bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.16),transparent_45%),radial-gradient(circle_at_15%_20%,rgba(16,185,129,0.14),transparent_55%)] p-6 md:p-8">
+    <div class="mb-7 flex flex-wrap items-stretch gap-5">
+        <div class="flex-1 rounded-2xl border border-slate-200/60 bg-white p-6 shadow-[0_20px_35px_rgba(15,23,42,0.08)]">
+            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">Panel estrategico del asesor</h1>
+            <p class="mt-2 text-sm text-slate-500">Lectura rapida de salud operativa y tendencias de cartera.</p>
         </div>
-        <div class="flex items-center gap-3 bg-white shadow-sm rounded-xl px-4 py-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-sm text-gray-600">Actualizacion en tiempo real</span>
-            <span id="lastUpdated" class="text-xs text-gray-400"></span>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-2xl p-6 shadow-lg border border-cyan-100">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 mb-2">Polizas activas</p>
-                    <p id="metric-polizas" class="text-4xl font-bold text-gray-800">
-                        {{ dashboard_data.polizas_activas }}
-                    </p>
-                </div>
-                <div class="bg-cyan-100 text-cyan-600 rounded-xl p-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-2xl p-6 shadow-lg border border-orange-100">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 mb-2">Siniestros en proceso</p>
-                    <p id="metric-siniestros" class="text-4xl font-bold text-gray-800">
-                        {{ dashboard_data.siniestros_en_proceso }}
-                    </p>
-                </div>
-                <div class="bg-orange-100 text-orange-500 rounded-xl p-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3M12 2a10 10 0 100 20 10 10 0 000-20z"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-2xl p-6 shadow-lg border border-rose-100">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 mb-2">Facturas pendientes</p>
-                    <p id="metric-facturas" class="text-4xl font-bold text-gray-800">
-                        {{ dashboard_data.facturas_pendientes }}
-                    </p>
-                </div>
-                <div class="bg-rose-100 text-rose-500 rounded-xl p-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-2xl p-6 shadow-lg border border-emerald-100">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 mb-2">Total pagado del mes</p>
-                    <p id="metric-pagado" class="text-4xl font-bold text-gray-800">
-                        ${{ dashboard_data.total_pagado_mes|floatformat:2 }}
-                    </p>
-                </div>
-                <div class="bg-emerald-100 text-emerald-600 rounded-xl p-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
+        <div class="rounded-2xl border border-slate-200/60 bg-white p-4 shadow-[0_20px_35px_rgba(15,23,42,0.08)]">
+            <div class="flex items-center gap-3 rounded-full bg-slate-900 px-5 py-3 text-[11px] uppercase tracking-[0.2em] text-slate-100">
+                <span class="relative flex h-2 w-2">
+                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span>
+                    <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
+                </span>
+                En vivo
+                <span id="lastUpdated" class="text-[10px] text-slate-300"></span>
             </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div class="bg-white rounded-2xl p-6 shadow-lg xl:col-span-2">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-bold text-gray-800">Tendencia de siniestros</h3>
-                <span class="text-xs text-gray-400">Ultimos 6 meses</span>
-            </div>
-            <div class="h-64">
+    <div class="mb-7 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div class="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white p-5 shadow-[0_20px_35px_rgba(15,23,42,0.08)]">
+            <div class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Polizas activas</div>
+            <div id="metric-polizas" class="mt-3 text-4xl font-extrabold text-slate-900">{{ dashboard_data.polizas_activas }}</div>
+            <div class="mt-2 text-xs text-slate-400">Estado vigente en cartera.</div>
+            <div class="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100" style="background:linear-gradient(120deg, transparent, rgba(14,165,233,0.08), transparent);"></div>
+        </div>
+        <div class="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white p-5 shadow-[0_20px_35px_rgba(15,23,42,0.08)]">
+            <div class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Siniestros en proceso</div>
+            <div id="metric-siniestros" class="mt-3 text-4xl font-extrabold text-slate-900">{{ dashboard_data.siniestros_en_proceso }}</div>
+            <div class="mt-2 text-xs text-slate-400">Casos en revision y aprobacion.</div>
+            <div class="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100" style="background:linear-gradient(120deg, transparent, rgba(249,115,22,0.12), transparent);"></div>
+        </div>
+        <div class="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white p-5 shadow-[0_20px_35px_rgba(15,23,42,0.08)]">
+            <div class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Facturas pendientes</div>
+            <div id="metric-facturas" class="mt-3 text-4xl font-extrabold text-slate-900">{{ dashboard_data.facturas_pendientes }}</div>
+            <div class="mt-2 text-xs text-slate-400">Pagos por liberar.</div>
+            <div class="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100" style="background:linear-gradient(120deg, transparent, rgba(244,63,94,0.12), transparent);"></div>
+        </div>
+        <div class="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white p-5 shadow-[0_20px_35px_rgba(15,23,42,0.08)]">
+            <div class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Total pagado del mes</div>
+            <div id="metric-pagado" class="mt-3 text-4xl font-extrabold text-slate-900">${{ dashboard_data.total_pagado_mes|floatformat:2 }}</div>
+            <div class="mt-2 text-xs text-slate-400">Suma del periodo actual.</div>
+            <div class="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100" style="background:linear-gradient(120deg, transparent, rgba(16,185,129,0.12), transparent);"></div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-5 xl:grid-cols-3">
+        <div class="rounded-3xl border border-slate-200/60 bg-white p-6 shadow-[0_20px_35px_rgba(15,23,42,0.08)] xl:col-span-2">
+            <div class="text-lg font-bold text-slate-900">Tendencia de siniestros</div>
+            <div class="text-xs uppercase tracking-[0.18em] text-slate-400">Ultimos 6 meses</div>
+            <div class="mt-5 h-64">
                 <canvas id="siniestrosChart"></canvas>
             </div>
         </div>
-        <div class="bg-white rounded-2xl p-6 shadow-lg">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-bold text-gray-800">Polizas creadas</h3>
-                <span class="text-xs text-gray-400">Ultimos 6 meses</span>
-            </div>
-            <div class="h-64">
+        <div class="rounded-3xl border border-slate-200/60 bg-white p-6 shadow-[0_20px_35px_rgba(15,23,42,0.08)]">
+            <div class="text-lg font-bold text-slate-900">Polizas creadas</div>
+            <div class="text-xs uppercase tracking-[0.18em] text-slate-400">Ultimos 6 meses</div>
+            <div class="mt-5 h-64">
                 <canvas id="polizasChart"></canvas>
             </div>
         </div>
