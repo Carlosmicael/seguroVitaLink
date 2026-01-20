@@ -26,6 +26,8 @@ def login_view(request):
             login(request, user)
 
             rol = user.profile.rol
+            if rol == 'administrador':
+                return redirect('aseguradoras_list')
 
             if rol == 'asesor':
                 return redirect('asesor_dashboard')

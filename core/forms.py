@@ -1,5 +1,14 @@
 from django import forms
-from .models import Poliza, Estudiante, Solicitud, TcasDocumentos, Factura, Pago
+from .models import (
+    Poliza,
+    Estudiante,
+    Solicitud,
+    TcasDocumentos,
+    Factura,
+    Pago,
+    Aseguradora,
+    PoliticaAseguradora,
+)
 
 class PolizaForm(forms.ModelForm):
         
@@ -57,8 +66,33 @@ class TcasDocumentosForm(forms.ModelForm):
 
 
 
-# Formulario para la gestión de Factura y Pago - RONAL ----
 
+
+# Formularios de Aseguradoras y Políticas - RONAL ----
+class AseguradoraForm(forms.ModelForm):
+    class Meta:
+        model = Aseguradora
+        fields = ["nombre", "direccion", "telefono", "email", "politicas", "is_active"]
+        widgets = {
+            "nombre": forms.TextInput(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+            "direccion": forms.Textarea(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg", "rows": 3}),
+            "telefono": forms.TextInput(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+            "email": forms.EmailInput(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+            "politicas": forms.Textarea(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg", "rows": 4}),
+        }
+
+
+class PoliticaAseguradoraForm(forms.ModelForm):
+    class Meta:
+        model = PoliticaAseguradora
+        fields = ["documento", "terminos", "fecha_version"]
+        widgets = {
+            "terminos": forms.Textarea(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg", "rows": 6}),
+            "fecha_version": forms.DateInput(attrs={"type": "date", "class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+        }
+
+
+# Formulario para la gestión de Factura y Pago - RONAL ----
 
 class FacturaForm(forms.ModelForm):
     class Meta:

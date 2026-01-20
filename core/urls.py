@@ -4,6 +4,7 @@ from .asesor import views as asesor_views
 from .solicitante import views as solicitante_views
 from .beneficiario import views as beneficiario_views
 from .aseguradora import views as aseguradora_views
+from .administrador import views as administrador_views
 
 
 
@@ -70,6 +71,21 @@ urlpatterns = [
     path('sinies/asesor/', asesor_views.lista_siniestros, name='siniestros_lista'),
     path('api/beneficiarios/<int:siniestro_id>/', asesor_views.obtener_beneficiarios_por_siniestro, name='api_beneficiarios_siniestro'),
     path('api/documentos/<int:beneficiario_id>/', asesor_views.obtener_documentos_por_beneficiario, name='api_documentos_beneficiario'),
+
+    # Administrador - Aseguradoras y Políticas - RONAL
+    path('administrador/aseguradoras/', administrador_views.aseguradoras_list, name='aseguradoras_list'),
+    path('administrador/aseguradoras/crear/', administrador_views.aseguradora_create, name='aseguradora_create'),
+    path('administrador/aseguradoras/<int:aseguradora_id>/editar/', administrador_views.aseguradora_edit, name='aseguradora_edit'),
+    path('administrador/aseguradoras/<int:aseguradora_id>/toggle/', administrador_views.aseguradora_toggle, name='aseguradora_toggle'),
+    path('administrador/aseguradoras/<int:aseguradora_id>/politicas/', administrador_views.politicas_list, name='politicas_list'),
+    path('administrador/aseguradoras/<int:aseguradora_id>/politicas/crear/', administrador_views.politica_create, name='politica_create'),
+    path('administrador/politicas/<int:politica_id>/editar/', administrador_views.politica_edit, name='politica_edit'),
+    path('administrador/publico/aseguradoras/', administrador_views.politicas_publicas_admin, name='politicas_publicas_admin'),
+    path('administrador/publico/aseguradoras/<int:aseguradora_id>/', administrador_views.politica_publica_detalle_admin, name='politica_publica_detalle_admin'),
+
+    # Publico - terminos y politicas - RONAL
+    path('aseguradoras/terminos/', administrador_views.politicas_publicas, name='politicas_publicas'),
+    path('aseguradoras/<int:aseguradora_id>/terminos/', administrador_views.politica_publica_detalle, name='politica_publica_detalle'),
 
 ]
 

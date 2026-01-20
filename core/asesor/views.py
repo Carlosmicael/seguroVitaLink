@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from core.decorators import role_required
 from core.models import Poliza, Estudiante, Profile, Notificaciones, Siniestro, Factura, Pago
 

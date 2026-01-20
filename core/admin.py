@@ -10,8 +10,9 @@ from .models import (
     Aseguradora,
     Beneficiario,
     DocumentosAseguradora,
-    Factura,
-    Pago,
+    Factura, # FACTURA - RONAL
+    Pago, # PAGO - RONAL
+    PoliticaAseguradora, # POLITICAS - RONAL
 )
 
 # Register your models here.
@@ -21,9 +22,10 @@ admin.site.register(Solicitud)
 admin.site.register(TcasDocumentos)
 admin.site.register(Aseguradora)
 admin.site.register(Beneficiario)
-admin.site.register(DocumentosAseguradora)
-admin.site.register(Factura)
-admin.site.register(Pago)
+admin.site.register(DocumentosAseguradora) 
+admin.site.register(Factura) # FACTURA - RONAL
+admin.site.register(Pago) # PAGO - RONAL
+admin.site.register(PoliticaAseguradora) # POLITICAS - RONAL
 
 
 

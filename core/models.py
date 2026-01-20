@@ -7,17 +7,37 @@ from django.db.models import JSONField
 import datetime
 
 
+# Modelo de Aseguradora y Politicas - RONAL --------------------------------------
 
 class Aseguradora(models.Model):
     id_aseguradora = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=200)
     direccion = models.TextField(blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    politicas = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    fecha_inactivacion = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.nombre
 
 
+class PoliticaAseguradora(models.Model):
+    aseguradora = models.ForeignKey(Aseguradora, on_delete=models.CASCADE, related_name="politicas_versiones")
+    documento = models.FileField(upload_to="politicas/", blank=True, null=True)
+    terminos = models.TextField()
+    fecha_version = models.DateField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-fecha_version', '-id']
+
+    def __str__(self):
+        return f"Politica {self.aseguradora.nombre} - {self.fecha_version}"
+
+# ---------------------------------------
 
 
 
@@ -251,7 +271,12 @@ class Estudiante(models.Model):
 
 class Profile(models.Model):
 
-    ROLE_CHOICES = (('asesor', 'Asesor'),('solicitante', 'Solicitante'),('beneficiario', 'Beneficiario'))
+    ROLE_CHOICES = (
+        ('asesor', 'Asesor'),
+        ('solicitante', 'Solicitante'),
+        ('beneficiario', 'Beneficiario'),
+        ('administrador', 'Administrador'), # RONAL added administrator role
+    )
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     rol = models.CharField(max_length=20, choices=ROLE_CHOICES)

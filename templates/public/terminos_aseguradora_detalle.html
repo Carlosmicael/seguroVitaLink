@@ -1,0 +1,33 @@
+{% extends "public/base_public.html" %}
+
+{% block title %}Terminos - {{ aseguradora.nombre }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <a href="{% url 'politicas_publicas' %}" class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 hover:text-slate-600">
+            Volver
+        </a>
+        <h1 class="mt-4 text-2xl font-bold text-slate-900">{{ aseguradora.nombre }}</h1>
+        <p class="mt-2 text-sm text-slate-500">{{ aseguradora.politicas|default:"Sin resumen de politicas." }}</p>
+    </div>
+
+    {% if politica %}
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+        <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Version {{ politica.fecha_version|date:"d/m/Y" }}</div>
+        <div class="text-sm leading-relaxed text-slate-700 whitespace-pre-line">
+            {{ politica.terminos }}
+        </div>
+        {% if politica.documento %}
+        <a href="{{ politica.documento.url }}" class="inline-flex text-xs font-semibold uppercase tracking-[0.2em] text-slate-700 hover:text-slate-900" target="_blank">
+            Descargar PDF
+        </a>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
+        No hay politicas registradas para esta aseguradora.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
