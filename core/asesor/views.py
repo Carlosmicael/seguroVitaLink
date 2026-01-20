@@ -1,10 +1,10 @@
 from django.shortcuts import render
 from core.decorators import role_required
-from core.models import Poliza, Estudiante, Profile, Notificaciones
+from core.models import Poliza, Estudiante, Profile, Notificaciones, ReporteEvento, Siniestro, ConfiguracionSiniestro
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from core.forms import PolizaForm
+from core.forms import PolizaForm, SiniestroForm
 from django.contrib.auth.decorators import login_required
 from core.tasks import ejecutar_recordatorio
 from django.utils.timezone import make_aware
@@ -15,6 +15,11 @@ from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequ
 import pusher
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render, get_object_or_404, redirect
+from django.utils.dateformat import DateFormat
+from django.views.decorators.http import require_POST
+import os
+from datetime import timedelta
 
 
 
@@ -33,32 +38,134 @@ def asesor_dashboard(request):
 
 
 
+
+
+
+
 @login_required(login_url='login')
 @role_required(['asesor'])
-def lista_polizas(request):
-    polizas = Poliza.objects.all()
-    estudiantes = Estudiante.objects.all() 
-    total = polizas.count()
-    pendientes = polizas.filter(estado='pendiente').count()
-    activas = polizas.filter(estado='activa').count()
-    vencidas = polizas.filter(estado='vencida').count()
-    canceladas = polizas.filter(estado='cancelada').count()
+def siniestros_module_lista(request):
+    siniestros = Siniestro.objects.select_related('poliza', 'revisado_por').all()
     
-    dias_vencimiento = {}
-    for poliza in polizas:
-        dias_vencimiento[poliza.numero_poliza] = poliza.dias_para_vencimiento()
+    # Estadísticas
+    total = siniestros.count()
+    pendientes = siniestros.filter(estado='pendiente').count()
+    aprobados = siniestros.filter(estado='aprobado').count()
+    rechazados = siniestros.filter(estado='rechazado').count()
+    pagados = siniestros.filter(estado='pagado').count()
+    enviados = siniestros.filter(enviado=True).count()
+    
+    for siniestro in siniestros:
+        if siniestro.fecha_limite_reporte:
+            delta = siniestro.fecha_limite_reporte - timezone.now().date()
+            siniestro.dias_restantes = delta.days
+        else:
+            siniestro.dias_restantes = None
+    
+    polizas_activas = Poliza.objects.all()
     
     context = {
-        'polizas': polizas,
+        'siniestros': siniestros,
         'total': total,
         'pendientes': pendientes,
-        'activas': activas,
-        'vencidas': vencidas,
-        'canceladas': canceladas,
-        'dias_vencimiento': dias_vencimiento,  
-        'estudiantes': estudiantes,
+        'aprobados': aprobados,
+        'rechazados': rechazados,
+        'pagados': pagados,
+        'enviados': enviados,
+        'polizas_activas': polizas_activas,
+        'tipos_siniestro': Siniestro.TIPO_CHOICES,
     }
-    return render(request, 'asesor/components/polizas/lista_polizas.html', context)
+    return render(request, 'asesor/components/siniestros/siniestros_module_lista.html', context)
+
+
+
+
+
+
+
+
+
+
+
+
+@login_required(login_url='login')
+@role_required(['asesor'])
+def siniestros_module_detalle(request, id):
+    siniestro = get_object_or_404(Siniestro, id=id)
+    
+    if not siniestro.revisado_por:
+        siniestro.revisado_por = request.user
+        siniestro.save()
+    
+    dias_restantes = None
+    if siniestro.fecha_limite_reporte:
+        delta = siniestro.fecha_limite_reporte - timezone.now().date()
+        dias_restantes = delta.days
+    
+    archivo_url = None
+    archivo_tipo = None
+    archivo_nombre = None
+    
+    if siniestro.documento:
+        archivo_url = siniestro.documento.url
+        archivo_nombre = os.path.basename(siniestro.documento.name)
+        extension = os.path.splitext(archivo_nombre)[1].lower()
+        
+        if extension in ['.pdf']:
+            archivo_tipo = 'pdf'
+        elif extension in ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']:
+            archivo_tipo = 'imagen'
+        elif extension in ['.doc', '.docx']:
+            archivo_tipo = 'word'
+        elif extension in ['.xls', '.xlsx']:
+            archivo_tipo = 'excel'
+        else:
+            archivo_tipo = 'otro'
+    
+    estudiantes_info = []
+    if siniestro.poliza:
+        estudiantes = siniestro.poliza.estudiantes.all()
+        for estudiante in estudiantes:
+            estudiantes_info.append(f"{estudiante.nombres} {estudiante.apellidos}")
+    
+    estudiantes_texto = ", ".join(estudiantes_info) if estudiantes_info else 'N/A'
+
+    
+    data = {
+        'id': siniestro.id,
+        'poliza': {'numero': siniestro.poliza.numero_poliza if siniestro.poliza else 'Sin póliza','estudiante': estudiantes_texto,},
+
+
+
+
+        'tipo': siniestro.get_tipo_display() if siniestro.tipo else 'N/A',
+        'descripcion': siniestro.descripcion,
+        'fecha_evento': siniestro.fecha_evento.strftime('%d/%m/%Y') if siniestro.fecha_evento else 'N/A',
+        'estado': siniestro.estado,
+        'estado_display': siniestro.get_estado_display(),
+        'enviado': siniestro.enviado,
+        'fecha_reporte': siniestro.fecha_reporte.strftime('%d/%m/%Y %I:%M %p'),
+        'fecha_limite': siniestro.fecha_limite_reporte.strftime('%d/%m/%Y') if siniestro.fecha_limite_reporte else 'N/A',
+        'dias_restantes': dias_restantes,
+        'nombre_beneficiario': siniestro.nombre_beneficiario,
+        'relacion_beneficiario': siniestro.relacion_beneficiario,
+        'parentesco': siniestro.parentesco,
+        'telefono': siniestro.telefono_contacto,
+        'email': siniestro.email_contacto,
+        'revisado_por': siniestro.revisado_por.username if siniestro.revisado_por else 'No revisado',
+        'comentarios': siniestro.comentarios,
+        'archivo_url': archivo_url,
+        'archivo_tipo': archivo_tipo,
+        'archivo_nombre': archivo_nombre,
+    }
+    
+    return JsonResponse(data)
+
+
+
+
+
+
 
 
 
@@ -68,48 +175,129 @@ def lista_polizas(request):
 @login_required(login_url='login')
 @role_required(['asesor'])
 @require_http_methods(["POST"])
-def crear_poliza(request):
+def siniestros_module_crear(request):
     try:
-        data = request.POST
-        form = PolizaForm(data)
-        fecha_hora_str = request.POST.get('fecha_fin')
-        
-        if form.is_valid() and fecha_hora_str:
-
-            print("Formulario válido")
-            print("Fecha hora str:", fecha_hora_str)
+        form = SiniestroForm(request.POST, request.FILES)
 
 
-            poliza = form.save(commit=False)
-            poliza.fecha_fin = fecha_hora_str
-            poliza.save()
-
-            fecha_hora_naive = datetime.fromisoformat(fecha_hora_str)
-            fecha_hora_aware = timezone.make_aware(fecha_hora_naive)
-            print(f"Programando tarea para: {fecha_hora_aware}")
-            task = ejecutar_recordatorio.apply_async(eta=fecha_hora_aware)
-            profile = Profile.objects.get(user=request.user)
-
-
-            recordatorio = Notificaciones.objects.create(
-                not_codcli=profile,
-                not_poliza=poliza,  
-                not_fecha_proceso=fecha_hora_aware, 
-                not_fecha_creacion=timezone.now(),
-                not_mensaje=f"Recordatorio de vencimiento de póliza para {poliza.numero_poliza} su estado actual es {poliza.estado}",
-                not_read=False,
-                not_estado=False,
-                not_celery_task_id=task.id,
-            )
-
-            recordatorio.save()
+        if form.is_valid():
+            siniestro = form.save(commit=False)
             
-            return JsonResponse({'success': True})
+            config = ConfiguracionSiniestro.objects.filter(activo=True).first()
+            
+            if config:
+                dias_max = config.dias_max_reporte
+                fecha_actual = timezone.now().date()
+                siniestro.fecha_limite_reporte = fecha_actual + timedelta(days=dias_max)
+            else:
+                fecha_actual = timezone.now().date()
+                siniestro.fecha_limite_reporte = fecha_actual + timedelta(days=3)
+            
+            siniestro.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Siniestro creado exitosamente',
+                'siniestro_id': siniestro.id
+            })
         else:
             return JsonResponse({'success': False,'errors': form.errors}, status=400)
             
     except Exception as e:
         return JsonResponse({'success': False,'message': str(e)}, status=500)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@login_required(login_url='login')
+@role_required(['asesor'])
+@require_http_methods(["POST"])
+def siniestros_module_enviar(request, id):
+    """Vista para marcar un siniestro como enviado"""
+    try:
+        siniestro = get_object_or_404(Siniestro, id=id)
+        
+        # Validar que el siniestro no esté ya enviado
+        if siniestro.enviado:
+            return JsonResponse({
+                'success': False,
+                'message': 'Este siniestro ya fue enviado anteriormente'
+            }, status=400)
+        
+        # Marcar como enviado
+        siniestro.enviado = True
+        siniestro.fecha_actualizacion = timezone.now()
+        siniestro.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Siniestro #{siniestro.id} enviado exitosamente a la aseguradora'
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=500)
+
+@login_required(login_url='login')
+@role_required(['asesor'])
+def siniestros_module_eliminar(request, id):
+    """Vista para eliminar un siniestro"""
+    siniestro = get_object_or_404(Siniestro, id=id)
+    
+    # Eliminar archivo si existe
+    if siniestro.documento:
+        try:
+            if os.path.isfile(siniestro.documento.path):
+                os.remove(siniestro.documento.path)
+        except Exception as e:
+            print(f"Error al eliminar archivo: {e}")
+    
+    siniestro.delete()
+    return redirect('siniestros_module_lista')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -152,27 +340,34 @@ def trigger_event(request, user_id):
 
 
 
+
+
+
 @login_required(login_url='login')
 @role_required(['asesor'])
-def generar_numero_poliza(request):
-    return JsonResponse({'numero_poliza': Poliza.generar_numero_poliza()})
-
-
-
-
-@login_required(login_url='/login')
 def obtener_notificaciones_usuario(request, user_id):
     profile = Profile.objects.get(user=user_id)
+    print(profile)
     mensajes = Notificaciones.objects.filter(not_codcli=profile).order_by('-not_fecha_creacion').values('not_id', 'not_poliza', 'not_fecha_proceso', 'not_estado', 'not_mensaje', 'not_fecha_creacion', 'not_read')
+    print(mensajes)
     return JsonResponse(list(mensajes), safe=False)
 
 
 
-@login_required(login_url='/login')
+@login_required(login_url='login')
+@role_required(['asesor'])
 def marcar_notificaciones_leidas(request, user_id):
     profile = Profile.objects.get(user=user_id)
     Notificaciones.objects.filter(not_codcli=profile, not_read=True).update(not_read=False)
     return JsonResponse({'status': 'ok'})
+
+
+
+
+
+
+
+
 
 
 
@@ -186,7 +381,8 @@ from django.http import JsonResponse
 from core.models import Siniestro, TcasDocumentos
 from django.contrib.auth.decorators import login_required
 
-@login_required(login_url='/login')
+@login_required(login_url='login')
+@role_required(['asesor'])
 def lista_siniestros(request):
     # Traer todos los siniestros sin filtros
     siniestros = Siniestro.objects.all().select_related('poliza').order_by('-fecha_reporte')
@@ -195,7 +391,8 @@ def lista_siniestros(request):
     }
     return render(request, 'asesor/components/documentos/siniestros_lista.html', context)
 
-@login_required(login_url='/login')
+@login_required(login_url='login')
+@role_required(['asesor'])
 def obtener_beneficiarios_por_siniestro(request, siniestro_id):
     siniestro = get_object_or_404(Siniestro, pk=siniestro_id)
     beneficiarios = siniestro.beneficiarios.all().values(
@@ -203,9 +400,134 @@ def obtener_beneficiarios_por_siniestro(request, siniestro_id):
     )
     return JsonResponse(list(beneficiarios), safe=False)
 
-@login_required(login_url='/login')
+@login_required(login_url='login')
+@role_required(['asesor'])
 def obtener_documentos_por_beneficiario(request, beneficiario_id):
     documentos = TcasDocumentos.objects.filter(beneficiario_id=beneficiario_id).values(
         "doc_cod_doc", "doc_descripcion", "doc_file", "doc_size", "fec_creacion", "fecha_edit", "estado"
     ).order_by('-fec_creacion')
     return JsonResponse(list(documentos), safe=False)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@login_required(login_url='login')
+@role_required(['asesor'])
+def lista_reportes(request):
+    """Vista principal para listar todos los reportes"""
+    reportes = ReporteEvento.objects.all().order_by('-fecha_creacion')
+    ultimo_reporte = reportes.first() if reportes.exists() else None
+    
+    # Estadísticas
+    context = {
+        'reportes': reportes,
+        'ultimo_reporte': ultimo_reporte,
+        'total_reportes': reportes.count(),
+        'reportes_nuevos': reportes.filter(estado='nuevo').count(),
+        'reportes_enviados': reportes.filter(estado='enviado').count(),
+        'reportes_evaluados': reportes.filter(evaluado=True).count(),
+    }
+    
+    return render(request, 'asesor/components/reportes/lista_reportes.html', context)
+
+
+
+
+
+
+
+
+@login_required(login_url='login')
+@role_required(['asesor'])
+def detalle_reporte(request, id):
+    reporte = get_object_or_404(ReporteEvento, id=id)
+    
+    archivo_url = None
+    archivo_tipo = None
+    archivo_nombre = None
+    
+    if reporte.archivo_documento:
+        archivo_url = reporte.archivo_documento.url
+        archivo_nombre = os.path.basename(reporte.archivo_documento.name)
+        extension = os.path.splitext(archivo_nombre)[1].lower()
+        
+        if extension in ['.pdf']:
+            archivo_tipo = 'pdf'
+        elif extension in ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']:
+            archivo_tipo = 'imagen'
+        elif extension in ['.doc', '.docx']:
+            archivo_tipo = 'word'
+        elif extension in ['.xls', '.xlsx']:
+            archivo_tipo = 'excel'
+        else:
+            archivo_tipo = 'otro'
+    
+    return JsonResponse({
+        'id': reporte.id,
+        'descripcion': reporte.descripcion,
+        'beneficiario': reporte.nombre_beneficiario,
+        'relacion': reporte.relacion_beneficiario,
+        'telefono': reporte.telefono,
+        'email': reporte.email,
+        'estado': reporte.estado,
+        'evaluado': reporte.evaluado,
+        'fecha': reporte.fecha_creacion.strftime('%d/%m/%Y %I:%M %p'),
+        'archivo_url': archivo_url,
+        'archivo_tipo': archivo_tipo,
+        'archivo_nombre': archivo_nombre,
+    })
+
+
+
+
+@login_required(login_url='login')
+@role_required(['asesor'])
+@require_POST
+def cambiar_estado_reporte(request, id):
+    reporte = get_object_or_404(ReporteEvento, id=id)
+    nuevo_estado = request.POST.get('estado')
+    
+    if nuevo_estado in ['nuevo', 'enviado', 'descartado']:
+        reporte.estado = nuevo_estado
+        
+        if nuevo_estado == 'enviado':
+            reporte.evaluado = True
+        
+        reporte.save()
+        
+        return JsonResponse({
+            'success': True,
+            'estado': nuevo_estado,
+            'evaluado': reporte.evaluado
+        })
+    
+    return JsonResponse({'success': False, 'error': 'Estado no válido'})
+
+@login_required(login_url='login')
+@role_required(['asesor'])
+def eliminar_reporte(request, id):
+    """Vista para eliminar un reporte"""
+    reporte = get_object_or_404(ReporteEvento, id=id)
+    
+    # Eliminar archivo físico si existe
+    if reporte.archivo_documento:
+        try:
+            if os.path.isfile(reporte.archivo_documento.path):
+                os.remove(reporte.archivo_documento.path)
+        except Exception as e:
+            print(f"Error al eliminar archivo: {e}")
+    
+    reporte.delete()
+    return redirect('lista_reportes')

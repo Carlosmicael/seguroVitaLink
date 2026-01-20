@@ -1,12 +1,27 @@
 from django import forms
-from .models import Poliza, Estudiante, Solicitud,TcasDocumentos
+from .models import Poliza, Estudiante, Solicitud,TcasDocumentos,Siniestro
+
+
+class SiniestroForm(forms.ModelForm):
+    class Meta:
+        model = Siniestro
+        fields = ['poliza','tipo','descripcion','fecha_evento','nombre_beneficiario','relacion_beneficiario','parentesco','telefono_contacto','email_contacto','documento']
+        widgets = {
+            'descripcion': forms.Textarea(attrs={'rows': 4}),
+            'fecha_evento': forms.DateInput(attrs={'type': 'date'}),
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['poliza'].queryset = Poliza.objects.filter(estado='activa')
+
+
 
 class PolizaForm(forms.ModelForm):
         
     class Meta:
         model = Poliza
-        fields = ['estudiante', 'numero_poliza', 'estado', 'tipo_cobertura', 'fecha_inicio', 'prima_neta']
-        widgets = {'fecha_inicio': forms.DateInput(attrs={'type': 'date'}),'estudiante': forms.Select(attrs={'class': 'form-select'}),}
+        fields = ['estudiantes','numero_poliza', 'estado', 'tipo_cobertura', 'fecha_inicio', 'prima_neta']
+        widgets = {'fecha_inicio': forms.DateInput(attrs={'type': 'date'}),'estudiantes': forms.CheckboxSelectMultiple(attrs={'class': 'form-select'}),}
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -43,19 +58,6 @@ class TcasDocumentosForm(forms.ModelForm):
         labels = {
             "doc_descripcion": "Descripción",
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -210,3 +212,12 @@ class GestionSolicitudForm(forms.ModelForm):
         if self.instance and self.instance.pk and self.instance.poliza and self.instance.poliza.estudiante:
             # Pre-seleccionar el estudiante actual si existe
             self.fields['estudiante'].initial = self.instance.poliza.estudiante
+
+
+
+
+
+
+
+
+

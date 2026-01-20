@@ -273,7 +273,7 @@
 
     //notificaciones y el resto//
     const userId = {{ user.id }};
-    const pusher = new Pusher('3e0fb7f926cfffecfe16', {cluster: 'us2', encrypted: true, authEndpoint: '/pusher/auth/'});
+    const pusher = new Pusher('3e0fb7f926cfffecfe16', {cluster: 'us2', encrypted: true, authEndpoint: '/pusher/auth/asesor'});
     const channel = pusher.subscribe(`private-user-${userId}`);
 
 
@@ -328,7 +328,7 @@
     //funcion para verificar los mensajes nuevos
     async function fetchMensajes() {
         
-        fetch(`/obtener-notificaciones-usuario/${userId}`)
+        fetch(`/obtener-notificaciones-usuario/asesor/${userId}/`)
             .then(response => response.json())
             .then(data => {
                 mensajes = data;
@@ -351,7 +351,7 @@
     //marcar todos los mensajes como leidos
     function marcarNotificacionesLeidas() {
       cantidad = 0;
-      fetch(`/marcar-notificaciones-leidas/${userId}`)
+      fetch(`/marcar-notificaciones-leidas/asesor/${userId}`)
       .then(data => {console.log(data);})
       .catch(error => {
         console.error('Error al marcar notificaciones como leidas:', error);
@@ -375,7 +375,7 @@
   notificationContent.innerHTML = '';
   marcarNotificacionesLeidas();
   
-  fetch(`/obtener-notificaciones-usuario/${userId}`)
+  fetch(`/obtener-notificaciones-usuario/asesor/${userId}/`)
     .then(response => response.json())
     .then(data => {
       mensajes = data;

@@ -65,11 +65,12 @@
         <div class="p-4 border-t border-teal-800 flex-shrink-0">
             <div class="flex items-center gap-3 px-3 py-3 rounded-lg bg-teal-800 bg-opacity-30 hover:bg-opacity-50 transition-all cursor-pointer group">
                 <div class="relative flex-shrink-0">
-                    <img src="https://i.pravatar.cc/150?img=33" alt="Alex" class="w-10 h-10 rounded-full border-2 border-emerald-400">
+                    <img src="https://i.pravatar.cc/150?img=33" alt="Admin" class="w-10 h-10 rounded-full border-2 border-emerald-400">
+                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-teal-900 rounded-full"></div>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-white text-sm truncate">Alex Williamson</p>
-                    <p class="text-xs text-teal-400 truncate">#dela-1974</p>
+                    <p class="font-semibold text-white text-sm truncate">{{ request.user.username }}</p>
+                    <p class="text-xs text-teal-400 truncate">Beneficiario</p>
                 </div>
             </div>
         </div>

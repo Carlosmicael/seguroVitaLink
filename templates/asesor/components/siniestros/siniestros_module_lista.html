@@ -1,0 +1,1022 @@
+{% extends "master/sideBar/sidebar_asesor.html" %}
+{% load static %}
+{% block title %}Gestión de Siniestros{% endblock %}
+
+{% block content %}
+{% include "master/appBar/appBar.html" %}
+
+
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #f8f9fc; }
+    
+    .fade-in { animation: fadeIn 0.5s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .fade-out { animation: fadeOut 0.2s ease-out forwards; }
+    @keyframes fadeOut {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(10px); }
+    }
+    
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div style="padding: 32px; background: #f8f9fc; min-height: 100vh;" class="fade-in">
+
+    <!-- Header -->
+    <div style="margin-bottom: 32px;">
+        <h1 style="font-size: 32px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">
+            <i class="fas fa-exclamation-triangle" style="color: #ef4444; margin-right: 12px;"></i>
+            Gestión de Siniestros
+        </h1>
+        <p style="color: #64748b; font-size: 15px;">Administra y procesa todos los reportes de siniestros</p>
+    </div>
+
+
+
+
+
+
+
+    <!-- Modal Detalle de Siniestro -->
+    <div id="modalDetalle" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; backdrop-filter: blur(8px); background: rgba(0, 0, 0, 0.4); animation: fadeIn 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+            <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 900px; width: 100%; max-height: 90vh; padding: 0; overflow: hidden; animation: slideUp 0.3s ease-out; display: flex; flex-direction: column;">
+                
+                <!-- Header Modal -->
+                <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 28px; position: relative;">
+                    <button onclick="cerrarModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.2); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; color: white; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h2 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">
+                        <i class="fas fa-file-medical" style="margin-right: 10px;"></i>
+                        Detalle del Siniestro
+                    </h2>
+                    <p style="color: rgba(255, 255, 255, 0.9); margin-top: 8px; font-size: 14px;" id="modal-numero"></p>
+                </div>
+
+                <!-- Body Modal -->
+                <div style="padding: 30px; overflow-y: auto; max-height: calc(90vh - 180px);">
+                    
+                    <!-- Información de Póliza -->
+                    <div style="margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <i class="fas fa-shield-alt" style="color: #ef4444; font-size: 20px; margin-right: 12px;"></i>
+                            <h3 style="color: #1e293b; font-size: 16px; font-weight: 600; margin: 0;">Información de Póliza</h3>
+                        </div>
+                        <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #ef4444;">
+                            <p style="color: #1e293b; font-weight: 600; font-size: 15px; margin-bottom: 4px;" id="modal-poliza"></p>
+                            <p style="color: #64748b; font-size: 14px; margin: 0;" id="modal-estudiante"></p>
+                        </div>
+                    </div>
+
+                    <!-- Grid de Información Básica -->
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+                        <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                            <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Tipo de Siniestro</p>
+                            <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-tipo"></p>
+                        </div>
+                        <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                            <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Estado</p>
+                            <p style="margin: 0;" id="modal-estado"></p>
+                        </div>
+                        <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                            <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Fecha del Evento</p>
+                            <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-fecha-evento"></p>
+                        </div>
+                        <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                            <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Fecha de Reporte</p>
+                            <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-fecha-reporte"></p>
+                        </div>
+                    </div>
+
+                    <!-- Beneficiario -->
+                    <div style="margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <i class="fas fa-user" style="color: #ef4444; font-size: 20px; margin-right: 12px;"></i>
+                            <h3 style="color: #1e293b; font-size: 16px; font-weight: 600; margin: 0;">Información del Beneficiario</h3>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                            <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                                <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Nombre Completo</p>
+                                <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-beneficiario"></p>
+                            </div>
+                            <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                                <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Relación</p>
+                                <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-relacion"></p>
+                            </div>
+                            <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                                <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Parentesco</p>
+                                <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-parentesco"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contacto -->
+                    <div style="margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <i class="fas fa-phone" style="color: #ef4444; font-size: 20px; margin-right: 12px;"></i>
+                            <h3 style="color: #1e293b; font-size: 16px; font-weight: 600; margin: 0;">Información de Contacto</h3>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                                <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Teléfono</p>
+                                <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-telefono"></p>
+                            </div>
+                            <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                                <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Email</p>
+                                <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-email"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #ef4444; margin-bottom: 24px;">
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+                            📝 Descripción del Evento
+                        </label>
+                        <div style="font-size: 14px; color: #334155; line-height: 1.8;" id="modal-descripcion"></div>
+                    </div>
+
+                    <!-- Revisión y Comentarios -->
+                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 24px;">
+                        <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                            <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Revisado Por</p>
+                            <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-revisado"></p>
+                        </div>
+                        <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                            <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Comentarios</p>
+                            <p style="color: #1e293b; font-size: 14px; margin: 0;" id="modal-comentarios"></p>
+                        </div>
+                    </div>
+
+                    <!-- Documento Adjunto -->
+                    <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                        <h3 style="font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-paperclip"></i> Documento Adjunto
+                        </h3>
+                        <div style="background: white; border-radius: 10px; padding: 15px; min-height: 400px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);" id="documentoViewer"></div>
+                    </div>
+
+                    <!-- Alerta de Fecha Límite -->
+                    <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 20px; border-radius: 12px; text-align: center; border: 2px solid #fbbf24;">
+                        <i class="fas fa-clock" style="color: #92400e; font-size: 32px; margin-bottom: 12px;"></i>
+                        <p style="color: #92400e; font-size: 13px; font-weight: 500; margin-bottom: 6px;">Fecha Límite de Envío</p>
+                        <p style="color: #92400e; font-size: 24px; font-weight: 700; margin: 0;" id="modal-fecha-limite"></p>
+                        <p style="color: #92400e; font-size: 14px; margin-top: 8px;">
+                            Días restantes: <strong id="modal-dias-restantes">0</strong>
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+    
+
+
+
+
+
+    <!-- Modal Crear Siniestro -->
+    <div id="modalCrear" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; backdrop-filter: blur(8px); background: rgba(0, 0, 0, 0.4); animation: fadeIn 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+            <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 750px; width: 100%; max-height: 90vh; padding: 0; overflow: hidden; animation: slideUp 0.3s ease-out; display: flex; flex-direction: column;">
+                
+                <!-- Header Modal -->
+                <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 28px; position: relative;">
+                    <button onclick="cerrarModalCrear()" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.2); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; color: white; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h2 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">
+                        <i class="fas fa-plus-circle" style="margin-right: 10px;"></i>
+                        Reportar Nuevo Siniestro
+                    </h2>
+                    <p style="color: rgba(255, 255, 255, 0.9); margin-top: 8px; font-size: 14px;">Complete el formulario para registrar un nuevo siniestro</p>
+                </div>
+
+                <!-- Body Modal con Scroll -->
+                <div style="padding: 24px; overflow-y: auto; max-height: calc(90vh - 180px);">
+                    <form id="formCrearSiniestro" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Póliza -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                <i class="fas fa-shield-alt" style="color: #ef4444; margin-right: 6px;"></i>
+                                Póliza *
+                            </label>
+                            <select name="poliza" required style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white; cursor: pointer;">
+                                <option value="">Seleccione una póliza activa</option>
+                                {% for poliza in polizas_activas %}
+                                <option value="{{ poliza.id }}">{{ poliza.numero_poliza }} - {{ poliza.estudiante.nombres }} {{ poliza.estudiante.apellidos }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Grid: Tipo y Fecha Evento -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                            <div>
+                                <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                    <i class="fas fa-tag" style="color: #ef4444; margin-right: 6px;"></i>
+                                    Tipo de Siniestro *
+                                </label>
+                                <select name="tipo" required style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white;">
+                                    <option value="">Seleccione tipo</option>
+                                    {% for key, value in tipos_siniestro %}
+                                    <option value="{{ key }}">{{ value }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                    <i class="fas fa-calendar-day" style="color: #ef4444; margin-right: 6px;"></i>
+                                    Fecha del Evento *
+                                </label>
+                                <input type="date" name="fecha_evento" required style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white;">
+                            </div>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                <i class="fas fa-file-alt" style="color: #ef4444; margin-right: 6px;"></i>
+                                Descripción del Evento *
+                            </label>
+                            <textarea name="descripcion" required rows="4" placeholder="Describa detalladamente lo ocurrido..." style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white; resize: vertical;"></textarea>
+                        </div>
+
+                        <!-- Información del Beneficiario -->
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                            <h4 style="color: #1e293b; font-size: 15px; font-weight: 600; margin-bottom: 16px;">
+                                <i class="fas fa-user" style="color: #ef4444; margin-right: 8px;"></i>
+                                Información del Beneficiario
+                            </h4>
+                            
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                    Nombre Completo
+                                </label>
+                                <input type="text" name="nombre_beneficiario" placeholder="Nombre del beneficiario" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div>
+                                    <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                        Relación
+                                    </label>
+                                    <input type="text" name="relacion_beneficiario" placeholder="Ej: Familiar" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
+                                </div>
+                                <div>
+                                    <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                        Parentesco
+                                    </label>
+                                    <input type="text" name="parentesco" placeholder="Ej: Padre/Madre" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información de Contacto -->
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                            <h4 style="color: #1e293b; font-size: 15px; font-weight: 600; margin-bottom: 16px;">
+                                <i class="fas fa-phone" style="color: #ef4444; margin-right: 8px;"></i>
+                                Información de Contacto
+                            </h4>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div>
+                                    <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                        Teléfono
+                                    </label>
+                                    <input type="tel" name="telefono_contacto" placeholder="0999999999" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
+                                </div>
+                                <div>
+                                    <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                        Email
+                                    </label>
+                                    <input type="email" name="email_contacto" placeholder="correo@ejemplo.com" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Documento Adjunto -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                <i class="fas fa-paperclip" style="color: #ef4444; margin-right: 6px;"></i>
+                                Documento Adjunto
+                            </label>
+                            <input type="file" name="documento" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white; cursor: pointer;">
+                            <p style="color: #64748b; font-size: 12px; margin-top: 6px;">Formatos permitidos: PDF, JPG, PNG, DOC, DOCX (Max 10MB)</p>
+                        </div>
+
+                        <!-- Mensaje de Error -->
+                        <div id="mensajeError" style="display: none; background: #fee2e2; border: 2px solid #ef4444; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+                            <p style="color: #991b1b; font-size: 14px; margin: 0;"></p>
+                        </div>
+
+                    </form>
+                </div>
+
+
+
+                <!-- Footer Modal -->
+                <div style="padding: 20px 24px; border-top: 2px solid #f1f5f9; background: #f8fafc; display: flex; gap: 12px; justify-content: flex-end;">
+                    <button onclick="cerrarModalCrear()" style="padding: 12px 24px; background: #e2e8f0; color: #475569; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s;">
+                        <i class="fas fa-times" style="margin-right: 6px;"></i>
+                        Cancelar
+                    </button>
+                    <button onclick="enviarFormulario()" id="btnGuardar" style="padding: 12px 24px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); transition: all 0.2s;">
+                        <i class="fas fa-save" style="margin-right: 6px;"></i>
+                        Guardar Siniestro
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+    <!-- Stats Card -->
+    <div style="background: white; padding: 28px; border-radius: 16px; margin-bottom: 32px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;">
+            
+            <div style="flex: 1; min-width: 140px; text-align: center;">
+                <div style="color: #94a3b8; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Total Siniestros</div>
+                <div style="color: #ef4444; font-size: 42px; font-weight: 700; line-height: 1;">{{ total }}</div>
+            </div>
+
+            <div style="flex: 1; min-width: 140px; text-align: center;">
+                <div style="color: #94a3b8; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Pendientes</div>
+                <div style="color: #f59e0b; font-size: 42px; font-weight: 700; line-height: 1;">{{ pendientes }}</div>
+            </div>
+
+            <div style="flex: 1; min-width: 140px; text-align: center;">
+                <div style="color: #94a3b8; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Aprobados</div>
+                <div style="color: #10b981; font-size: 42px; font-weight: 700; line-height: 1;">{{ aprobados }}</div>
+            </div>
+
+            <div style="flex: 1; min-width: 140px; text-align: center;">
+                <div style="color: #94a3b8; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Rechazados</div>
+                <div style="color: #64748b; font-size: 42px; font-weight: 700; line-height: 1;">{{ rechazados }}</div>
+            </div>
+
+            <div style="flex: 1; min-width: 140px; text-align: center;">
+                <div style="color: #94a3b8; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Pagados</div>
+                <div style="color: #6366f1; font-size: 42px; font-weight: 700; line-height: 1;">{{ pagados }}</div>
+            </div>
+
+            <div style="flex: 1; min-width: 140px; text-align: center;">
+                <div style="color: #94a3b8; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Enviados</div>
+                <div style="color: #8b5cf6; font-size: 42px; font-weight: 700; line-height: 1;">{{ enviados }}</div>
+            </div>
+
+            <button onclick="abrirModalCrear()" style="padding: 14px 28px; background: #ef4444; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); transition: all 0.2s;">
+                <i class="fas fa-plus-circle" style="margin-right: 8px;"></i>
+                Reportar Siniestro
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div style="background: white; padding: 24px; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end;">
+            
+            <!-- Filtro Estado -->
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; color: #64748b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                    <i class="fas fa-filter" style="margin-right: 6px;"></i>
+                    Estado del Siniestro
+                </label>
+                <select id="filtroEstado" style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 14px; color: #1e293b; background: #f8fafc; cursor: pointer; transition: all 0.2s;">
+                    <option value="">Todos los estados</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="aprobado">Aprobado</option>
+                    <option value="rechazado">Rechazado</option>
+                    <option value="pagado">Pagado</option>
+                </select>
+            </div>
+
+            <!-- Filtro Tipo -->
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; color: #64748b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                    <i class="fas fa-tag" style="margin-right: 6px;"></i>
+                    Tipo de Siniestro
+                </label>
+                <select id="filtroTipo" style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 14px; color: #1e293b; background: #f8fafc; cursor: pointer; transition: all 0.2s;">
+                    <option value="">Todos los tipos</option>
+                    <option value="accidente">Accidente</option>
+                    <option value="enfermedad">Enfermedad grave</option>
+                    <option value="hospitalizacion">Hospitalización</option>
+                    <option value="fallecimiento">Fallecimiento</option>
+                    <option value="otro">Otro</option>
+                </select>
+            </div>
+
+            <!-- Filtro Enviado -->
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; color: #64748b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                    <i class="fas fa-paper-plane" style="margin-right: 6px;"></i>
+                    Estado de Envío
+                </label>
+                <select id="filtroEnviado" style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 14px; color: #1e293b; background: #f8fafc; cursor: pointer; transition: all 0.2s;">
+                    <option value="">Todos</option>
+                    <option value="true">Enviados</option>
+                    <option value="false">No enviados</option>
+                </select>
+            </div>
+
+            <!-- Botón Limpiar -->
+            <button onclick="limpiarFiltros()" style="padding: 12px 24px; background: #ef4444; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); transition: all 0.2s;">
+                <i class="fas fa-redo-alt" style="margin-right: 6px;"></i>
+                Limpiar Filtros
+            </button>
+        </div>
+    </div>
+
+    <!-- Tabla -->
+    <div style="background: white; padding: 24px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto;">
+        <table id="tablaSiniestros" class="display" style="width: 100%; border-collapse: separate; border-spacing: 0;">
+            <thead>
+                <tr style="background: #f8fafc;">
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">ID</th>
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Póliza</th>
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Beneficiario</th>
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Tipo</th>
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Fecha Reporte</th>
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Días Rest.</th>
+                    <th style="padding: 16px; text-align: center; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Estado</th>
+                    <th style="padding: 16px; text-align: center; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for siniestro in siniestros %}
+                <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" 
+                    onmouseover="this.style.background='#f8fafc'" 
+                    onmouseout="this.style.background='white'"
+                    data-id="{{ siniestro.id }}"
+                    data-estado="{{ siniestro.estado }}"
+                    data-tipo="{{ siniestro.tipo }}"
+                    data-enviado="{{ siniestro.enviado|lower }}">
+                    
+                    <td style="padding: 16px;">
+                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px;">
+                            {{ siniestro.id }}
+                        </div>
+                    </td>
+                    
+                    <td style="padding: 16px; color: #1e293b; font-weight: 600; font-size: 14px; white-space: nowrap;">
+                        {{ siniestro.poliza.numero_poliza|default:"N/A" }}
+                    </td>
+                    
+                    <td style="padding: 16px; white-space: nowrap;">
+                        <div style="color: #1e293b; font-weight: 500; font-size: 14px;">{{ siniestro.nombre_beneficiario|default:"Sin información" }}</div>
+                        <div style="color: #94a3b8; font-size: 12px; margin-top: 2px;">{{ siniestro.relacion_beneficiario|default:"" }}</div>
+                    </td>
+                    
+                    <td style="padding: 16px; color: #475569; font-size: 14px; white-space: nowrap;">
+                        {{ siniestro.get_tipo_display|default:"N/A" }}
+                    </td>
+                    
+                    <td style="padding: 16px; color: #475569; font-size: 14px; white-space: nowrap;">
+                        {{ siniestro.fecha_reporte|date:"d/m/Y" }}
+                        <div style="color: #94a3b8; font-size: 12px;">{{ siniestro.fecha_reporte|date:"h:i A" }}</div>
+                    </td>
+                    
+                    <td style="padding: 16px; white-space: nowrap;">
+                        {% if siniestro.dias_restantes != None %}
+                            {% if siniestro.dias_restantes < 0 %}
+                                <span style="display: inline-block; padding: 6px 12px; background: #fee2e2; color: #991b1b; border-radius: 20px; font-size: 12px; font-weight: 600;">Vencido</span>
+                            {% elif siniestro.dias_restantes == 0 %}
+                                <span style="display: inline-block; padding: 6px 12px; background: #fef3c7; color: #92400e; border-radius: 20px; font-size: 12px; font-weight: 600;">Hoy</span>
+                            {% elif siniestro.dias_restantes <= 3 %}
+                                <span style="display: inline-block; padding: 6px 12px; background: #fed7aa; color: #9a3412; border-radius: 20px; font-size: 12px; font-weight: 600;">{{ siniestro.dias_restantes }} días</span>
+                            {% else %}
+                                <span style="display: inline-block; padding: 6px 12px; background: #d1fae5; color: #065f46; border-radius: 20px; font-size: 12px; font-weight: 600;">{{ siniestro.dias_restantes }} días</span>
+                            {% endif %}
+                        {% else %}
+                            <span style="color: #94a3b8; font-size: 12px;">Sin fecha</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 16px; text-align: center; white-space: nowrap;">
+                        {% if siniestro.estado == 'pendiente' %}
+                            <span style="display: inline-block; padding: 6px 16px; background: #fef3c7; color: #92400e; border-radius: 20px; font-size: 12px; font-weight: 600;">Pendiente</span>
+                        {% elif siniestro.estado == 'aprobado' %}
+                            <span style="display: inline-block; padding: 6px 16px; background: #d1fae5; color: #065f46; border-radius: 20px; font-size: 12px; font-weight: 600;">Aprobado</span>
+                        {% elif siniestro.estado == 'rechazado' %}
+                            <span style="display: inline-block; padding: 6px 16px; background: #fee2e2; color: #991b1b; border-radius: 20px; font-size: 12px; font-weight: 600;">Rechazado</span>
+                        {% elif siniestro.estado == 'pagado' %}
+                            <span style="display: inline-block; padding: 6px 16px; background: #e0e7ff; color: #3730a3; border-radius: 20px; font-size: 12px; font-weight: 600;">Pagado</span>
+                        {% endif %}
+                        
+                        {% if siniestro.enviado %}
+                            <div style="margin-top: 4px;">
+                                <span style="display: inline-block; padding: 4px 10px; background: #ddd6fe; color: #5b21b6; border-radius: 12px; font-size: 10px; font-weight: 600;">
+                                    <i class="fas fa-check-circle"></i> Enviado
+                                </span>
+                            </div>
+                        {% endif %}
+                    </td>
+                    
+                    <td style="padding: 16px; text-align: center; white-space: nowrap;">
+                        <button onclick="verDetalle({{ siniestro.id }})" style="padding: 10px 14px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25); margin-right: 8px; transition: all 0.2s;" title="Ver Detalle">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        
+                        {% if not siniestro.enviado %}
+                        <button onclick="enviarSiniestro({{ siniestro.id }})" style="padding: 10px 14px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25); margin-right: 8px; transition: all 0.2s;" title="Enviar a Aseguradora">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                        {% else %}
+                        <button disabled style="padding: 10px 14px; background: #cbd5e1; color: #64748b; border: none; border-radius: 8px; font-weight: 600; cursor: not-allowed; font-size: 14px; margin-right: 8px;" title="Ya enviado">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        {% endif %}
+                        
+                        <button onclick="confirmarEliminar({{ siniestro.id }})" style="padding: 10px 14px; background: #64748b; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 2px 6px rgba(100, 116, 139, 0.25); transition: all 0.2s;" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 60px 20px; color: #94a3b8;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">
+                            <i class="fas fa-folder-open"></i>
+                        </div>
+                        <div style="font-size: 18px; font-weight: 600;">No hay siniestros registrados</div>
+                        <div style="font-size: 14px; margin-top: 8px;">Comience reportando un nuevo siniestro</div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- jQuery y DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+
+<script>
+let tabla;
+let siniestrosData = [];
+
+$(document).ready(function() {
+    // Inicializar DataTable
+    tabla = $('#tablaSiniestros').DataTable({
+        language: {
+            search: "Buscar:",
+            lengthMenu: "Mostrar _MENU_ registros",
+            info: "Mostrando _START_ a _END_ de _TOTAL_ siniestros",
+            infoEmpty: "No hay registros disponibles",
+            infoFiltered: "(filtrado de _MAX_ registros totales)",
+            paginate: {
+                first: "Primero",
+                last: "Último",
+                next: "Siguiente",
+                previous: "Anterior"
+            }
+        },
+        pageLength: 10,
+        order: [[0, 'desc']],
+        columnDefs: [
+            { orderable: false, targets: 7 }
+        ]
+    });
+
+    // Guardar datos originales
+    $('#tablaSiniestros tbody tr').each(function() {
+        siniestrosData.push(this);
+    });
+
+    // Filtros
+    $('#filtroEstado, #filtroTipo, #filtroEnviado').on('change', function() {
+        aplicarFiltros();
+    });
+
+    // Cerrar modales al hacer clic fuera
+    $('#modalDetalle, #modalCrear').on('click', function(e) {
+        if (e.target.id === 'modalDetalle' || e.target.id === 'modalCrear') {
+            cerrarModal();
+            cerrarModalCrear();
+        }
+    });
+    
+    // Cerrar con ESC
+    $(document).on('keydown', function(e) {
+        if (e.key === 'Escape') {
+            cerrarModal();
+            cerrarModalCrear();
+        }
+    });
+});
+
+function aplicarFiltros() {
+    const estadoSeleccionado = $('#filtroEstado').val();
+    const tipoSeleccionado = $('#filtroTipo').val();
+    const enviadoSeleccionado = $('#filtroEnviado').val();
+
+    $('#tablaSiniestros tbody tr').addClass('fade-out');
+
+    setTimeout(() => {
+        tabla.clear();
+
+        siniestrosData.forEach(function(fila) {
+            let mostrar = true;
+
+            if (estadoSeleccionado && $(fila).data('estado') !== estadoSeleccionado) {
+                mostrar = false;
+            }
+
+            if (tipoSeleccionado && $(fila).data('tipo') !== tipoSeleccionado) {
+                mostrar = false;
+            }
+
+            if (enviadoSeleccionado) {
+                const enviado = $(fila).data('enviado') === 'true';
+                const filtroEnviado = enviadoSeleccionado === 'true';
+                if (enviado !== filtroEnviado) {
+                    mostrar = false;
+                }
+            }
+
+            if (mostrar) {
+                $(fila).removeClass('fade-out');
+                tabla.row.add(fila);
+            }
+        });
+
+        tabla.draw();
+    }, 200);
+}
+
+function limpiarFiltros() {
+    $('#filtroEstado').val('');
+    $('#filtroTipo').val('');
+    $('#filtroEnviado').val('');
+    
+    $('#tablaSiniestros tbody tr').addClass('fade-out');
+    
+    setTimeout(() => {
+        tabla.clear();
+        siniestrosData.forEach(function(fila) {
+            $(fila).removeClass('fade-out');
+            tabla.row.add(fila);
+        });
+        tabla.draw();
+    }, 200);
+}
+
+function abrirModalCrear() {
+    $('#modalCrear').fadeIn(300);
+}
+
+function cerrarModalCrear() {
+    $('#modalCrear').fadeOut(300);
+    $('#formCrearSiniestro')[0].reset();
+    $('#mensajeError').hide();
+}
+
+function enviarFormulario() {
+    const form = $('#formCrearSiniestro')[0];
+    const formData = new FormData(form);
+    
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    const btnGuardar = $('#btnGuardar');
+    btnGuardar.prop('disabled', true);
+    btnGuardar.html('<i class="fas fa-spinner fa-spin" style="margin-right: 6px;"></i>Guardando...');
+    
+    $.ajax({
+        url: "{% url 'siniestros_module_crear' %}",
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                cerrarModalCrear();
+                location.reload();
+            }
+        },
+        error: function(xhr) {
+            const error = xhr.responseJSON;
+            let mensaje = 'Error al crear el siniestro';
+            
+            if (error.errors) {
+                mensaje = Object.values(error.errors).flat().join(', ');
+            } else if (error.message) {
+                mensaje = error.message;
+            }
+            
+            $('#mensajeError p').text(mensaje);
+            $('#mensajeError').show();
+        },
+        complete: function() {
+            btnGuardar.prop('disabled', false);
+            btnGuardar.html('<i class="fas fa-save" style="margin-right: 6px;"></i>Guardar Siniestro');
+        }
+    });
+}
+
+function verDetalle(id) {
+    $.ajax({
+        url: `/siniestros/${id}/`,
+        type: 'GET',
+        success: function(data) {
+
+            console.log("estudiantes")
+            console.log(data.poliza.estudiante)
+            console.log("fecha limite")
+            console.log(data.fecha_limite)
+            console.log("dias restantes")
+            console.log(data.dias_restantes)
+            $('#modal-numero').text(`Siniestro #${data.id}`);
+            $('#modal-poliza').text(data.poliza.numero);
+            $('#modal-estudiante').text(data.poliza.estudiante);
+            $('#modal-tipo').text(data.tipo);
+            $('#modal-fecha-evento').text(data.fecha_evento);
+            $('#modal-fecha-reporte').text(data.fecha_reporte);
+            $('#modal-beneficiario').text(data.nombre_beneficiario || 'N/A');
+            $('#modal-relacion').text(data.relacion_beneficiario || 'N/A');
+            $('#modal-parentesco').text(data.parentesco || 'N/A');
+            $('#modal-telefono').text(data.telefono || 'N/A');
+            $('#modal-email').text(data.email || 'N/A');
+            $('#modal-descripcion').text(data.descripcion);
+            $('#modal-revisado').text(data.revisado_por);
+            $('#modal-comentarios').text(data.comentarios || 'Sin comentarios');
+            $('#modal-fecha-limite').text(data.fecha_limite);
+            $('#modal-dias-restantes').text(data.dias_restantes !== null ? data.dias_restantes : 'N/A');
+            
+            let estadoBadge = '';
+            if (data.estado === 'pendiente') {
+                estadoBadge = '<span style="display: inline-block; padding: 6px 16px; background: #fef3c7; color: #92400e; border-radius: 20px; font-size: 12px; font-weight: 600;">Pendiente</span>';
+            } else if (data.estado === 'aprobado') {
+                estadoBadge = '<span style="display: inline-block; padding: 6px 16px; background: #d1fae5; color: #065f46; border-radius: 20px; font-size: 12px; font-weight: 600;">Aprobado</span>';
+            } else if (data.estado === 'rechazado') {
+                estadoBadge = '<span style="display: inline-block; padding: 6px 16px; background: #fee2e2; color: #991b1b; border-radius: 20px; font-size: 12px; font-weight: 600;">Rechazado</span>';
+            } else if (data.estado === 'pagado') {
+                estadoBadge = '<span style="display: inline-block; padding: 6px 16px; background: #e0e7ff; color: #3730a3; border-radius: 20px; font-size: 12px; font-weight: 600;">Pagado</span>';
+            }
+            
+            if (data.enviado) {
+                estadoBadge += ' <span style="display: inline-block; padding: 4px 10px; background: #ddd6fe; color: #5b21b6; border-radius: 12px; font-size: 10px; font-weight: 600; margin-left: 8px;"><i class="fas fa-check-circle"></i> Enviado</span>';
+            }
+            
+            $('#modal-estado').html(estadoBadge);
+                        
+            const documentoViewer = $('#documentoViewer');
+            if (data.archivo_url) {
+                let contenido = '';
+                
+                if (data.archivo_tipo === 'pdf') {
+                    contenido = `
+                        <div id="pdf-viewer" style="width: 100%; height: 500px; overflow: auto; position: relative;">
+                            <canvas id="pdf-canvas" style="width: 100%; height: auto; display: block;"></canvas>
+                            <div id="pdf-controls" style="margin-top: 15px; text-align: center; display: flex; justify-content: center; align-items: center; gap: 15px;">
+                                <button onclick="prevPage()" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px;">← Anterior</button>
+                                <span style="font-size: 14px; color: #64748b;">
+                                    Página <span id="page-num">1</span> de <span id="page-count">1</span>
+                                </span>
+                                <button onclick="nextPage()" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px;">Siguiente →</button>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; text-align: center;">
+                            <a href="${data.archivo_url}" 
+                               target="_blank" 
+                               style="display: inline-block; background: #10b981; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                                📥 Descargar PDF
+                            </a>
+                        </div>
+                    `;
+                    
+                    documentoViewer.html(contenido);
+                    
+                    setTimeout(() => {
+                        initPDFViewer(data.archivo_url);
+                    }, 100);
+                    
+                } else if (data.archivo_tipo === 'imagen') {
+                    // Para imágenes usar embed normal
+                    contenido = `
+                        <div style="text-align: center;">
+                            <img src="${data.archivo_url}" 
+                                 alt="${data.archivo_nombre || 'Documento'}" 
+                                 style="max-width: 100%; max-height: 500px; object-fit: contain; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <div style="margin-top: 15px; text-align: center;">
+                                <a href="${data.archivo_url}" 
+                                   target="_blank" 
+                                   style="display: inline-block; background: #10b981; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                                    📥 Descargar Imagen
+                                </a>
+                            </div>
+                        </div>`;
+                    documentoViewer.html(contenido);
+                } else {
+                    contenido = `
+                        <div style="text-align: center; padding: 40px 20px;">
+                            <div style="font-size: 60px; margin-bottom: 20px; color: #64748b;">📎</div>
+                            <div style="font-size: 16px; font-weight: 600; margin-bottom: 10px; color: #1e293b;">
+                                Archivo Adjunto
+                            </div>
+                            <div style="font-size: 14px; color: #64748b; margin-bottom: 15px; padding: 10px; background: #f8fafc; border-radius: 8px;">
+                                ${data.archivo_nombre}
+                            </div>
+                            <div style="font-size: 12px; color: #94a3b8; margin-bottom: 20px; padding: 8px 12px; background: #f1f5f9; border-radius: 6px;">
+                                Tipo: ${(data.archivo_tipo || 'DESCONOCIDO').toUpperCase()}
+                            </div>
+                            <a href="${data.archivo_url}" 
+                               target="_blank" 
+                               style="background: #3b82f6; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">
+                                📥 Descargar Archivo
+                            </a>
+                        </div>`;
+                    documentoViewer.html(contenido);
+                }
+                
+            } else {
+                documentoViewer.html(`
+                    <div style="text-align: center; padding: 60px 20px;">
+                        <div style="font-size: 48px; margin-bottom: 15px; color: #94a3b8;">📭</div>
+                        <div style="font-size: 16px; color: #64748b;">
+                            No hay documento adjunto
+                        </div>
+                    </div>
+                `);
+            }
+            
+            $('#modalDetalle').fadeIn(300);
+        },
+        error: function() {
+            alert('Error al cargar los detalles del siniestro');
+        }
+    });
+}
+
+
+
+
+
+let pdfDoc = null;
+let pageNum = 1;
+let pageRendering = false;
+let pageNumPending = null;
+let scale = 1.5;
+
+
+
+function initPDFViewer(pdfUrl) {
+    if (typeof pdfjsLib === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+        script.onload = function() {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            loadPDF(pdfUrl);
+        };
+        document.head.appendChild(script);
+    } else {
+        loadPDF(pdfUrl);
+    }
+}
+
+function loadPDF(pdfUrl) {
+    pdfjsLib.getDocument(pdfUrl).promise.then(function(pdfDoc_) {
+        pdfDoc = pdfDoc_;
+        document.getElementById('page-count').textContent = pdfDoc.numPages;
+        renderPage(pageNum);
+    });
+}
+
+function renderPage(num) {
+    if (!pdfDoc) return;
+    pageRendering = true;
+    
+    pdfDoc.getPage(num).then(function(page) {
+        const canvas = document.getElementById('pdf-canvas');
+        const ctx = canvas.getContext('2d');
+        const viewport = page.getViewport({ scale: scale });
+        
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        
+        const renderContext = {
+            canvasContext: ctx,
+            viewport: viewport
+        };
+        
+        const renderTask = page.render(renderContext);
+        
+        renderTask.promise.then(function() {
+            pageRendering = false;
+            if (pageNumPending !== null) {
+                renderPage(pageNumPending);
+                pageNumPending = null;
+            }
+        });
+        
+        document.getElementById('page-num').textContent = num;
+    });
+}
+
+function prevPage() {
+    if (pageNum <= 1) return;
+    pageNum--;
+    queueRenderPage(pageNum);
+}
+
+function nextPage() {
+    if (pageNum >= pdfDoc.numPages) return;
+    pageNum++;
+    queueRenderPage(pageNum);
+}
+
+function queueRenderPage(num) {
+    if (pageRendering) {
+        pageNumPending = num;
+    } else {
+        renderPage(num);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function cerrarModal() {
+    $('#modalDetalle').fadeOut(300);
+}
+
+function enviarSiniestro(id) {
+    if (confirm('¿Está seguro de enviar este siniestro a la aseguradora? Esta acción no se puede deshacer.')) {
+        $.ajax({
+            url: `/siniestros/${id}/enviar/`,
+            type: 'POST',
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    alert(response.message);
+                    location.reload();
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function(xhr) {
+                const error = xhr.responseJSON;
+                alert(error.message || 'Error al enviar el siniestro');
+            }
+        });
+    }
+}
+
+function confirmarEliminar(id) {
+    if (confirm('¿Está seguro de eliminar este siniestro? Esta acción no se puede deshacer.')) {
+        window.location.href = `/siniestros/${id}/eliminar/`;
+    }
+}
+</script>
+
+{% endblock %}
