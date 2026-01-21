@@ -5,64 +5,173 @@
 {% block content %}
 {% include "master/appBar/appBar.html" %}
 
-<div class="space-y-6">
-    <div class="flex flex-wrap items-start justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-900">
-                {% if modo == 'editar' %}Editar aseguradora{% else %}Nueva aseguradora{% endif %}
-            </h1>
-            <p class="mt-2 text-sm text-slate-500">Registro dinamico de datos y estado operativo.</p>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.75);
+        --glass-border: rgba(148, 163, 184, 0.22);
+        --glass-shadow: 0 22px 44px rgba(15, 23, 42, 0.16);
+        --ink: #0f172a;
+        --muted: #64748b;
+    }
+
+    .ui-shell {
+        background:
+            radial-gradient(900px 420px at 12% 8%, rgba(20, 184, 166, 0.16), transparent 55%),
+            radial-gradient(980px 520px at 88% 18%, rgba(14, 165, 233, 0.2), transparent 60%),
+            linear-gradient(135deg, #f8fafc 0%, #eef2ff 45%, #f1f5f9 100%);
+        position: relative;
+        overflow: hidden;
+        font-family: 'Manrope', 'Segoe UI', sans-serif;
+    }
+
+    .ui-shell::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0.06;
+        pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
+    }
+
+    .ui-container {
+        max-width: 1180px;
+        margin: 0 auto;
+    }
+
+    .ui-card {
+        background: linear-gradient(180deg, var(--glass-bg) 0%, rgba(255, 255, 255, 0.62) 100%);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        box-shadow: var(--glass-shadow);
+        backdrop-filter: blur(12px);
+    }
+
+    .ui-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--ink);
+        letter-spacing: -0.03em;
+    }
+
+    .ui-subtitle {
+        font-size: 14px;
+        color: var(--muted);
+    }
+
+    .ui-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.08);
+        color: var(--ink);
+    }
+
+    .ui-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .ui-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.6rem 1.4rem;
+        border-radius: 14px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
+
+    .ui-btn-primary {
+        background: #0f172a;
+        color: #f8fafc;
+        box-shadow: 0 16px 28px rgba(15, 23, 42, 0.2);
+    }
+
+    .ui-btn-ghost {
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        color: #475569;
+        background: rgba(248, 250, 252, 0.7);
+    }
+</style>
+
+<div class="ui-shell p-6 md:p-10">
+    <div class="ui-container space-y-6">
+        <div class="ui-card p-6">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <span class="ui-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                <path d="M4 7h16M4 12h10M4 17h7" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <h1 class="ui-title">
+                            {% if modo == 'editar' %}Editar aseguradora{% else %}Nueva aseguradora{% endif %}
+                        </h1>
+                    </div>
+                    <p class="ui-subtitle mt-2">Registro dinamico de datos y estado operativo.</p>
+                </div>
+                <a href="{% url 'aseguradoras_list' %}" class="text-sm font-semibold text-slate-500 hover:text-slate-700">
+                    Volver al listado
+                </a>
+            </div>
         </div>
-        <a href="{% url 'aseguradoras_list' %}" class="text-sm font-semibold text-slate-500 hover:text-slate-700">
-            Volver al listado
-        </a>
+
+        <form method="POST" class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            {% csrf_token %}
+            <div class="ui-card p-6 space-y-4">
+                <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Datos de contacto</div>
+                <div>
+                    <label class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Nombre</label>
+                    {{ form.nombre }}
+                    {{ form.nombre.errors }}
+                </div>
+                <div>
+                    <label class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Direccion</label>
+                    {{ form.direccion }}
+                    {{ form.direccion.errors }}
+                </div>
+                <div>
+                    <label class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Telefono</label>
+                    {{ form.telefono }}
+                    {{ form.telefono.errors }}
+                </div>
+                <div>
+                    <label class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Email</label>
+                    {{ form.email }}
+                    {{ form.email.errors }}
+                </div>
+            </div>
+
+            <div class="ui-card p-6 space-y-4">
+                <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Politicas y estado</div>
+                <div>
+                    <label class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Politicas (resumen)</label>
+                    {{ form.politicas }}
+                    {{ form.politicas.errors }}
+                </div>
+                <div class="flex items-center gap-3">
+                    {{ form.is_active }}
+                    <span class="text-sm text-slate-600">Aseguradora activa</span>
+                </div>
+            </div>
+
+            <div class="xl:col-span-2 flex justify-end gap-3">
+                <a href="{% url 'aseguradoras_list' %}" class="ui-btn ui-btn-ghost">
+                    Cancelar
+                </a>
+                <button type="submit" class="ui-btn ui-btn-primary">
+                    Guardar
+                </button>
+            </div>
+        </form>
     </div>
-
-    <form method="POST" class="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        {% csrf_token %}
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-            <div>
-                <label class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Nombre</label>
-                {{ form.nombre }}
-                {{ form.nombre.errors }}
-            </div>
-            <div>
-                <label class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Direccion</label>
-                {{ form.direccion }}
-                {{ form.direccion.errors }}
-            </div>
-            <div>
-                <label class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Telefono</label>
-                {{ form.telefono }}
-                {{ form.telefono.errors }}
-            </div>
-            <div>
-                <label class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Email</label>
-                {{ form.email }}
-                {{ form.email.errors }}
-            </div>
-        </div>
-
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-            <div>
-                <label class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Politicas (resumen)</label>
-                {{ form.politicas }}
-                {{ form.politicas.errors }}
-            </div>
-            <div class="flex items-center gap-3">
-                {{ form.is_active }}
-                <span class="text-sm text-slate-600">Aseguradora activa</span>
-            </div>
-        </div>
-
-        <div class="xl:col-span-2 flex justify-end gap-3">
-            <a href="{% url 'aseguradoras_list' %}" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">
-                Cancelar
-            </a>
-            <button type="submit" class="rounded-lg bg-slate-900 px-6 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-white hover:bg-slate-800">
-                Guardar
-            </button>
-        </div>
-    </form>
 </div>
 {% endblock %}

@@ -11,7 +11,7 @@ from django.utils.timezone import make_aware
 from django.utils import timezone
 import logging
 from datetime import datetime
-from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponse
 import pusher
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
@@ -455,25 +455,143 @@ def registrar_liquidacion(request, beneficiario_id):
     )
 
 
+def _parse_date(value):
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+
+def _factura_estado(monto_factura, total_pagado):
+    if total_pagado <= Decimal('0.00'):
+        return 'pendiente'
+    if total_pagado < monto_factura:
+        return 'parcial'
+    return 'pagada'
+
+
+@login_required(login_url='/login')
+@role_required(['asesor'])
+def factura_detalle(request, factura_id):
+    factura = get_object_or_404(Factura.objects.select_related('beneficiario', 'siniestro'), pk=factura_id)
+    pagos = factura.pagos.order_by('-fecha_pago')
+    total_pagado = pagos.aggregate(total=Sum('monto_pagado')).get('total') or Decimal('0.00')
+    restante = factura.monto - total_pagado
+    estado = _factura_estado(factura.monto, total_pagado)
+    return render(
+        request,
+        'asesor/components/reportes/factura_detalle.html',
+        {
+            'factura': factura,
+            'pagos': pagos,
+            'total_pagado': total_pagado,
+            'restante': restante,
+            'estado': estado,
+        },
+    )
+
+
 @login_required(login_url='/login')
 @role_required(['asesor'])
 def reportes_liquidacion(request):
-    total_facturado = Factura.objects.aggregate(total=Sum('monto')).get('total') or Decimal('0.00')
-    total_pagado = Pago.objects.aggregate(total=Sum('monto_pagado')).get('total') or Decimal('0.00')
+    start_date = _parse_date(request.GET.get('fecha_inicio'))
+    end_date = _parse_date(request.GET.get('fecha_fin'))
+    beneficiario_id = request.GET.get('beneficiario') or ''
+    estado_filtro = request.GET.get('estado') or ''
+    export = request.GET.get('export')
 
-    facturas = Factura.objects.select_related('beneficiario', 'siniestro').prefetch_related('pagos').order_by('-fecha')
-    liquidaciones = []
-    for factura in facturas:
-        total_pagado_factura = factura.pagos.aggregate(total=Sum('monto_pagado')).get('total') or Decimal('0.00')
-        liquidaciones.append(
+    facturas_qs = Factura.objects.select_related('beneficiario', 'siniestro', 'siniestro__poliza', 'siniestro__poliza__estudiante').prefetch_related('pagos').order_by('-fecha')
+    if beneficiario_id:
+        facturas_qs = facturas_qs.filter(beneficiario_id=beneficiario_id)
+
+    facturas_filtradas = []
+    for factura in facturas_qs:
+        pagos_qs = factura.pagos.all()
+        if start_date:
+            pagos_qs = pagos_qs.filter(fecha_pago__gte=start_date)
+        if end_date:
+            pagos_qs = pagos_qs.filter(fecha_pago__lte=end_date)
+
+        total_pagado_filtrado = pagos_qs.aggregate(total=Sum('monto_pagado')).get('total') or Decimal('0.00')
+        total_pagado_total = factura.pagos.aggregate(total=Sum('monto_pagado')).get('total') or Decimal('0.00')
+        estado = _factura_estado(factura.monto, total_pagado_total)
+
+        if start_date or end_date:
+            if total_pagado_filtrado == Decimal('0.00'):
+                continue
+
+        if estado_filtro and estado != estado_filtro:
+            continue
+
+        saldo_pendiente = factura.monto - total_pagado_total
+        facturas_filtradas.append(
             {
                 'factura': factura,
                 'beneficiario': factura.beneficiario,
                 'siniestro': factura.siniestro,
-                'total_pagado': total_pagado_factura,
-                'pagada': total_pagado_factura >= factura.monto,
+                'estudiante': factura.siniestro.poliza.estudiante if factura.siniestro and factura.siniestro.poliza else None,
+                'total_pagado': total_pagado_filtrado,
+                'saldo_pendiente': saldo_pendiente,
+                'estado': estado,
             }
         )
+
+    total_facturado = sum((item['factura'].monto for item in facturas_filtradas), Decimal('0.00'))
+    total_pagado = sum((item['total_pagado'] for item in facturas_filtradas), Decimal('0.00'))
+    saldo_pendiente = total_facturado - total_pagado
+
+    if export == 'xlsx':
+        from openpyxl import Workbook
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Liquidaciones"
+        ws.append([
+            "Siniestro",
+            "Beneficiario",
+            "Estudiante",
+            "Carrera",
+            "Nivel",
+            "Factura",
+            "Monto facturado",
+            "Total pagado",
+            "Saldo pendiente",
+            "Estado",
+        ])
+        for item in facturas_filtradas:
+            estudiante = item['estudiante']
+            estudiante_nombre = f"{estudiante.nombres} {estudiante.apellidos}" if estudiante else "-"
+            ws.append([
+                item['siniestro'].id if item['siniestro'] else "",
+                item['beneficiario'].nombre if item['beneficiario'] else "",
+                estudiante_nombre,
+                estudiante.carrera if estudiante else "",
+                estudiante.nivel if estudiante else "",
+                item['factura'].numero_factura,
+                float(item['factura'].monto),
+                float(item['total_pagado']),
+                float(item['saldo_pendiente']),
+                item['estado'],
+            ])
+
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="reporte_liquidaciones.xlsx"'
+        wb.save(response)
+        return response
+
+    siniestros_groups = {}
+    for item in facturas_filtradas:
+        siniestro_id = item['siniestro'].id if item['siniestro'] else None
+        siniestros_groups.setdefault(siniestro_id, {'siniestro': item['siniestro'], 'items': []})
+        siniestros_groups[siniestro_id]['items'].append(item)
+
+    siniestros_ordenados = [siniestros_groups[key] for key in sorted(siniestros_groups.keys(), reverse=True)]
+
+    beneficiarios = Factura.objects.values_list('beneficiario_id', 'beneficiario__nombre').distinct().order_by('beneficiario__nombre')
 
     return render(
         request,
@@ -481,6 +599,14 @@ def reportes_liquidacion(request):
         {
             'total_facturado': total_facturado,
             'total_pagado': total_pagado,
-            'liquidaciones': liquidaciones,
+            'saldo_pendiente': saldo_pendiente,
+            'siniestros_ordenados': siniestros_ordenados,
+            'beneficiarios': beneficiarios,
+            'filtros': {
+                'fecha_inicio': start_date.isoformat() if start_date else '',
+                'fecha_fin': end_date.isoformat() if end_date else '',
+                'beneficiario': beneficiario_id,
+                'estado': estado_filtro,
+            },
         },
     )

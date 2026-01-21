@@ -40,6 +40,7 @@ urlpatterns = [
     path('asesor/liquidaciones/', asesor_views.siniestros_pendientes_pago, name='siniestros_pendientes_pago'),
     path('asesor/liquidaciones/beneficiario/<int:beneficiario_id>/', asesor_views.registrar_liquidacion, name='registrar_liquidacion'),
     path('asesor/reportes/liquidaciones/', asesor_views.reportes_liquidacion, name='reportes_liquidacion'),
+    path('asesor/reportes/liquidaciones/factura/<int:factura_id>/', asesor_views.factura_detalle, name='factura_detalle'),
     # Ronal - Fin Gestión de Liquidaciones
     path('polizas/crear/', asesor_views.crear_poliza, name='crear_poliza'),
     path('polizas/generar-numero/', asesor_views.generar_numero_poliza, name='generar_numero_poliza'),
