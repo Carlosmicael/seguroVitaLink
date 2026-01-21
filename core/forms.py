@@ -1,18 +1,50 @@
 from django import forms
-from .models import Poliza, Estudiante, Solicitud,TcasDocumentos,Siniestro
+from .models import Poliza, Estudiante, Solicitud,TcasDocumentos,Siniestro,Beneficiario
 
 
-class SiniestroForm(forms.ModelForm):
+
+
+class BeneficiarioForm(forms.ModelForm):
     class Meta:
-        model = Siniestro
-        fields = ['poliza','tipo','descripcion','fecha_evento','nombre_beneficiario','relacion_beneficiario','parentesco','telefono_contacto','email_contacto','documento']
+        model = Beneficiario
+        fields = ['siniestro', 'nombre', 'correo', 'numero_cuenta', 'telefono']
         widgets = {
-            'descripcion': forms.Textarea(attrs={'rows': 4}),
-            'fecha_evento': forms.DateInput(attrs={'type': 'date'}),
+            'siniestro': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all',
+            }),
+            'nombre': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all',
+                'placeholder': 'Nombre completo del beneficiario'
+            }),
+            'correo': forms.EmailInput(attrs={
+                'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all',
+                'placeholder': 'correo@ejemplo.com'
+            }),
+            'numero_cuenta': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all',
+                'placeholder': 'Número de cuenta bancaria'
+            }),
+            'telefono': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all',
+                'placeholder': '0999999999'
+            }),
         }
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['poliza'].queryset = Poliza.objects.filter(estado='activa')
+        # Solo mostrar siniestros aprobados
+        from .models import Siniestro
+        self.fields['siniestro'].queryset = Siniestro.objects.filter(estado='aprobado')
+        self.fields['siniestro'].label = 'Siniestro Aprobado'
+        self.fields['nombre'].label = 'Nombre Completo'
+        self.fields['correo'].label = 'Correo Electrónico'
+        self.fields['numero_cuenta'].label = 'Número de Cuenta'
+        self.fields['numero_cuenta'].required = False
+        self.fields['telefono'].label = 'Teléfono'
+        self.fields['telefono'].required = False
+
+
+
 
 
 

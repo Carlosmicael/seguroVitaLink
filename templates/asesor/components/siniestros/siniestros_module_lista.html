@@ -549,9 +549,55 @@
                         </button>
                         
                         {% if not siniestro.enviado %}
-                        <button onclick="enviarSiniestro({{ siniestro.id }})" style="padding: 10px 14px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25); margin-right: 8px; transition: all 0.2s;" title="Enviar a Aseguradora">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
+
+
+                            {% if siniestro.dias_restantes == 0 %}
+                            
+                            <button disabled style="
+                                padding: 10px 14px; 
+                                background: #10b981; 
+                                color: white; 
+                                border: none; 
+                                border-radius: 8px; 
+                                font-weight: 600; 
+                                font-size: 14px; 
+                                cursor: not-allowed;
+                                margin-right: 8px;
+                                filter: grayscale(100%) brightness(70%);
+                                opacity: 0.7;
+                                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                                transition: all 0.3s;
+                                pointer-events: none;
+                            " title="Siniestro vencido - No se puede enviar">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                            {% elif siniestro.dias_restantes < 0 %}
+                            <button disabled style="
+                                    padding: 10px 14px; 
+                                    background: #10b981; 
+                                    color: white; 
+                                    border: none; 
+                                    border-radius: 8px; 
+                                    font-weight: 600; 
+                                    font-size: 14px; 
+                                    cursor: not-allowed;
+                                    margin-right: 8px;
+                                    filter: grayscale(100%) brightness(70%);
+                                    opacity: 0.7;
+                                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                                    transition: all 0.3s;
+                                    pointer-events: none;
+                                " title="Siniestro vencido - No se puede enviar">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            {% else %}
+                                <button  onclick="enviarSiniestro({{ siniestro.id }})" style="padding: 10px 14px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25); margin-right: 8px; transition: all 0.2s;" title="Enviar a Aseguradora">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            {% endif %}
+
+
+
                         {% else %}
                         <button disabled style="padding: 10px 14px; background: #cbd5e1; color: #64748b; border: none; border-radius: 8px; font-weight: 600; cursor: not-allowed; font-size: 14px; margin-right: 8px;" title="Ya enviado">
                             <i class="fas fa-check"></i>
@@ -705,9 +751,14 @@ function cerrarModalCrear() {
     $('#mensajeError').hide();
 }
 
+
+
+
 function enviarFormulario() {
     const form = $('#formCrearSiniestro')[0];
     const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    console.log("Datos del formulario:", data);
     
     if (!form.checkValidity()) {
         form.reportValidity();
@@ -718,6 +769,8 @@ function enviarFormulario() {
     btnGuardar.prop('disabled', true);
     btnGuardar.html('<i class="fas fa-spinner fa-spin" style="margin-right: 6px;"></i>Guardando...');
     
+
+
     $.ajax({
         url: "{% url 'siniestros_module_crear' %}",
         type: 'POST',
@@ -749,6 +802,14 @@ function enviarFormulario() {
         }
     });
 }
+
+
+
+
+
+
+
+
 
 function verDetalle(id) {
     $.ajax({

@@ -24,7 +24,7 @@ urlpatterns = [
     #beneficiario
     path('beneficiario/', beneficiario_views.beneficiario_dashboard, name='beneficiario_dashboard'),
     path('beneficiario/documentos/', beneficiario_views.mis_siniestros_view, name='beneficiario_documentos'),
-    path('api/documentos_aseguradora/<int:poliza_id>/', beneficiario_views.documentos_aseguradora_api, name='documentos_aseguradora_api'),
+    path('api/documentos_aseguradora/<str:poliza_numero>/', beneficiario_views.documentos_aseguradora_api, name='documentos_aseguradora_api'),
     path('api/subir-documento/', beneficiario_views.subir_documento, name='subir_documento_api'),
 
 
@@ -108,6 +108,11 @@ urlpatterns = [
     path('siniestros/<int:id>/', asesor_views.siniestros_module_detalle, name='siniestros_module_detalle'),
     path('siniestros/<int:id>/enviar/', asesor_views.siniestros_module_enviar, name='siniestros_module_enviar'),
     path('siniestros/<int:id>/eliminar/', asesor_views.siniestros_module_eliminar, name='siniestros_module_eliminar'),
+
+     # URLs del módulo de beneficiarios
+    path('beneficiarios/', asesor_views.beneficiarios_module_lista, name='beneficiarios_module_lista'),
+    path('beneficiarios/crear/', asesor_views.beneficiarios_module_crear, name='beneficiarios_module_crear'),
+    path('beneficiarios/<int:id>/', asesor_views.beneficiarios_module_detalle, name='beneficiarios_module_detalle'),
     
 
 

@@ -390,6 +390,8 @@ class Beneficiario(models.Model):
     telefono = models.CharField(max_length=20, blank=True, null=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="beneficiarios", blank=True, null=True)
+    # Nuevo campo: Array de fechas límite para cada documento
+    fechas_limite = models.JSONField(default=list, blank=True, null=True,help_text="Fechas límite para cada documento en formato YYYY-MM-DD")
 
     def __str__(self):
         return self.nombre

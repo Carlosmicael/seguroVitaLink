@@ -4,7 +4,6 @@ from core.models import Poliza, Estudiante, Profile, Notificaciones, ReporteEven
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from core.forms import PolizaForm, SiniestroForm
 from django.contrib.auth.decorators import login_required
 from core.tasks import ejecutar_recordatorio
 from django.utils.timezone import make_aware
@@ -170,42 +169,100 @@ def siniestros_module_detalle(request, id):
 
 
 
-
-
 @login_required(login_url='login')
 @role_required(['asesor'])
 @require_http_methods(["POST"])
 def siniestros_module_crear(request):
     try:
-        form = SiniestroForm(request.POST, request.FILES)
-
-
-        if form.is_valid():
-            siniestro = form.save(commit=False)
-            
-            config = ConfiguracionSiniestro.objects.filter(activo=True).first()
-            
-            if config:
-                dias_max = config.dias_max_reporte
-                fecha_actual = timezone.now().date()
-                siniestro.fecha_limite_reporte = fecha_actual + timedelta(days=dias_max)
-            else:
-                fecha_actual = timezone.now().date()
-                siniestro.fecha_limite_reporte = fecha_actual + timedelta(days=3)
-            
-            siniestro.save()
-            
-            return JsonResponse({
-                'success': True,
-                'message': 'Siniestro creado exitosamente',
-                'siniestro_id': siniestro.id
-            })
+        
+        data = request.POST
+        
+        if not all([data.get('poliza'), data.get('tipo'), data.get('descripcion'), data.get('fecha_evento')]):
+            return JsonResponse({'success': False,'message': 'Faltan campos requeridos'}, status=400)
+        
+        try:
+            poliza = Poliza.objects.get(id=int(data['poliza']))
+        except:
+            return JsonResponse({'success': False,'message': 'Póliza no válida'}, status=400)
+        
+        siniestro = Siniestro(
+            poliza=poliza,
+            tipo=data['tipo'],
+            descripcion=data['descripcion'],
+            fecha_evento=data['fecha_evento'],
+            nombre_beneficiario=data.get('nombre_beneficiario', ''),
+            relacion_beneficiario=data.get('relacion_beneficiario', ''),
+            parentesco=data.get('parentesco', ''),
+            telefono_contacto=data.get('telefono_contacto', ''),
+            email_contacto=data.get('email_contacto', ''),
+            estado='pendiente',
+            enviado=False,
+        )
+        
+        if 'documento' in request.FILES:
+            siniestro.documento = request.FILES['documento']
+        
+        config = ConfiguracionSiniestro.objects.filter(activo=True).first()
+        fecha_actual = timezone.now().date()
+        
+        if config:
+            siniestro.fecha_limite_reporte = fecha_actual + timedelta(days=config.dias_max_reporte)
         else:
-            return JsonResponse({'success': False,'errors': form.errors}, status=400)
+            siniestro.fecha_limite_reporte = fecha_actual + timedelta(days=3)
+        
+
+        siniestro.save()
+
+        # ============================================
+        # CREAR RECORDATORIOS
+        # ============================================
+        
+        profile = Profile.objects.get(user=request.user)
+        
+        hora_actual = timezone.now().time()
+        fecha_limite = siniestro.fecha_limite_reporte
+        
+        dias_recordatorios = [1, 2] 
+        
+        for dias_antes in dias_recordatorios:
+            fecha_recordatorio = fecha_limite - timedelta(days=dias_antes)
+            fecha_hora_recordatorio = timezone.make_aware(datetime.combine(fecha_recordatorio, hora_actual))
+            mensaje = (
+                f"Recordatorio: Reporte de siniestro #{siniestro.id} "
+                f"({siniestro.get_tipo_display()}) vence el "
+                f"{fecha_limite.strftime('%d/%m/%Y')}. "
+                f"¡Falta{'n' if dias_antes > 1 else ''} {dias_antes} día{'s' if dias_antes > 1 else ''}!"
+            )
+            
+            task = ejecutar_recordatorio.apply_async(eta=fecha_hora_recordatorio)
+                
+            recordatorio = Notificaciones.objects.create(
+                not_codcli=profile,
+                not_poliza=poliza,
+                not_fecha_proceso=fecha_hora_recordatorio,
+                not_fecha_creacion=timezone.now(),
+                not_mensaje=mensaje,
+                not_read=False,
+                not_estado=False,
+                not_celery_task_id=task.id,
+            )
+
+            recordatorio.save()
+
+        return JsonResponse({
+            'success': True,
+            'message': f'Siniestro creado exitosamente. Se programaron recordatorios.',
+            'siniestro_id': siniestro.id,
+            'fecha_limite': siniestro.fecha_limite_reporte.strftime('%d/%m/%Y'),
+            'recordatorios_creados': len(dias_recordatorios)
+        })
+
+        
+        
             
     except Exception as e:
-        return JsonResponse({'success': False,'message': str(e)}, status=500)
-
+        print(f"Error: {e}")
+        return JsonResponse({'success': False,'message': f'Error: {str(e)}'}, status=500)
 
 
 
@@ -226,32 +283,35 @@ def siniestros_module_crear(request):
 @role_required(['asesor'])
 @require_http_methods(["POST"])
 def siniestros_module_enviar(request, id):
-    """Vista para marcar un siniestro como enviado"""
     try:
         siniestro = get_object_or_404(Siniestro, id=id)
         
-        # Validar que el siniestro no esté ya enviado
         if siniestro.enviado:
-            return JsonResponse({
-                'success': False,
-                'message': 'Este siniestro ya fue enviado anteriormente'
-            }, status=400)
+            return JsonResponse({'success': False,'message': 'Este siniestro ya fue enviado anteriormente'}, status=400)
         
-        # Marcar como enviado
+        if siniestro.fecha_limite_reporte:
+            dias_restantes = (siniestro.fecha_limite_reporte - timezone.now().date()).days
+            
+            if dias_restantes < 0:
+                return JsonResponse({'success': False,'message': f'No se puede enviar el siniestro porque está vencido. La fecha límite era: {siniestro.fecha_limite_reporte.strftime("%d/%m/%Y")}'}, status=400)
+            
+            if dias_restantes <= 3:
+                print(f"ADVERTENCIA: Siniestro #{id} se está enviando con solo {dias_restantes} días restantes")
+        
         siniestro.enviado = True
         siniestro.fecha_actualizacion = timezone.now()
         siniestro.save()
         
-        return JsonResponse({
-            'success': True,
-            'message': f'Siniestro #{siniestro.id} enviado exitosamente a la aseguradora'
-        })
+        return JsonResponse({'success': True,'message': f'Siniestro #{siniestro.id} enviado exitosamente a la aseguradora'})
         
     except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': str(e)
-        }, status=500)
+        return JsonResponse({'success': False,'message': str(e)}, status=500)
+
+
+
+
+
+
 
 @login_required(login_url='login')
 @role_required(['asesor'])
@@ -269,6 +329,189 @@ def siniestros_module_eliminar(request, id):
     
     siniestro.delete()
     return redirect('siniestros_module_lista')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import random
+import string
+from datetime import datetime
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.contrib.auth.models import User
+from django.db import transaction
+from core.models import Beneficiario, Siniestro, Profile
+from core.forms import BeneficiarioForm
+from core.tasks import enviar_recordatorio
+
+def generar_username(nombre):
+    base = nombre.lower().replace(' ', '')[:8]
+    numeros = ''.join(random.choices(string.digits, k=4))
+    fecha = datetime.now().strftime('%m%d')
+    username = f"{base}{fecha}{numeros}"
+    
+    while User.objects.filter(username=username).exists():
+        numeros = ''.join(random.choices(string.digits, k=6))
+        username = f"{base}{numeros}"
+    
+    return username
+
+
+
+
+
+def generar_password():
+    caracteres = string.ascii_letters + string.digits + '@#$%&*'
+    password = ''.join(random.choices(caracteres, k=12))
+    return password
+
+@login_required(login_url='login')
+@role_required(['asesor'])
+def beneficiarios_module_lista(request):
+    beneficiarios = Beneficiario.objects.select_related('siniestro', 'siniestro__poliza','profile', 'profile__user').all()
+
+    total = beneficiarios.count()
+    activos = beneficiarios.filter(profile__isnull=False).count()
+    pendientes = beneficiarios.filter(profile__isnull=True).count()
+    siniestros_aprobados = Siniestro.objects.filter(estado='aprobado')
+    
+    form = BeneficiarioForm()
+    
+    context = {'beneficiarios': beneficiarios,'total': total,'activos': activos,'pendientes': pendientes,'siniestros_aprobados': siniestros_aprobados,'form': form}
+    
+    return render(request, 'asesor/components/beneficiarios/beneficiarios_module_lista.html', context)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@login_required(login_url='login')
+@role_required(['asesor'])
+def beneficiarios_module_detalle(request, id):
+
+    beneficiario = get_object_or_404(Beneficiario, id_beneficiario=id)
+    
+    data = {
+        'id': beneficiario.id_beneficiario,
+        'nombre': beneficiario.nombre,
+        'correo': beneficiario.correo,
+        'numero_cuenta': beneficiario.numero_cuenta or 'N/A',
+        'telefono': beneficiario.telefono or 'N/A',
+        'fecha_creacion': beneficiario.fecha_creacion.strftime('%d/%m/%Y %I:%M %p'),
+        'siniestro': {
+            'id': beneficiario.siniestro.id,
+            'tipo': beneficiario.siniestro.get_tipo_display(),
+            'poliza': beneficiario.siniestro.poliza.numero_poliza if beneficiario.siniestro.poliza else 'N/A',
+            'estado': beneficiario.siniestro.get_estado_display(),
+        },
+        'tiene_cuenta': beneficiario.profile is not None,
+        'username': beneficiario.profile.user.username if beneficiario.profile else None,
+    }
+    
+    return JsonResponse(data)
+
+
+
+
+
+
+@login_required(login_url='login')
+@role_required(['asesor'])
+@require_http_methods(["POST"])
+def beneficiarios_module_crear(request):
+
+    try:
+        form = BeneficiarioForm(request.POST)
+        
+        if form.is_valid():
+
+            siniestro = form.cleaned_data['siniestro']
+            
+            if siniestro.estado != 'aprobado':
+                return JsonResponse({'success': False,'message': f'El siniestro #{siniestro.id} no ha sido aprobado o esta caducado. Estado actual: {siniestro.get_estado_display()}'}, status=400)
+            
+
+            with transaction.atomic():
+
+                username = generar_username(form.cleaned_data['nombre'])
+                password = generar_password()
+                
+                user = User.objects.create_user(username=username,email=form.cleaned_data['correo'],password=password)
+                
+                profile = Profile.objects.create(user=user,rol='beneficiario')
+                
+                beneficiario = form.save(commit=False)
+                beneficiario.profile = profile
+                beneficiario.save()
+                
+
+                mensaje = f"""
+                Bienvenido al sistema VitaLink.
+                
+                Se ha creado una cuenta para usted como beneficiario del siniestro #{siniestro.id}.
+                
+                Sus credenciales de acceso son:
+                Usuario: {username}
+                Contraseña: {password}
+                
+                Por favor, guarde estas credenciales en un lugar seguro y cámbielas al iniciar sesión por primera vez.
+                
+                Puede acceder al sistema en: {request.build_absolute_uri('/')}
+                """
+                
+                fecha_actual = datetime.now().strftime('%d/%m/%Y')
+                
+                try:
+                    enviar_recordatorio(user, mensaje, fecha_actual)
+                except Exception as e:
+                    print(f"Error al enviar correo: {e}")
+                
+                
+
+
+            return JsonResponse({'success': True,'message': f'Beneficiario creado exitosamente. Se han enviado las credenciales a {form.cleaned_data["correo"]}','beneficiario_id': beneficiario.id_beneficiario})
+        else:
+            return JsonResponse({'success': False,'errors': form.errors}, status=400)
+            
+    except Exception as e:
+        return JsonResponse({'success': False,'message': f'Error al crear el beneficiario: {str(e)}'}, status=500)
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -360,6 +603,11 @@ def marcar_notificaciones_leidas(request, user_id):
     profile = Profile.objects.get(user=user_id)
     Notificaciones.objects.filter(not_codcli=profile, not_read=True).update(not_read=False)
     return JsonResponse({'status': 'ok'})
+
+
+
+
+
 
 
 
