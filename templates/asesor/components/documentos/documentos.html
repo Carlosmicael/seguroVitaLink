@@ -1,0 +1,579 @@
+{% extends "master/sideBar/sidebar_asesor.html" %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo }} - Portafolio Jurídico</title>
+    
+    <link rel="stylesheet" href="{% static 'css/documentos.css' %}?v=1.1">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css">
+    
+    <script src="{% static 'js/theme-manager.js' %}?v=1.1"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
+</head>
+<body>
+    
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <main class="main-content">
+        <div class="documentos-container">
+            <div class="documentos-grid">
+
+                
+
+
+
+                <!-- Área principal de documentos -->
+                <div class="documentos-main"
+                    style="
+                        height: calc(100vh - 90px);
+                        padding: 24px;
+                        display: flex;
+                        flex-direction: column;
+                        background: #f5f6fa;
+                    ">
+
+                    <!-- HEADER -->
+                    <div class="proceso-selected-header"
+                        style="
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            margin-bottom: 16px;
+                        ">
+
+                        <div>
+                            <h3 id="procesoNombre" style="margin:0;font-size:1.4rem;">
+                                Documentos
+                            </h3>
+                            <span id="procesoDocCount"
+                                style="color:#6c757d;font-size:0.9rem;">
+                                0 documentos
+                            </span>
+                        </div>
+
+                        <button onclick="abrirModalDocumento()"
+                                style="
+                                    background: linear-gradient(135deg,#34c759,#28a745);
+                                    color:white;
+                                    border:none;
+                                    padding:10px 16px;
+                                    border-radius:10px;
+                                    font-weight:600;
+                                    cursor:pointer;
+                                ">
+                            <i class="fas fa-upload"></i> Subir documento
+                        </button>
+                    </div>
+
+                    <!-- LISTA -->
+                    <div id="documentosLista"
+                        class="documentos-lista"
+                        style="
+                            display:flex;
+                            flex-direction:column;
+                            gap:14px;
+                            overflow-y:auto;
+                            padding-right:6px;
+                        ">
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+    </main>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <!-- Modal para subir documento -->
+    <div id="modalDocumento" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-upload"></i> Subir Documento</h3>
+                <button class="modal-close" onclick="cerrarModal('modalDocumento')">&times;</button>
+            </div>
+            
+            <form method="post" action="{% url 'documentos' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    {{formDocumentos.doc_cod_pro.as_hidden}}
+                    <label for="nombreDocumento">
+                        <i class="fas fa-file-signature"></i>descripcion    
+                    </label>
+                    {{formDocumentos.doc_descripcion}}
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-paperclip"></i> Archivo
+                    </label>
+                    <div class="upload-area" onclick="document.getElementById('archivoInput').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h4>Arrastra aquí tu archivo</h4>
+                        <p>o haz clic para seleccionar</p>
+                        <button type="button" class="btn-select-file">Seleccionar archivo</button>
+                    </div>
+                    <input type="file" id="archivoInput" name="archivo" class="file-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
+                    <div id="archivoSeleccionado" style="margin-top: 12px; display: none; color: rgba(60, 60, 60, 0.9); font-size: 0.9rem;">
+                        <i class="fas fa-file"></i> <span id="nombreArchivo"></span>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                    <button type="button" onclick="cerrarModal('modalDocumento')" style="background: rgba(108, 117, 125, 0.1); color: #6c757d; border: 1px solid rgba(108, 117, 125, 0.2); padding: 10px 20px; border-radius: 10px; cursor: pointer;">
+                        Cancelar
+                    </button>
+                    <button type="submit" style="background: linear-gradient(135deg, #34c759 0%, #28a745 100%); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                        <i class="fas fa-upload"></i> Subir Documento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+    <!-- Modal para Visualizar documentos -->
+    <div id="viewModal" class="modal">
+        <div class="modal-content" style="overflow-x: auto;">
+            <img id="viewModalContent" src="" alt="" style="display: none; max-width: 100%; max-height: 80vh; margin: auto;">    
+            <div id="pdfViewer" style="display: none; width:100%; height: 80vh; overflow-y: auto; overflow-x: auto; margin: auto; border: 1px solid #ddd; border-radius: 8px;"></div>
+            <br>
+            <div class="modal-footer">
+                <button type="button" class="modal-close-btn" onclick="cerrarModalDriveDelete('viewModal')"><i class="fas fa-times-circle"></i> Cerrar</button>
+                <br>
+                <br>
+                <button type="button" class="modal-close-btn" onclick="remplazarDocumento()"><i class="fas fa-save" id="remplazarDocumento"></i> guardar</button>
+            </div>
+            <br>
+        </div>
+    </div>
+    
+    <!-- Loader -->
+    <div id="loader" style="display:none;">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="{% static 'js/navigation.js' %}"></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js"></script>
+
+    <script>
+        let currentUrlPdf = null;
+        let currentFilePath = null;
+        let currentDocId = null;
+
+
+
+
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+
+
+
+
+        function remplazarDocumento() {
+            if (!currentUrlPdf || !currentFilePath || !currentDocId) {
+                console.error("Faltan parámetros");
+                return;
+            }
+
+            fetch(`/documentos/${currentDocId}/remplazar/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: JSON.stringify({
+                    url_pdf: currentUrlPdf,
+                    file_path: currentFilePath
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log("Documento reemplazado:", data);
+                alert("Documento actualizado correctamente.");
+                cerrarModal('viewModal');
+            })
+            .catch(err => console.error("Error al reemplazar documento:", err));
+        }
+
+        const lista = document.getElementById("documentosLista");
+
+
+
+
+
+
+
+        lista.addEventListener("click", function (e) {
+            if (e.target.closest(".btn-documento")) {
+                const btn = e.target.closest(".btn-documento");
+                const item = btn.closest(".documento-item");
+        
+                const fileName = item.querySelector("h4").innerText;
+                const docId = item.dataset.docid;
+        
+                if (btn.title === "Descargar") {
+                    console.log("Descargando:", fileName, "ID:", docId);
+                    window.open(`/documentos/${docId}/descargar/`, "_blank"); 
+                }
+
+
+
+
+
+                if (btn.title === "Ver") {
+                    document.getElementById('loader').style.display = "flex";
+                    fetch(`/documentos/${docId}/view/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log("Documento:", data);
+                            const url_pdf = data.doc_file_url;
+
+
+                            try {
+                                if (data.doc_file.endsWith(".pdf") || data.doc_file.endsWith(".doc") || data.doc_file.endsWith(".docx")) {
+                                    document.getElementById('viewModalContent').style.display = "none";
+                                    document.getElementById('remplazarDocumento').style.display = "block";
+
+                                    currentDocId = docId;
+                                    currentFilePath = data.doc_file;
+                                    currentUrlPdf = url_pdf;
+
+                                    console.log("currentDocId:", currentDocId);
+                                    console.log("currentFilePath:", currentFilePath);
+                                    console.log("currentUrlPdf:", currentUrlPdf);
+
+                                    const googleViewerUrl = `${url_pdf}`;
+                                    console.log("URL de Google Docs:", googleViewerUrl);
+
+                                    const pdfViewer = document.getElementById("pdfViewer");
+                                    pdfViewer.innerHTML = `
+                                        <iframe src="${googleViewerUrl}" style="width:100%;height:80vh;border:none;"></iframe>
+                                    `;
+                                    pdfViewer.style.display = "block";
+
+                                    document.getElementById('loader').style.display = "none";
+                                    abrirModalView();
+                                } 
+
+                            } catch (error) {
+
+                                document.getElementById('pdfViewer').style.display = "none";
+                                const img = document.getElementById('viewModalContent');
+                                console.log("Imagen URL:", data.doc_file_url);
+
+                                fetch(data.doc_file_url)
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error("Error al cargar imagen");
+                                        }
+                                        return response.blob(); 
+                                    })
+                                    .then(blob => {
+                                        const imageUrl = URL.createObjectURL(blob); 
+                                        img.src = imageUrl;
+                                        img.style.display = "block";
+                                        document.getElementById('loader').style.display = "none";
+                                        abrirModalView();
+                                    })
+                                    .catch(error => {
+                                        console.error("Error mostrando imagen:", error);
+                                        document.getElementById('loader').style.display = "none";
+                                    });
+                                console.error("Error al obtener la imagen:", error);
+                            }
+
+                        })
+                        .catch(error => {
+                            console.error("Error al obtener el documento:", error);
+                            document.getElementById('loader').style.display = "none";
+                        });
+                }
+
+
+                
+
+                if (btn.title === "Eliminar") {
+                    console.log("Eliminando:", fileName, "ID:", docId);
+                    fetch(`/documentos/${docId}/eliminar/`, {method: "DELETE",headers: { "X-CSRFToken": getCookie("csrftoken") }})
+                    .then(res => {
+                        if (res.ok) {
+                            item.remove();
+                        }
+                    })
+                    .catch(err => console.error("Error eliminando:", err));
+                }
+            }
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        async function init() {
+            try {
+                fetch(`/documentos/poliza`)
+                .then(response => response.json())
+                .then(data => {
+
+
+                    const cantidadDocs = data.length;
+                    const textoContador = cantidadDocs === 1 ? '1 documento' : `${cantidadDocs} documentos`;
+                    document.getElementById('procesoDocCount').textContent = textoContador;
+                    
+            
+
+
+
+                    const lista = document.getElementById("documentosLista");
+                    lista.innerHTML = "";
+        
+                    data.forEach(doc => {
+    
+                        let fileName = doc.doc_file.split("/").pop(); 
+                        let fileNameDoom = doc.doc_file.split("/").pop(); 
+
+                        if (fileNameDoom.length > 36) {
+                            fileNameDoom = fileNameDoom.substring(0, 36) + "...";
+                        }
+                        
+                        let iconClass = "";
+                        if (fileName.endsWith(".pdf")) {
+                            iconClass = `<div class="documento-icon pdf"><i class="fas fa-file-pdf"></i></div>`;
+                        } else if (fileName.endsWith(".doc") || fileName.endsWith(".docx")) {
+                            iconClass = `<div class="documento-icon doc"><i class="fas fa-file-word"></i></div>`;
+                        } else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png")) {
+                            iconClass = `<div class="documento-icon img"><i class="fas fa-image"></i></div>`;
+                        } else {
+                            iconClass = `<div class="documento-icon"><i class="fas fa-file"></i></div>`; 
+                        }
+
+
+                        let fechaEdit = doc.fecha_edit;
+                        console.log("Fecha de edición:", fechaEdit);
+                        let fechaEdicionFormateadaEdit = "";
+                        if (fechaEdit) {
+                            const fechaMod = new Date(fechaEdit);
+                            const opcionesEdit = {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true
+                            };
+                            fechaEdicionFormateadaEdit = fechaMod.toLocaleString("es-ES", opcionesEdit);
+                        } else {
+                            fechaEdicionFormateadaEdit = "—";
+                        }
+
+                        const fecha = new Date(doc.fec_creacion);
+                        const opciones = { year: "numeric", month: "short", day: "numeric" };
+                        const fechaFormateada = fecha.toLocaleDateString("es-ES", opciones);
+        
+                        const itemHTML = `
+                            <div class="documento-item" data-docid="${doc.doc_cod_doc}">
+                                ${iconClass}
+                                <div class="documento-info">
+                                    <h4>${fileNameDoom}</h4>
+                                    <div class="documento-meta">
+                                        <span><i class="fas fa-calendar"></i> ${fechaFormateada}</span>
+                                        <span><i class="fas fa-user"></i> Dr. Martínez</span>
+                                        <span><i class="fas fa-weight-hanging"></i> ${(doc.doc_size / 1024 / 1024).toFixed(2)} MB</span>
+                                        <span>Última modificación: ${fechaEdicionFormateadaEdit}</span>
+                                    </div>
+                                </div>
+                                <div class="documento-actions">
+                                    <button class="btn-documento" title="Descargar">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <button class="btn-documento" title="Ver">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-documento" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+        
+                        lista.insertAdjacentHTML("beforeend", itemHTML);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error al obtener documentos:", error);
+                });
+            } catch (error) {
+                console.error("Error al obtener los procesos:", error);
+            }
+        }
+
+        init();
+
+
+
+
+
+
+
+
+
+    
+
+       
+
+        function abrirModalDocumento() {
+            document.getElementById('modalDocumento').classList.add('show');
+        }
+
+  
+        function abrirModalView() {
+            document.getElementById('viewModal').classList.add('show');
+        }
+
+        function cerrarModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        function cerrarModalDriveDelete(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+            if (currentUrlPdf) {
+                    fetch(`/documentos/eliminar_drive/`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": getCookie("csrftoken"),
+                        },
+                        body: JSON.stringify({ url_pdf: currentUrlPdf })
+                    })
+                    .then(res => res.json())
+                    .then(data => console.log("Archivo de Drive eliminado:", data))
+                    .catch(err => console.error("Error al eliminar de Drive:", err));
+            }
+        }
+
+        document.getElementById('archivoInput').addEventListener('change', function() {
+            const archivo = this.files[0];
+            if (archivo) {
+                document.getElementById('nombreArchivo').textContent = archivo.name;
+                document.getElementById('archivoSeleccionado').style.display = 'block';
+            } else {
+                document.getElementById('archivoSeleccionado').style.display = 'none';
+            }
+        });
+
+        const uploadArea = document.querySelector('.upload-area');
+        
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('archivoInput').files = files;
+                document.getElementById('nombreArchivo').textContent = files[0].name;
+                document.getElementById('archivoSeleccionado').style.display = 'block';
+            }
+        });
+
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('show');
+
+                if (currentUrlPdf) {
+                    fetch(`/documentos/eliminar_drive/`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": getCookie("csrftoken"),
+                        },
+                        body: JSON.stringify({ url_pdf: currentUrlPdf })
+                    })
+                    .then(res => res.json())
+                    .then(data => console.log("Archivo de Drive eliminado:", data))
+                    .catch(err => console.error("Error al eliminar de Drive:", err));
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+

@@ -11,9 +11,15 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / ".env")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -37,9 +43,77 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_recaptcha',
     'core',
-    'siniestros',
+    'django.contrib.humanize',
 ]
+
+
+JAZZMIN_SETTINGS = {
+    # Título que se muestra en el navegador
+    "site_title": "VitaLink Admin",
+
+    # Título en la barra de navegación
+    "site_header": "VitaLink",
+
+    # Título en la página de login (opcional)
+    "site_brand": "VitaLink Admin",
+
+    # Logo para la barra de navegación
+    "site_logo": "/static/img/logoVitalink.png", # Ruta actualizada para el logo
+
+    # URL de inicio para el sitio (ej. "/admin/")
+    "welcome_sign": "Bienvenido al administrador de VitaLink",
+
+    # CSS personalizado
+    "custom_css": None,
+
+    # JS personalizado
+    "custom_js": None,
+
+    # Mostrar el icono del 'home' en la barra de navegación
+    "show_ui_builder": True, # Esto permite personalizar el tema desde el admin
+
+    # Configuración de UI para colores, etc.
+    "ui_builder": True,
+
+    "theme": "cerulean", # Un tema base azul
+    "topmenu_links": [
+        {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
+
+        # apps
+        {"app": "siniestros", "icon": "fas fa-file-invoice"},
+        {"app": "Facturacion", "icon": "fas fa-money-bill-wave"},
+    ],
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-dark", # Barra de navegación más oscura
+    "accent": "accent-warning", # Acento amarillo/dorado
+    "navbar": "navbar-dark navbar-primary", # Barra de navegación azul oscuro
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary", # Sidebar oscuro con acento primario
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "cerulean", # Coincide con el tema principal
+    "dark_mode_listener": True,
+    "button_classes": {
+        "primary": "btn-outline-primary",
+        "secondary": "btn-outline-secondary",
+    }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -79,7 +153,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'seguros_personas',
         'USER': 'root',
-        'PASSWORD': 'password',
+        'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -107,15 +181,16 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
+# https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Guayaquil'
 
 USE_I18N = True
 
 USE_TZ = True
+
 
 
 # Static files (CSS, JavaScript, Images)
@@ -123,3 +198,49 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+
+
+# Aquí le decimos a Celery que use Redis.
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
+#Pusher
+
+PUSHER_APP_ID = "2028408"
+PUSHER_KEY = "3e0fb7f926cfffecfe16"
+PUSHER_SECRET = "0f37afa61a6ead39c961"
+PUSHER_CLUSTER = "us2"
+
+import pusher
+
+pusher_client = pusher.Pusher(app_id=PUSHER_APP_ID,key=PUSHER_KEY,secret=PUSHER_SECRET,cluster=PUSHER_CLUSTER,ssl=True)
+
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  
+EMAIL_PORT = 587 
+EMAIL_USE_TLS = True  
+EMAIL_HOST_USER = 'carlosmlo381@gmail.com' 
+EMAIL_HOST_PASSWORD = 'sraj uiwt xzpf llvu' 
+
+
+
+# reCAPTCHA keys (se leen de variables de entorno / .env)
+# Keep legacy names and provide keys expected by the installed package
+RECAPTCHA_SITE_KEY = os.environ.get('RECAPTCHA_SITE_KEY', '')
+RECAPTCHA_SECRET_KEY = os.environ.get('RECAPTCHA_SECRET_KEY', '')
+# django_recaptcha expects RECAPTCHA_PUBLIC_KEY and RECAPTCHA_PRIVATE_KEY
+RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_SITE_KEY', RECAPTCHA_SITE_KEY)
+RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_SECRET_KEY', RECAPTCHA_SECRET_KEY)
+
+
+
+
+
+
+
+
+
+

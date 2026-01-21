@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "dauntless-brace-449803-q3",
+  "private_key_id": "5ec7704ad2bca9ea3848b88f6cc046823492b1c4",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC+cRLqWPoQE7Gj\nbhzY/ycxahv6NH4VTbOsexNIYt2/4/qhU6V96i+WdYUxg0ZKraeJow5gD8s7590+\ncsZFmGuJlV95Aib1nDSB/zmYvkXfrr7pnm7QqVjg026YCckpDUYSX9bxF/DaXt74\nCqPjU4xuZhfbNadQ0VGXjx2jBMG4nzmOKRKcbAYTDxUcRXvdLAAlazxweeOJoP+O\nOb90H+2Hd6jj//r2kkmgQInm3fJWnFS3ImqJhlR8QdCKoX0Q7Onno3mqFq3l/3/R\n33ErRLrtKHdZC6RG4ojkhOhlEbN3IMCmANdC/Y3vKYSbjdQxeEefquesfsxNSE4h\nmqQrQgRDAgMBAAECggEACO9/RrWkDgsOg6+P9PKL4TqsU2IRJGi/7HDd58CTzQQi\nZ11oX28Uioe7Fyakrq5VNRUMgJ9dFtN7QwnZmbxcF1mF4ESklVOd9xeFmVAcMTGe\nzZFce7fmbq4c+09CPAXeatBKYoeQCn73EUZWiD0MUsXBisyKrDUWEflqF5MKj+H7\n8Pi9X9nPChHWm9/esTVDNWbj0K0kOWwpBotO6jj9MSJBSA4RF/RUrEnHmlzzsTZJ\nAnLb7fSvJxzcBUsL7Fby2pCuEuSVrkLoO/Ek7/9IH/9QlNhDSjrLof32JyvdVD+i\nSLlGVqJck911XMBkROvO/Pt/+fc0Nl5eNNJGy6XBeQKBgQDmlQtjexZsG3pQ2ILF\nb+XbtK9NHApq27FrzpLK7SiD+ohlejxiytGGa8jDg3sPtpXCaMLJiW27C8lUjGQV\nFfFqYS0P8bcn2D1fvuheDytwoPjyJvBx2mpjS1TYbRoZCSlGYa0Wbr6e7EP1cFKe\nSXDr0g+jWfSAmsjGp1qcGrl3TQKBgQDTb0byw9O8xs48wRkqDrQVZlHFPYtzzcoT\nkKuUPmDw/cmD/ayFb/v8WPpSvUCUsAMOdQNv+vd0vfouDnfqEjhsKwHj4vF//Tm3\nmveq3c7aTOX159u/aWHDdkFzMajOHqFvFNO02S7D3i34Nygk5ZujVYQ1oZ1YeGxV\nWBObWABBzwKBgHK4KKhf7vHuYdajQby1RWkf5i+5Cb3Me+MlLYdkosm29fF29WA5\nhDEaoxIS8kEJGE1XDcJza3KqFIrKJmkPN8MzgdXy7qsWPMLMGpPhfD1W+USQ9wPO\nJSwtqJLdBST7l9t6cUE96/zpk44jSheSdmn9YuZktO7fE5EyZjRQX4HpAoGBAKKz\n/uTRzR533jziW3sB1ZKiKkqeEbILqnVj3qU1W2QX5/qqOxh0FHUcA4WoHQpOaAu3\n/+0sM0Ci8OKAP8bgPor+jXXQLgdP1hp0JiJWjddvVYbl5TRm49SGK9d5X20+JPxW\nCpQgjNwtHTLlPv8lsZ7/L74Vn/90q+kA3hWsooYBAoGBAJtfdTeEZxZEoFHYxG0C\nTWtYIOaBJQestvBasMVesBpAojoax3KxaDYFZS3pm3xyfeIEthJ1JstIK9yMFt0t\nYitpjIqWXcvqDm79qEr+gcxOgTrhUF3gRpG9mXBbOPU40SpOCbasPFCje0/E6/SX\nKbH3YPTmJwO5mQizauGlDlL9\n-----END PRIVATE KEY-----\n",
+  "client_email": "legacy@dauntless-brace-449803-q3.iam.gserviceaccount.com",
+  "client_id": "112693076516922751673",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/legacy%40dauntless-brace-449803-q3.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

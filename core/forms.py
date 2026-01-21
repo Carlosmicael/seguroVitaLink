@@ -1,0 +1,311 @@
+from django import forms
+from .models import Poliza, Estudiante, Solicitud,TcasDocumentos,Siniestro,Beneficiario,Factura,Pago,Aseguradora,PoliticaAseguradora
+
+
+
+
+class BeneficiarioForm(forms.ModelForm):
+    class Meta:
+        model = Beneficiario
+        fields = ['siniestro', 'nombre', 'correo', 'numero_cuenta', 'telefono']
+        widgets = {
+            'siniestro': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all',
+            }),
+            'nombre': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all',
+                'placeholder': 'Nombre completo del beneficiario'
+            }),
+            'correo': forms.EmailInput(attrs={
+                'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all',
+                'placeholder': 'correo@ejemplo.com'
+            }),
+            'numero_cuenta': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all',
+                'placeholder': 'Número de cuenta bancaria'
+            }),
+            'telefono': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all',
+                'placeholder': '0999999999'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Solo mostrar siniestros aprobados
+        from .models import Siniestro
+        self.fields['siniestro'].queryset = Siniestro.objects.filter(estado='aprobado')
+        self.fields['siniestro'].label = 'Siniestro Aprobado'
+        self.fields['nombre'].label = 'Nombre Completo'
+        self.fields['correo'].label = 'Correo Electrónico'
+        self.fields['numero_cuenta'].label = 'Número de Cuenta'
+        self.fields['numero_cuenta'].required = False
+        self.fields['telefono'].label = 'Teléfono'
+        self.fields['telefono'].required = False
+
+
+
+
+class PolizaForm(forms.ModelForm):
+        
+    class Meta:
+        model = Poliza
+        fields = ['estudiantes','numero_poliza', 'estado', 'tipo_cobertura', 'fecha_inicio', 'prima_neta']
+        widgets = {'fecha_inicio': forms.DateInput(attrs={'type': 'date'}),'estudiantes': forms.CheckboxSelectMultiple(attrs={'class': 'form-select'}),}
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            self.fields['numero_poliza'].initial = Poliza.generar_numero_poliza()
+            self.fields['numero_poliza'].widget.attrs['readonly'] = True
+
+
+
+
+
+class SolicitudForm(forms.ModelForm):
+    class Meta:
+        model = Solicitud
+        fields = ['estudiante','tipo_poliza','monto_solicitado','motivo','documento_identidad','telefono','direccion']
+
+    def clean_monto_solicitado(self):
+        monto = self.cleaned_data.get('monto_solicitado')
+        if monto <= 0:
+            raise forms.ValidationError("El monto debe ser mayor a 0")
+        return monto
+
+
+
+
+
+class TcasDocumentosForm(forms.ModelForm):
+    class Meta:
+        model = TcasDocumentos
+        fields = ["doc_descripcion"]
+        widgets = {
+            "doc_descripcion": forms.Textarea(attrs={"class": "form-control"}),
+        }
+        labels = {
+            "doc_descripcion": "Descripción",
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Formularios de Aseguradoras y Políticas - RONAL ----
+class AseguradoraForm(forms.ModelForm):
+    class Meta:
+        model = Aseguradora
+        fields = ["nombre", "direccion", "telefono", "email", "politicas", "is_active"]
+        widgets = {
+            "nombre": forms.TextInput(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+            "direccion": forms.Textarea(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg", "rows": 3}),
+            "telefono": forms.TextInput(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+            "email": forms.EmailInput(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+            "politicas": forms.Textarea(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg", "rows": 4}),
+        }
+
+
+class PoliticaAseguradoraForm(forms.ModelForm):
+    class Meta:
+        model = PoliticaAseguradora
+        fields = ["documento", "terminos", "fecha_version"]
+        widgets = {
+            "terminos": forms.Textarea(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg", "rows": 6}),
+            "fecha_version": forms.DateInput(attrs={"type": "date", "class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+        }
+
+
+# Formulario para la gestión de Factura y Pago - RONAL ----
+
+class FacturaForm(forms.ModelForm):
+    class Meta:
+        model = Factura
+        fields = ["numero_factura", "monto", "fecha"]
+        widgets = {
+            "numero_factura": forms.TextInput(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+            "monto": forms.NumberInput(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+            "fecha": forms.DateInput(attrs={"type": "date", "class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+        }
+
+
+class PagoForm(forms.ModelForm):
+    class Meta:
+        model = Pago
+        fields = ["monto_pagado", "fecha_pago", "metodo_pago"]
+        widgets = {
+            "monto_pagado": forms.NumberInput(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+            "fecha_pago": forms.DateInput(attrs={"type": "date", "class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+            "metodo_pago": forms.Select(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
+        }
+
+
+
+
+
+from django import forms
+from django.core.exceptions import ValidationError
+from .models import Siniestro, Poliza, Estudiante
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Checkbox
+
+
+class ActivacionPolizaForm(forms.Form):
+    """Formulario para reportar evento/siniestro de estudiante UTPL"""
+    
+    # Datos del siniestro
+    descripcion = forms.CharField(
+        label='Descripción del Evento',
+        required=True,
+        widget=forms.Textarea(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600',
+            'placeholder': 'Describe los detalles del evento...',
+            'rows': 5
+        })
+    )
+    
+    # Información del beneficiario
+    nombre_beneficiario = forms.CharField(
+        max_length=150,
+        label='Nombre del Beneficiario',
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600',
+            'placeholder': 'Nombre completo'
+        })
+    )
+    
+    relacion_beneficiario = forms.CharField(
+        max_length=50,
+        label='Relación con el Asegurado',
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600',
+            'placeholder': 'Ej: Familiar, Heredero, etc.'
+        })
+    )
+    
+    # Contacto
+    telefono = forms.CharField(
+        max_length=20,
+        label='Teléfono de Contacto',
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600',
+            'placeholder': '+593 99 123 4567'
+        })
+    )
+    
+    email = forms.EmailField(
+        label='Correo Electrónico',
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600',
+            'placeholder': 'tu@ejemplo.com'
+        })
+    )
+    
+    # Documentación
+    archivo_documento = forms.FileField(
+        label='Documento de Soporte (PDF)',
+        required=False,
+        widget=forms.FileInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600',
+            'accept': '.pdf,.doc,.docx'
+        })
+    )
+    
+    # Consentimiento
+    acepta_terminos = forms.BooleanField(
+        label='Acepto los términos y condiciones de la póliza',
+        required=True,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'rounded border-gray-300'
+        })
+    )
+    
+    # Google reCAPTCHA v2 (checkbox)
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox)
+    
+    def clean_archivo_documento(self):
+        """Validar tamaño del archivo"""
+        archivo = self.cleaned_data.get('archivo_documento')
+        if archivo:
+            if archivo.size > 5 * 1024 * 1024:  # 5MB máximo
+                raise ValidationError('El archivo no debe ser mayor a 5MB.')
+        return archivo
+
+    def clean(self):
+        return super().clean()
+
+
+class BeneficiarioLoginForm(forms.Form):
+    """Formulario de login para beneficiarios"""
+    username = forms.CharField(
+        label='Usuario',
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600',
+            'placeholder': 'Ingresa tu usuario'
+        })
+    )
+    password = forms.CharField(
+        label='Contraseña',
+        required=True,
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600',
+            'placeholder': 'Ingresa tu contraseña'
+        })
+    )
+
+
+class GestionSolicitudForm(forms.ModelForm):
+    """Formulario para que el administrador gestione una solicitud"""
+    
+    # Campo para seleccionar estudiante
+    estudiante = forms.ModelChoiceField(
+        queryset=Estudiante.objects.all().order_by('apellidos', 'nombres'),
+        label='Estudiante',
+        required=True,
+        widget=forms.Select(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600'
+        })
+    )
+    
+    class Meta:
+        model = Siniestro
+        fields = ['tipo', 'estado', 'comentarios']
+        widgets = {
+            'tipo': forms.Select(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600'
+            }),
+            'estado': forms.Select(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600'
+            }),
+            'comentarios': forms.Textarea(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600',
+                'rows': 4
+            })
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk and self.instance.poliza and self.instance.poliza.estudiante:
+            # Pre-seleccionar el estudiante actual si existe
+            self.fields['estudiante'].initial = self.instance.poliza.estudiante
+
+
+
+
+
