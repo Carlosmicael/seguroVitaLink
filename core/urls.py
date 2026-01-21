@@ -38,7 +38,7 @@ urlpatterns = [
     path('asesor/dashboard/metrics/', asesor_views.asesor_dashboard_metrics, name='asesor_dashboard_metrics'),
     # Ronal - Gestión de Liquidaciones
     path('asesor/liquidaciones/', asesor_views.siniestros_pendientes_pago, name='siniestros_pendientes_pago'),
-    path('asesor/liquidaciones/<int:siniestro_id>/', asesor_views.registrar_liquidacion, name='registrar_liquidacion'),
+    path('asesor/liquidaciones/beneficiario/<int:beneficiario_id>/', asesor_views.registrar_liquidacion, name='registrar_liquidacion'),
     path('asesor/reportes/liquidaciones/', asesor_views.reportes_liquidacion, name='reportes_liquidacion'),
     # Ronal - Fin Gestión de Liquidaciones
     path('polizas/crear/', asesor_views.crear_poliza, name='crear_poliza'),

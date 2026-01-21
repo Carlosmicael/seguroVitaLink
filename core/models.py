@@ -395,14 +395,23 @@ class DocumentosAseguradora(models.Model):
 
 ## Factura y Pago Models - RONAL --------------------------------------
 
+# Mejora de lógica para gestión de facturas y pagos asociados a siniestros
+
 class Factura(models.Model):
-    siniestro = models.OneToOneField(Siniestro, on_delete=models.CASCADE, related_name="factura")
+    siniestro = models.ForeignKey(Siniestro, on_delete=models.CASCADE, related_name="facturas")
+    beneficiario = models.OneToOneField(
+        Beneficiario,
+        on_delete=models.CASCADE,
+        related_name="factura",
+        null=True,
+        blank=True,
+    )
     numero_factura = models.CharField(max_length=50, verbose_name="Numero de Factura")
     monto = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0.01)])
     fecha = models.DateField()
 
     def __str__(self):
-        return f"Factura {self.numero_factura} - Siniestro {self.siniestro_id}"
+        return f"Factura {self.numero_factura} - Beneficiario {self.beneficiario_id}"
 
 
 class Pago(models.Model):
@@ -415,7 +424,7 @@ class Pago(models.Model):
     ]
 
     siniestro = models.ForeignKey(Siniestro, on_delete=models.CASCADE, related_name="pagos")
-    factura = models.ForeignKey(Factura, on_delete=models.SET_NULL, null=True, blank=True, related_name="pagos")
+    factura = models.ForeignKey(Factura, on_delete=models.CASCADE, related_name="pagos")
     monto_pagado = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0.01)])
     fecha_pago = models.DateField()
     metodo_pago = models.CharField(max_length=20, choices=METODO_PAGO_CHOICES)
