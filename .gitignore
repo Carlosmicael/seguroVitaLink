@@ -1,1 +1,137 @@
+# Ambiente Virtual
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Archivos Python
+*.py[cod]
+*$py.class
+__pycache__/
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Base de Datos
 db.sqlite3
+db.sqlite3-journal
+*.db
+
+# Variables de Entorno
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# IDE y Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+.vim/
+.vimrc
+.emacs
+
+# Archivos del Sistema
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Node y Tailwind (si lo usas)
+node_modules/
+npm-debug.log
+yarn-error.log
+.npm
+package-lock.json
+yarn.lock
+
+# Logs
+*.log
+logs/
+*.pot
+
+# Archivos temporales
+*.tmp
+*.temp
+.temp/
+tmp/
+
+# Cobertura de tests
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Directorios de media/static
+media/
+staticfiles/
+
+# Archivos de compilación
+*.o
+*.a
+*.so
+
+# Archivos de IDE específicos
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+
+# Archivos temporales de Windows
+*.lnk
+
+# Directorios de instalación
+site-packages/
+
+# Archivos específicos del proyecto
+*.sqlite
+local_settings.py
+/media
+/static
+.env.production
+
+# Archivos de configuración local
+config/local_settings.py
+config/.env
+
+# Cache de Django
+.django_cache/
+
+# Archivos de administración
+*.bak
+*.backup

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Siniestros - VitaLink</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a3a52 0%, #2d5a7a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 950px;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a3a52 0%, #2d5a7a 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 50%;
+            transform: translate(100px, -100px);
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-logo {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #d4af37;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.95;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .content {
+            padding: 60px 50px;
+        }
+
+        .intro-section {
+            margin-bottom: 50px;
+        }
+
+        .intro-section h2 {
+            color: #1a3a52;
+            font-size: 32px;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .intro-text {
+            color: #555;
+            line-height: 1.8;
+            font-size: 16px;
+            margin-bottom: 18px;
+        }
+
+        .benefits {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+            padding: 40px;
+            border-radius: 12px;
+            margin: 40px 0;
+            border-left: 6px solid #d4af37;
+        }
+
+        .benefits h3 {
+            color: #1a3a52;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .benefits-list li {
+            padding: 12px 0;
+            color: #555;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .benefits-list li:before {
+            content: "✓";
+            color: #d4af37;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+
+        .process-section {
+            margin: 50px 0;
+        }
+
+        .process-section h3 {
+            color: #1a3a52;
+            font-size: 20px;
+            margin-bottom: 30px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .step {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+            padding: 35px 25px;
+            border-radius: 12px;
+            text-align: center;
+            border-top: 5px solid #d4af37;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .step:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(26, 58, 82, 0.15);
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #d4af37 0%, #c9a227 100%);
+            color: #1a3a52;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-weight: bold;
+            font-size: 24px;
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .step-title {
+            color: #1a3a52;
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .step-description {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+            padding: 50px 40px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 50px 0;
+            border: 2px solid #d4af37;
+        }
+
+        .cta-section h2 {
+            color: #1a3a52;
+            font-size: 28px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .cta-text {
+            color: #666;
+            font-size: 17px;
+            margin-bottom: 35px;
+            line-height: 1.7;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #d4af37 0%, #c9a227 100%);
+            color: #1a3a52;
+            padding: 18px 60px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.8px;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 45px rgba(212, 175, 55, 0.4);
+            background: linear-gradient(135deg, #e0bb42 0%, #d4af37 100%);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f0f7ff 100%);
+            border-left: 6px solid #1a3a52;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+
+        .info-box strong {
+            color: #1a3a52;
+            font-size: 17px;
+        }
+
+        .info-box p {
+            color: #555;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .footer-section {
+            background: linear-gradient(135deg, #f9f9f9 0%, #f5f5f5 100%);
+            padding: 40px;
+            text-align: center;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .footer-section p {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .highlight {
+            color: #d4af37;
+            font-weight: 700;
+        }
+
+        .contact-info {
+            margin-top: 15px;
+            font-size: 15px;
+        }
+
+        .contact-info a {
+            color: #d4af37;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .contact-info a:hover {
+            color: #c9a227;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 35px 25px;
+            }
+
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .content {
+                padding: 35px 25px;
+            }
+
+            .intro-section h2 {
+                font-size: 24px;
+            }
+
+            .cta-section {
+                padding: 35px 25px;
+            }
+
+            .btn-primary {
+                width: 100%;
+                padding: 16px 40px;
+            }
+
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .header p {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-logo">Universidad Técnica Particular de Loja</div>
+                <h1>VitaLink</h1>
+                <p>Gestión Integral de Pólizas de Vida Estudiantil</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Intro Section -->
+            <div class="intro-section">
+                <h2>Bienvenido a tu Centro de Siniestros</h2>
+                <p class="intro-text">
+                    En VitaLink entendemos la importancia de tu tranquilidad y la de tu familia. 
+                    Como estudiante de la Universidad Técnica Particular de Loja, tienes acceso a una póliza de vida 
+                    que te protege en todo momento.
+                </p>
+                <p class="intro-text">
+                    Este portal te permite activar tu póliza de forma fácil, segura y transparente desde cualquier lugar. 
+                    Solo necesitas reportar un evento o necesidad, y tu solicitud será procesada para activar la cobertura de vida 
+                    que te corresponde.
+                </p>
+            </div>
+
+            <!-- Benefits Section -->
+            <div class="benefits">
+                <h3>¿Por qué confiar en VitaLink?</h3>
+                <ul class="benefits-list">
+                    <li>Cobertura completa diseñada especialmente para estudiantes UTPL</li>
+                    <li>Gestión 100% digital sin trámites complicados</li>
+                    <li>Procesamiento rápido de solicitudes en máximo 24 horas</li>
+                    <li>Asistencia dedicada en español</li>
+                    <li>Total confidencialidad y seguridad de datos</li>
+                </ul>
+            </div>
+
+            <!-- Process Section -->
+            <div class="process-section">
+                <h3>Proceso para Activar tu Póliza</h3>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-title">Reporta tu Evento</div>
+                        <div class="step-description">
+                            Presiona el botón principal y completa el formulario con toda la información 
+                            del evento que requiere la activación de tu póliza.
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-title">Verificación Segura</div>
+                        <div class="step-description">
+                            Nuestro equipo especializado revisará tu solicitud y documentación 
+                            de forma segura y confidencial.
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-title">Activación Inmediata</div>
+                        <div class="step-description">
+                            Tu póliza de vida será activada automáticamente una vez aprobada tu solicitud. 
+                            Recibirás confirmación por correo electrónico.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA Section -->
+            <div class="cta-section">
+                <h2>¿Necesitas Activar tu Póliza?</h2>
+                <p class="cta-text">
+                    Presiona el botón de abajo para reportar un evento y activar tu cobertura de vida. 
+                    El proceso es sencillo: solo completa un formulario con tu información básica y el evento que lo motiva.
+                </p>
+                <button class="btn-primary" onclick="reportarSiniestro()">
+                    📋 Reportar Evento y Activar Póliza
+                </button>
+            </div>
+
+            <!-- Info Box -->
+            <div class="info-box">
+                <p>
+                    <strong>⏱️ Información Importante:</strong><br>
+                    Una vez completes el formulario de reporte, tu solicitud será enviada a nuestro sistema de validación. 
+                    La póliza se activará automáticamente en un plazo no mayor a 24 horas hábiles. 
+                    Recibirás actualizaciones por correo electrónico en cada paso del proceso.
+                </p>
+            </div>
+
+            <!-- Coverage Section -->
+            <div class="intro-section">
+                <h2>¿Qué incluye tu póliza de vida?</h2>
+                <div class="benefits">
+                    <ul class="benefits-list">
+                        <li>Cobertura de vida accidental completa</li>
+                        <li>Asistencia médica de emergencia 24/7</li>
+                        <li>Repatriación en caso necesario</li>
+                        <li>Cobertura familiar ampliada</li>
+                        <li>Beneficios adicionales para dependientes</li>
+                        <li>Soporte legal durante el proceso</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="footer-section">
+            <p>
+                <strong>¿Tienes dudas o necesitas asistencia?</strong>
+            </p>
+            <div class="contact-info">
+                <p>
+                    📞 Teléfono: <a href="tel:+593726582940">+593 7 2658-2940</a><br>
+                    📧 Correo: <a href="mailto:vitalink@utpl.edu.ec">vitalink@utpl.edu.ec</a><br>
+                    🌐 Portal: <a href="https://www.utpl.edu.ec" target="_blank">www.utpl.edu.ec</a>
+                </p>
+            </div>
+            <p style="margin-top: 20px; font-size: 13px; color: #999;">
+                VitaLink © 2026 - Universidad Técnica Particular de Loja<br>
+                Sistema de Gestión Integral de Pólizas de Vida para Estudiantes
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function reportarSiniestro() {
+            // Aquí irá el enlace al formulario de reporte
+            alert('Redirigiendo al formulario de reporte de eventos y activación de póliza...\n\nEsta funcionalidad estará disponible próximamente.');
+            // window.location.href = '/siniestros/reportar/';
+        }
+    </script>
+</body>
+</html>
