@@ -81,6 +81,18 @@ urlpatterns = [
     path('marcar-notificaciones-leidas/asesor/<int:user_id>/', asesor_views.marcar_notificaciones_leidas, name='marcar_notificaciones_leidas'),
 
 
+
+
+
+    path('asesor/dashboard/metrics/', asesor_views.asesor_dashboard_metrics, name='asesor_dashboard_metrics'),
+    # Ronal - Gestión de Liquidaciones
+    path('asesor/liquidaciones/', asesor_views.siniestros_pendientes_pago, name='siniestros_pendientes_pago'),
+    path('asesor/liquidaciones/beneficiario/<int:beneficiario_id>/', asesor_views.registrar_liquidacion, name='registrar_liquidacion'),
+    path('asesor/reportes/liquidaciones/', asesor_views.reportes_liquidacion, name='reportes_liquidacion'),
+    path('asesor/reportes/liquidaciones/factura/<int:factura_id>/', asesor_views.factura_detalle, name='factura_detalle'),
+    # Ronal - Fin Gestión de Liquidaciones
+
+
     #Documentos
     path("documentos/poliza/", views.obtener_documentos_por_proceso, name="obtener_documentos"),
     path("documentos/<int:doc_id>/descargar/", views.descargar_documento, name="descargar_documento"),
@@ -126,6 +138,16 @@ urlpatterns = [
     path('siniestros/admin/solicitud/<int:pk>/gestionar/', views.AdminGestionSolicitudView.as_view(), name='admin_gestionar_solicitud'),
     path('reportar-evento/', views.reportar_evento, name='reportar_evento'),
 
+
+    # Administrador - Aseguradoras y Políticas - RONAL
+    path('administrador/aseguradoras/<int:aseguradora_id>/politicas/crear/', administrador_views.politica_create, name='politica_create'),
+    path('administrador/politicas/<int:politica_id>/editar/', administrador_views.politica_edit, name='politica_edit'),
+    path('administrador/publico/aseguradoras/', administrador_views.politicas_publicas_admin, name='politicas_publicas_admin'),
+    path('administrador/publico/aseguradoras/<int:aseguradora_id>/', administrador_views.politica_publica_detalle_admin, name='politica_publica_detalle_admin'),
+
+    # Publico - terminos y politicas - RONAL
+    path('aseguradoras/terminos/', administrador_views.politicas_publicas, name='politicas_publicas'),
+    path('aseguradoras/<int:aseguradora_id>/terminos/', administrador_views.politica_publica_detalle, name='politica_publica_detalle'),
 
 ]
 

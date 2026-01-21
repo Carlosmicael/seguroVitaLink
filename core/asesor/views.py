@@ -1,16 +1,19 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from core.decorators import role_required
-from core.models import Poliza, Estudiante, Profile, Notificaciones, ReporteEvento, Siniestro, ConfiguracionSiniestro
+from core.models import Poliza, Estudiante, Profile, Notificaciones, ReporteEvento, Siniestro, ConfiguracionSiniestro,Factura,Pago,Beneficiario
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+
+from django.views.decorators.http import require_http_methods
+from core.forms import PolizaForm, FacturaForm, PagoForm
 from django.contrib.auth.decorators import login_required
 from core.tasks import ejecutar_recordatorio
 from django.utils.timezone import make_aware
 from django.utils import timezone
 import logging
 from datetime import datetime
-from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponse
 import pusher
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
@@ -19,6 +22,10 @@ from django.utils.dateformat import DateFormat
 from django.views.decorators.http import require_POST
 import os
 from datetime import timedelta
+from django.db.models import Count, Sum, F, Q
+from django.db import transaction
+from django.contrib import messages
+from decimal import Decimal
 
 
 
@@ -29,10 +36,118 @@ logger = logging.getLogger(__name__)
 
 
 
+MONTH_LABELS = [
+    "Ene", "Feb", "Mar", "Abr", "May", "Jun",
+    "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
+]
+
+
+def _shift_month(year, month, delta):
+    total = year * 12 + (month - 1) + delta
+    return total // 12, total % 12 + 1
+
+
+def _month_sequence(count=6):
+    today = timezone.now().date()
+    months = []
+    for offset in range(-count + 1, 1):
+        year, month = _shift_month(today.year, today.month, offset)
+        months.append((year, month))
+    return months
+
+
+def _month_label(year, month):
+    return f"{MONTH_LABELS[month - 1]} {year}"
+
+
+def _series_for(qs, date_field, months):
+    start_year, start_month = months[0]
+    end_year, end_month = _shift_month(months[-1][0], months[-1][1], 1)
+    tz = timezone.get_current_timezone()
+    start = timezone.datetime(start_year, start_month, 1, tzinfo=tz)
+    end = timezone.datetime(end_year, end_month, 1, tzinfo=tz)
+
+    month_map = {}
+    date_values = qs.filter(**{f"{date_field}__gte": start, f"{date_field}__lt": end}).values_list(
+        date_field, flat=True
+    )
+    for value in date_values:
+        if value is None:
+            continue
+        if timezone.is_aware(value):
+            value = timezone.localtime(value)
+        key = (value.year, value.month)
+        month_map[key] = month_map.get(key, 0) + 1
+
+    return [month_map.get((year, month), 0) for year, month in months]
+
+
+def _current_month_range():
+    now = timezone.now()
+    start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    end_year, end_month = _shift_month(start.year, start.month, 1)
+    end = start.replace(year=end_year, month=end_month)
+    return start, end
+
+
+def _build_dashboard_metrics():
+    polizas_activas = Poliza.objects.filter(estado='activa').count()
+    siniestros_en_proceso = Siniestro.objects.filter(
+        estado__in=['pendiente', 'aprobado']
+    ).count()
+    #Modficación de la lógica para facturas pendientes - Ronal
+    #Hace que cuente las facturas que no han sido pagadas completamente
+    facturas_pendientes = (
+        Factura.objects.annotate(total_pagado=Sum('pagos__monto_pagado'))
+        .filter(Q(total_pagado__lt=F('monto')) | Q(total_pagado__isnull=True))
+        .count()
+    )
+
+    start, end = _current_month_range()
+    start_date = start.date()
+    end_date = end.date()
+    total_pagado_mes = (
+        Pago.objects.filter(
+            fecha_pago__gte=start_date,
+            fecha_pago__lt=end_date,
+        )
+        .aggregate(total=Sum('monto_pagado'))
+        .get('total')
+    )
+    if total_pagado_mes is None:
+        total_pagado_mes = Decimal('0.00')
+
+    months = _month_sequence(6)
+    labels = [_month_label(year, month) for year, month in months]
+    polizas_series = _series_for(Poliza.objects.all(), "fecha_creacion", months)
+    siniestros_series = _series_for(Siniestro.objects.all(), "fecha_reporte", months)
+
+    return {
+        "polizas_activas": polizas_activas,
+        "siniestros_en_proceso": siniestros_en_proceso,
+        "facturas_pendientes": facturas_pendientes,
+        "total_pagado_mes": total_pagado_mes,
+        "labels": labels,
+        "polizas_series": polizas_series,
+        "siniestros_series": siniestros_series,
+    }
+
+
 @login_required(login_url='login')
 @role_required(['asesor'])
 def asesor_dashboard(request):
-    return render(request, 'asesor/components/dashboard/dashboard.html')
+    dashboard_data = _build_dashboard_metrics()
+    return render(
+        request,
+        'asesor/components/dashboard/dashboard.html',
+        {"dashboard_data": dashboard_data},
+    )
+
+
+@login_required(login_url='login')
+@role_required(['asesor'])
+def asesor_dashboard_metrics(request):
+    return JsonResponse(_build_dashboard_metrics())
 
 
 
@@ -779,3 +894,297 @@ def eliminar_reporte(request, id):
     
     reporte.delete()
     return redirect('lista_reportes')
+
+
+
+
+
+
+## Gestión de Liquidaciones - RONAL ----
+
+
+@login_required(login_url='/login')
+@role_required(['asesor'])
+def siniestros_pendientes_pago(request):
+    siniestros = (
+        Siniestro.objects.filter(estado='aprobado')
+        .select_related('poliza')
+        .prefetch_related('beneficiarios', 'beneficiarios__factura', 'beneficiarios__factura__pagos')
+        .order_by('-fecha_reporte')
+    )
+
+    siniestros_data = []
+    for siniestro in siniestros:
+        beneficiarios = []
+        for beneficiario in siniestro.beneficiarios.all():
+            factura = getattr(beneficiario, 'factura', None)
+            total_pagado = (
+                factura.pagos.aggregate(total=Sum('monto_pagado')).get('total') or Decimal('0.00')
+                if factura
+                else Decimal('0.00')
+            )
+            restante = (factura.monto - total_pagado) if factura else None
+            beneficiarios.append(
+                {
+                    'beneficiario': beneficiario,
+                    'factura': factura,
+                    'total_pagado': total_pagado,
+                    'restante': restante,
+                    'pagada': factura is not None and total_pagado >= factura.monto,
+                }
+            )
+
+        if not beneficiarios:
+            continue
+
+        siniestros_data.append(
+            {
+                'siniestro': siniestro,
+                'beneficiarios': beneficiarios,
+            }
+        )
+
+    return render(
+        request,
+        'asesor/components/liquidaciones/siniestros_pendientes.html',
+        {'siniestros_data': siniestros_data},
+    )
+
+
+def _siniestro_liquidado(siniestro):
+    beneficiarios = list(siniestro.beneficiarios.all())
+    if not beneficiarios:
+        return False
+    for beneficiario in beneficiarios:
+        factura = getattr(beneficiario, 'factura', None)
+        if factura is None:
+            return False
+        total_pagado = factura.pagos.aggregate(total=Sum('monto_pagado')).get('total') or Decimal('0.00')
+        if total_pagado < factura.monto:
+            return False
+    return True
+
+
+def registrar_liquidacion(request, beneficiario_id):
+    beneficiario = get_object_or_404(Beneficiario, pk=beneficiario_id)
+    siniestro = beneficiario.siniestro
+    factura = getattr(beneficiario, 'factura', None)
+    pagos = factura.pagos.order_by('-fecha_pago') if factura else Pago.objects.none()
+
+    total_pagado = (
+        factura.pagos.aggregate(total=Sum('monto_pagado')).get('total') or Decimal('0.00')
+        if factura
+        else Decimal('0.00')
+    )
+    restante = (factura.monto - total_pagado) if factura else None
+
+    if request.method == 'POST':
+        if factura is None:
+            factura_form = FacturaForm(request.POST, prefix='factura')
+            pago_form = PagoForm(prefix='pago')
+            if factura_form.is_valid():
+                nueva_factura = factura_form.save(commit=False)
+                nueva_factura.siniestro = siniestro
+                nueva_factura.beneficiario = beneficiario
+                nueva_factura.save()
+                messages.success(request, 'Factura registrada correctamente.')
+                return redirect('registrar_liquidacion', beneficiario_id=beneficiario.id_beneficiario)
+        else:
+            pago_form = PagoForm(request.POST, prefix='pago')
+            factura_form = FacturaForm(prefix='factura', instance=factura)
+            # Modificación de la lógica para validar el pago
+            if pago_form.is_valid():
+                monto_pagado = pago_form.cleaned_data['monto_pagado']
+                if restante is not None and restante <= Decimal('0.00'):
+                    pago_form.add_error('monto_pagado', 'La factura ya esta completamente pagada.')
+                elif restante is not None and monto_pagado > restante:
+                    pago_form.add_error('monto_pagado', 'El monto supera el saldo pendiente.')
+                else:
+                    with transaction.atomic():
+                        pago = pago_form.save(commit=False)
+                        pago.factura = factura
+                        pago.siniestro = siniestro
+                        pago.save()
+
+                        if _siniestro_liquidado(siniestro):
+                            siniestro.estado = 'pagado'
+                            siniestro.save(update_fields=['estado'])
+
+                    messages.success(request, 'Pago registrado correctamente.')
+                    return redirect('registrar_liquidacion', beneficiario_id=beneficiario.id_beneficiario)
+    else:
+        factura_form = FacturaForm(prefix='factura') if factura is None else FacturaForm(prefix='factura', instance=factura)
+        pago_form = PagoForm(prefix='pago')
+
+    return render(
+        request,
+        'asesor/components/liquidaciones/registrar_liquidacion.html',
+        {
+            'siniestro': siniestro,
+            'beneficiario': beneficiario,
+            'factura': factura,
+            'pagos': pagos,
+            'total_pagado': total_pagado,
+            'restante': restante,
+            'factura_form': factura_form,
+            'pago_form': pago_form,
+        },
+    )
+
+
+def _parse_date(value):
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+
+def _factura_estado(monto_factura, total_pagado):
+    if total_pagado <= Decimal('0.00'):
+        return 'pendiente'
+    if total_pagado < monto_factura:
+        return 'parcial'
+    return 'pagada'
+
+
+@login_required(login_url='/login')
+@role_required(['asesor'])
+def factura_detalle(request, factura_id):
+    factura = get_object_or_404(Factura.objects.select_related('beneficiario', 'siniestro'), pk=factura_id)
+    pagos = factura.pagos.order_by('-fecha_pago')
+    total_pagado = pagos.aggregate(total=Sum('monto_pagado')).get('total') or Decimal('0.00')
+    restante = factura.monto - total_pagado
+    estado = _factura_estado(factura.monto, total_pagado)
+    return render(
+        request,
+        'asesor/components/reportes/factura_detalle.html',
+        {
+            'factura': factura,
+            'pagos': pagos,
+            'total_pagado': total_pagado,
+            'restante': restante,
+            'estado': estado,
+        },
+    )
+
+
+@login_required(login_url='/login')
+@role_required(['asesor'])
+def reportes_liquidacion(request):
+    start_date = _parse_date(request.GET.get('fecha_inicio'))
+    end_date = _parse_date(request.GET.get('fecha_fin'))
+    beneficiario_id = request.GET.get('beneficiario') or ''
+    estado_filtro = request.GET.get('estado') or ''
+    export = request.GET.get('export')
+
+    # Cambiamos 'siniestro__poliza__estudiante' por prefetch_related
+    facturas_qs = Factura.objects.select_related('beneficiario', 'siniestro', 'siniestro__poliza').prefetch_related('pagos', 'siniestro__poliza__estudiantes').order_by('-fecha')
+    if beneficiario_id:
+        facturas_qs = facturas_qs.filter(beneficiario_id=beneficiario_id)
+
+    facturas_filtradas = []
+    for factura in facturas_qs:
+        pagos_qs = factura.pagos.all()
+        if start_date:
+            pagos_qs = pagos_qs.filter(fecha_pago__gte=start_date)
+        if end_date:
+            pagos_qs = pagos_qs.filter(fecha_pago__lte=end_date)
+
+        total_pagado_filtrado = pagos_qs.aggregate(total=Sum('monto_pagado')).get('total') or Decimal('0.00')
+        total_pagado_total = factura.pagos.aggregate(total=Sum('monto_pagado')).get('total') or Decimal('0.00')
+        estado = _factura_estado(factura.monto, total_pagado_total)
+
+        if start_date or end_date:
+            if total_pagado_filtrado == Decimal('0.00'):
+                continue
+
+        if estado_filtro and estado != estado_filtro:
+            continue
+
+        saldo_pendiente = factura.monto - total_pagado_total
+        facturas_filtradas.append(
+            {
+                'factura': factura,
+                'beneficiario': factura.beneficiario,
+                'siniestro': factura.siniestro,
+                'estudiante': factura.siniestro.poliza.estudiante if factura.siniestro and factura.siniestro.poliza else None,
+                'total_pagado': total_pagado_filtrado,
+                'saldo_pendiente': saldo_pendiente,
+                'estado': estado,
+            }
+        )
+
+    total_facturado = sum((item['factura'].monto for item in facturas_filtradas), Decimal('0.00'))
+    total_pagado = sum((item['total_pagado'] for item in facturas_filtradas), Decimal('0.00'))
+    saldo_pendiente = total_facturado - total_pagado
+
+    if export == 'xlsx':
+        from openpyxl import Workbook
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Liquidaciones"
+        ws.append([
+            "Siniestro",
+            "Beneficiario",
+            "Estudiante",
+            "Carrera",
+            "Nivel",
+            "Factura",
+            "Monto facturado",
+            "Total pagado",
+            "Saldo pendiente",
+            "Estado",
+        ])
+        for item in facturas_filtradas:
+            estudiante = item['estudiante']
+            estudiante_nombre = f"{estudiante.nombres} {estudiante.apellidos}" if estudiante else "-"
+            ws.append([
+                item['siniestro'].id if item['siniestro'] else "",
+                item['beneficiario'].nombre if item['beneficiario'] else "",
+                estudiante_nombre,
+                estudiante.carrera if estudiante else "",
+                estudiante.nivel if estudiante else "",
+                item['factura'].numero_factura,
+                float(item['factura'].monto),
+                float(item['total_pagado']),
+                float(item['saldo_pendiente']),
+                item['estado'],
+            ])
+
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="reporte_liquidaciones.xlsx"'
+        wb.save(response)
+        return response
+
+    siniestros_groups = {}
+    for item in facturas_filtradas:
+        siniestro_id = item['siniestro'].id if item['siniestro'] else None
+        siniestros_groups.setdefault(siniestro_id, {'siniestro': item['siniestro'], 'items': []})
+        siniestros_groups[siniestro_id]['items'].append(item)
+
+    siniestros_ordenados = [siniestros_groups[key] for key in sorted(siniestros_groups.keys(), reverse=True)]
+
+    beneficiarios = Factura.objects.values_list('beneficiario_id', 'beneficiario__nombre').distinct().order_by('beneficiario__nombre')
+
+    return render(
+        request,
+        'asesor/components/reportes/liquidaciones_reportes.html',
+        {
+            'total_facturado': total_facturado,
+            'total_pagado': total_pagado,
+            'saldo_pendiente': saldo_pendiente,
+            'siniestros_ordenados': siniestros_ordenados,
+            'beneficiarios': beneficiarios,
+            'filtros': {
+                'fecha_inicio': start_date.isoformat() if start_date else '',
+                'fecha_fin': end_date.isoformat() if end_date else '',
+                'beneficiario': beneficiario_id,
+                'estado': estado_filtro,
+            },
+        },
+    )

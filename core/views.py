@@ -75,6 +75,8 @@ def login_view(request):
             login(request, user)
 
             rol = user.profile.rol
+            if rol == 'administrador':
+                return redirect('administrador_dashboard')
 
             if rol == 'asesor':
                 return redirect('asesor_dashboard')
@@ -84,9 +86,6 @@ def login_view(request):
 
             elif rol == 'beneficiario':
                 return redirect('beneficiario_dashboard')
-            
-            elif rol == 'administrador':
-                return redirect('administrador_dashboard')
 
         return render(request, 'login.html', {'error': 'Credenciales inválidas'})
 

@@ -1,0 +1,110 @@
+{% extends "master/sideBar/sidebar_admin.html" %}
+
+{% block title %}Terminos - {{ aseguradora.nombre }}{% endblock %}
+
+{% block content %}
+{% include "master/appBar/appBar.html" %}
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.75);
+        --glass-border: rgba(148, 163, 184, 0.22);
+        --glass-shadow: 0 22px 44px rgba(15, 23, 42, 0.16);
+        --ink: #0f172a;
+        --muted: #64748b;
+    }
+
+    .ui-shell {
+        background:
+            radial-gradient(900px 420px at 12% 8%, rgba(20, 184, 166, 0.16), transparent 55%),
+            radial-gradient(980px 520px at 88% 18%, rgba(14, 165, 233, 0.2), transparent 60%),
+            linear-gradient(135deg, #f8fafc 0%, #eef2ff 45%, #f1f5f9 100%);
+        position: relative;
+        overflow: hidden;
+        font-family: 'Manrope', 'Segoe UI', sans-serif;
+    }
+
+    .ui-shell::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0.06;
+        pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
+    }
+
+    .ui-container {
+        max-width: 980px;
+        margin: 0 auto;
+    }
+
+    .ui-card {
+        background: linear-gradient(180deg, var(--glass-bg) 0%, rgba(255, 255, 255, 0.62) 100%);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        box-shadow: var(--glass-shadow);
+        backdrop-filter: blur(12px);
+    }
+
+    .ui-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--ink);
+        letter-spacing: -0.03em;
+    }
+
+    .ui-subtitle {
+        font-size: 14px;
+        color: var(--muted);
+    }
+
+    .ui-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #475569;
+    }
+</style>
+
+<div class="ui-shell p-6 md:p-10">
+    <div class="ui-container space-y-6">
+        <div class="ui-card p-6">
+            <a href="{% url 'politicas_publicas_admin' %}" class="ui-link">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                    <path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Volver
+            </a>
+            <h1 class="mt-4 ui-title">{{ aseguradora.nombre }}</h1>
+            <p class="mt-2 ui-subtitle">{{ aseguradora.politicas|default:"Sin resumen de politicas." }}</p>
+        </div>
+
+        {% if politica %}
+        <div class="ui-card p-6 space-y-4">
+            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Version {{ politica.fecha_version|date:"d/m/Y" }}</div>
+            <div class="text-sm leading-relaxed text-slate-700 whitespace-pre-line">
+                {{ politica.terminos }}
+            </div>
+            {% if politica.documento %}
+            <a href="{{ politica.documento.url }}" class="ui-link" target="_blank">
+                Descargar PDF
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                    <path d="M7 17L17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </a>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="ui-card p-6 text-sm text-slate-500">
+            No hay politicas registradas para esta aseguradora.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

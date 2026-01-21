@@ -1,0 +1,14 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}VitaLink{% endblock %}</title>
+    <link href="{% static 'css/output.css' %}" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-900">
+    <main class="min-h-screen px-6 py-10">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

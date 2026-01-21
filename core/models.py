@@ -7,15 +7,24 @@ from django.db.models import JSONField
 import datetime
 from datetime import timedelta, datetime, time,date
 
+# Modelo de Aseguradora y Politicas - RONAL --------------------------------------
 
 class Aseguradora(models.Model):
     id_aseguradora = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=200)
     direccion = models.TextField(blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    politicas = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    fecha_inactivacion = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.nombre
+
+
 
 
 class ReglasPoliza(models.Model):
@@ -42,8 +51,8 @@ class ReglasPoliza(models.Model):
     permite_renovacion = models.BooleanField(default=True)
     requiere_aprobacion = models.BooleanField(default=False)
     activo = models.BooleanField(default=True)
-    fecha_creacion = models.DateTimeField(auto_now_add=True)
-    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True,blank=True,null=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True,blank=True,null=True)
     
     class Meta:
         verbose_name = "Regla de Póliza"
@@ -73,6 +82,28 @@ class ReglasPoliza(models.Model):
         return fecha_fin, fecha_vencimiento
 
 
+
+
+
+
+
+
+
+
+
+class PoliticaAseguradora(models.Model):
+    aseguradora = models.ForeignKey(Aseguradora, on_delete=models.CASCADE, related_name="politicas_versiones")
+    documento = models.FileField(upload_to="politicas/", blank=True, null=True)
+    terminos = models.TextField()
+    fecha_version = models.DateField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-fecha_version', '-id']
+
+    def __str__(self):
+        return f"Politica {self.aseguradora.nombre} - {self.fecha_version}"
+
+# ---------------------------------------
 
 
 
@@ -146,6 +177,15 @@ class Estudiante(models.Model):
 
 
 
+    
+
+
+
+
+
+
+
+
 class Poliza(models.Model):
     ESTADO_CHOICES = [
         ('pendiente', 'Pendiente'),
@@ -161,7 +201,8 @@ class Poliza(models.Model):
         ('ampliada', 'Cobertura Ampliada'),
         ('completa', 'Cobertura Completa')
     ]
-    
+
+    #carlos
     estudiantes = models.ManyToManyField('Estudiante', related_name='polizas', verbose_name="Estudiantes")
     
     aseguradora = models.ForeignKey(Aseguradora, on_delete=models.CASCADE, related_name='polizas', null=True, blank=True)
@@ -248,6 +289,28 @@ class Poliza(models.Model):
         return f'POL-{fecha_str}-{secuencia}'
 
 
+    
+    def calcular_fecha_vencimiento(self, fecha_inicio):
+        if isinstance(fecha_inicio, str):
+            fecha_inicio = datetime.fromisoformat(fecha_inicio.replace('Z', '+00:00'))
+        elif isinstance(fecha_inicio, date) and not isinstance(fecha_inicio, datetime):
+            fecha_inicio = datetime.combine(fecha_inicio, time.min)
+        
+        fecha_fin = fecha_inicio + timedelta(
+            days=self.dias_vigencia,
+            hours=self.horas_vigencia,
+            minutes=self.minutos_vigencia
+        )
+        
+        fecha_vencimiento = fecha_fin + timedelta(
+            days=self.dias_gracia,
+            hours=self.horas_gracia,
+            minutes=self.minutos_gracia
+        )
+        
+        return fecha_fin, fecha_vencimiento
+
+
 
 
 
@@ -319,9 +382,7 @@ class Siniestro(models.Model):
 
 
 class Profile(models.Model):
-
     ROLE_CHOICES = (('asesor', 'Asesor'),('solicitante', 'Solicitante'),('beneficiario', 'Beneficiario'),('administrador', 'Administrador'))
-
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     rol = models.CharField(max_length=20, choices=ROLE_CHOICES)
 
@@ -443,6 +504,44 @@ class DocumentosAseguradora(models.Model):
     def __str__(self):
         return f"{self.nombre_documento} ({'Obligatorio' if self.obligatorio else 'Opcional'})"
 
+## Factura y Pago Models - RONAL --------------------------------------
+
+# Mejora de lógica para gestión de facturas y pagos asociados a siniestros
+
+class Factura(models.Model):
+    siniestro = models.ForeignKey(Siniestro, on_delete=models.CASCADE, related_name="facturas")
+    beneficiario = models.OneToOneField(
+        Beneficiario,
+        on_delete=models.CASCADE,
+        related_name="factura",
+        null=True,
+        blank=True,
+    )
+    numero_factura = models.CharField(max_length=50, verbose_name="Numero de Factura")
+    monto = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0.01)])
+    fecha = models.DateField()
+
+    def __str__(self):
+        return f"Factura {self.numero_factura} - Beneficiario {self.beneficiario_id}"
+
+
+class Pago(models.Model):
+    METODO_PAGO_CHOICES = [
+        ("transferencia", "Transferencia"),
+        ("cheque", "Cheque"),
+        ("efectivo", "Efectivo"),
+        ("tarjeta", "Tarjeta"),
+        ("otro", "Otro"),
+    ]
+
+    siniestro = models.ForeignKey(Siniestro, on_delete=models.CASCADE, related_name="pagos")
+    factura = models.ForeignKey(Factura, on_delete=models.CASCADE, related_name="pagos")
+    monto_pagado = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0.01)])
+    fecha_pago = models.DateField()
+    metodo_pago = models.CharField(max_length=20, choices=METODO_PAGO_CHOICES)
+
+    def __str__(self):
+        return f"Pago {self.id} - Siniestro {self.siniestro_id}"
 
 
 
