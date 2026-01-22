@@ -1074,13 +1074,20 @@ def factura_detalle(request, factura_id):
 @role_required(['asesor'])
 def reportes_liquidacion(request):
     start_date = _parse_date(request.GET.get('fecha_inicio'))
+    print(f"Fecha inicio: {start_date}")
     end_date = _parse_date(request.GET.get('fecha_fin'))
+    print(f"Fecha fin: {end_date}")
     beneficiario_id = request.GET.get('beneficiario') or ''
+    print(f"Beneficiario ID: {beneficiario_id}")
     estado_filtro = request.GET.get('estado') or ''
+    print(f"Estado filtro: {estado_filtro}")
     export = request.GET.get('export')
+    print(f"Export: {export}")
 
     # Cambiamos 'siniestro__poliza__estudiante' por prefetch_related
     facturas_qs = Factura.objects.select_related('beneficiario', 'siniestro', 'siniestro__poliza').prefetch_related('pagos', 'siniestro__poliza__estudiantes').order_by('-fecha')
+    print(f"Facturas iniciales: {facturas_qs.count()}")
+    print(facturas_qs.query)
     if beneficiario_id:
         facturas_qs = facturas_qs.filter(beneficiario_id=beneficiario_id)
 
@@ -1109,7 +1116,7 @@ def reportes_liquidacion(request):
                 'factura': factura,
                 'beneficiario': factura.beneficiario,
                 'siniestro': factura.siniestro,
-                'estudiante': factura.siniestro.poliza.estudiante if factura.siniestro and factura.siniestro.poliza else None,
+                'estudiante': factura.siniestro.poliza.estudiantes if factura.siniestro and factura.siniestro.poliza else None,
                 'total_pagado': total_pagado_filtrado,
                 'saldo_pendiente': saldo_pendiente,
                 'estado': estado,
