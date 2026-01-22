@@ -1,0 +1,66 @@
+* 3981aab9 (HEAD -> main, upstream/main, origin/main, origin/HEAD) FINAL DEPLOYMENT: Full synchronization with carlos branch
+*   79e65208 Merge branch 'main' of https://github.com/Carlosmicael/seguroVitaLink  fetch:merge main
+|\  
+* | bf7920b3 fix: resolve checkout issue
+| | *   6fc9ade3 (upstream/carlos) fetch:merge 21/01/2026 main
+| | |\  
+| | | * 5199a219 (upstream/desarrollo-ronal) Dashboard Solicitante
+| | | * 35ede8fe REPORTES ASESOR Y DISEÑO
+| | | * 26c3970f MEJORA LÓGICA DE LIQUIDACIÓN - DEFINITIVA
+| | | * d77d6a31 CRUD ASEGURADORA - POLITICAS - TERMINAR Y VISTA ADMINISTRADROR
+| | | * 66fa86d1 Liquidacion y Reportes
+| | | * 687b76c8 Dashboard del asesor
+| | | * 6b3798f7 Corrección advertencia DataTables
+| | | * e2014545 Nueva lógica y DASHBOARD
+| | | * af263410 Inicio
+| | * | c6f15b94 fetch:update 21/01/2026
+| | * | 44d2c72c fetch:update 19/01/2026
+| | |/  
+| | * c39498e8 fix: resolve checkout issue 17/01/2026
+| | * 268e9b97 fetch:update
+| |/  
+|/|   
+| | * 410e7758 (upstream/gabriela) tercera1
+| | * fbb5be77 tercer commit
+| | * 5ebee430 segundo commit
+| | * b22eb024 primer commit
+| |/  
+| | * dd852976 (upstream/ronal, upstream/respaldo-ronal-premerge) Panel de reportes
+| | * 7e26781d Siniestro corregido
+| | * ee411ea7 Documentacion siniestros
+| | * 04b1f48b Reglas de documentos
+| | * 0e21ce7e Plazo maximo para reportar
+| | * 9e3a2469 Agregacion de campo - DIAS MAXIMOS
+| | * 3742db2d Ronal
+| | * b0168478 GESTION Documentos de política SUBIDA
+| | * 4667539b CRUD ASEGURADORAS
+| | * b6a71484 Facturas pendientes
+| | * e836096d Siniestros atendidos
+| | * e6f42286 Estudiantes asegurados
+| | * 6cd31cf4 Reporte de pagos
+| | * 0c17ed4e Exportar los siniestros en un excel
+| | * ff2eb251 Gráfico de ingresos mensuales completado
+| | * dce6c17f Estructura base de datos y dashboard
+| |/  
+| *   3cf27a42 Merge pull request #3 from Carlosmicael/kriss
+| |\  
+| | | *   fd81d73e (upstream/kriss) Merge pull request #5 from CristianJ23/kriss
+| | | |\  
+| | | | * f8816446 (origin/kriss, kriss) facturation created and amdin
+| | | * | f7d80791 Merge pull request #4 from CristianJ23/kriss
+| | |/| | 
+| | | |/  
+| | | * bcda5aeb form to user activation
+| | * | 169ba632 Merge pull request #2 from CristianJ23/kriss
+| |/| | 
+| | |/  
+| | * 1e93b799 kriss branch creation
+| * | 5d7036e4 Merge pull request #1 from CristianJ23/kriss
+| |\| 
+| | * c826fd34 creation of activacion request reception page
+| |/  
+|/|   
+| * 510e8358 updateSidebar-fetch
+|/  
+* afc43f25 requeriments.txt
+* b16750dd estructura creada
