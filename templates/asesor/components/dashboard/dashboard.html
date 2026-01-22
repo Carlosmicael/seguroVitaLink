@@ -1,0 +1,446 @@
+{% extends "master/sideBar/sidebar_asesor.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+{% include "master/appBar/appBar.html" %}
+
+<style>
+  /* Tipografía premium */
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root{
+    --bg0:#070A0F;
+    --bg1:#0A1220;
+    --bg2:#0B1E1C;
+
+    --card: rgba(255,255,255,.72);
+    --card2: rgba(255,255,255,.62);
+    --stroke: rgba(148,163,184,.22);
+
+    --text:#0B1220;
+    --muted:#64748b;
+
+    --shadow: 0 18px 45px rgba(2,6,23,.18);
+    --shadow2: 0 28px 70px rgba(2,6,23,.22);
+
+    --r-xl: 26px;
+    --r-lg: 20px;
+    --r-md: 16px;
+
+    --teal:#14b8a6;
+    --cyan:#06b6d4;
+    --sky:#0ea5e9;
+    --amber:#f59e0b;
+    --rose:#fb7185;
+  }
+
+  *{ font-family: 'Manrope', 'Segoe UI', sans-serif; }
+
+  /* Fondo premium: gradiente + viñeta + blobs + noise */
+  .ui-shell{
+    min-height: 100vh;
+    background:
+      radial-gradient(1200px 600px at 15% 10%, rgba(20,184,166,.22), transparent 60%),
+      radial-gradient(900px 520px at 82% 20%, rgba(14,165,233,.24), transparent 55%),
+      radial-gradient(900px 520px at 60% 95%, rgba(99,102,241,.18), transparent 60%),
+      linear-gradient(135deg, #f8fafc 0%, #eef2ff 35%, #f1f5f9 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ui-shell::before{
+    content:"";
+    position:absolute; inset:-2px;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(0,0,0,.05), transparent 35%),
+      radial-gradient(circle at 70% 75%, rgba(0,0,0,.06), transparent 40%);
+    pointer-events:none;
+    mix-blend-mode:multiply;
+  }
+
+  /* Noise overlay */
+  .ui-shell::after{
+    content:"";
+    position:absolute; inset:0;
+    pointer-events:none;
+    opacity:.06;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+  }
+
+  /* Contenedor con ancho controlado (se siente más ordenado) */
+  .ui-container{
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  /* Cards premium */
+  .ui-card{
+    background: linear-gradient(180deg, var(--card) 0%, var(--card2) 100%);
+    border: 1px solid var(--stroke);
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow .18s ease, border-color .18s ease;
+  }
+
+  .ui-card::before{
+    content:"";
+    position:absolute; inset:-1px;
+    background: radial-gradient(600px 220px at 25% 0%, rgba(255,255,255,.65), transparent 55%);
+    opacity:.55;
+    pointer-events:none;
+  }
+
+  .ui-card:hover{
+    box-shadow: var(--shadow2);
+    border-color: rgba(148,163,184,.35);
+  }
+
+  /* Header */
+  .ui-header{
+    display:flex; flex-wrap:wrap;
+    gap:18px; align-items:stretch;
+  }
+
+  .ui-title{
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    color: var(--text);
+    line-height: 1.15;
+  }
+
+  .ui-subtitle{
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .ui-icon{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.08);
+    color: var(--text);
+  }
+
+  .ui-icon svg{
+    width: 22px;
+    height: 22px;
+  }
+
+  /* KPI cards */
+  .kpi-label{
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: #64748b;
+  }
+
+  .kpi-value{
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .kpi-hint{
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  /* Accent glow per KPI */
+  .kpi-glow{
+    position:absolute; inset:auto -50px -70px auto;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    filter: blur(18px);
+    opacity: .22;
+    pointer-events:none;
+  }
+  .glow-cyan{ background: radial-gradient(circle, rgba(6,182,212,.9), transparent 65%); }
+  .glow-amber{ background: radial-gradient(circle, rgba(245,158,11,.9), transparent 65%); }
+  .glow-rose{ background: radial-gradient(circle, rgba(251,113,133,.9), transparent 65%); }
+  .glow-emerald{ background: radial-gradient(circle, rgba(16,185,129,.9), transparent 65%); }
+
+  /* Live pill */
+  .live-pill{
+    background: linear-gradient(180deg, rgba(2,6,23,.92), rgba(2,6,23,.85));
+    color: #e2e8f0;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 999px;
+    padding: 12px 16px;
+    box-shadow: 0 18px 40px rgba(2,6,23,.18);
+    display:flex; align-items:center; gap:10px;
+    text-transform: uppercase;
+    letter-spacing: .2em;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  /* Chart card header */
+  .card-title{
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .card-kicker{
+    font-size: 11px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: #94a3b8;
+  }
+
+  /* Animación */
+  .fade-in{ animation: fadeIn .45s ease-out both; }
+  @keyframes fadeIn{
+    from{ opacity:0; transform: translateY(10px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+</style>
+
+
+<div class="ui-shell p-6 md:p-10">
+  <div class="ui-container">
+    <div class="ui-header mb-8">
+        <div class="fade-in ui-card flex-1 p-6">
+            <div class="flex items-center gap-3">
+                <span class="ui-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                        <path d="M4 6h16M4 12h10M4 18h7" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </span>
+                <h1 class="ui-title">Panel estrategico del asesor</h1>
+            </div>
+            <p class="ui-subtitle mt-2">Lectura rapida de salud operativa y tendencias de cartera.</p>
+        </div>
+        <div class="fade-in ui-card p-4">
+            <div class="live-pill">
+                <span class="relative flex h-2 w-2">
+                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span>
+                    <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
+                </span>
+                En vivo
+                <span id="lastUpdated" class="text-[10px] text-slate-300"></span>
+            </div>
+        </div>
+    </div>
+  </div>
+    <div class="mb-8 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div class="fade-in ui-card group relative overflow-hidden p-5">
+            <div class="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                    <path d="M5 7h14M5 12h10M5 17h7" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Polizas activas
+            </div>
+            <div id="metric-polizas" class="ui-kpi mt-3">{{ dashboard_data.polizas_activas }}</div>
+            <div class="mt-2 text-xs text-slate-400">Estado vigente en cartera.</div>
+            <div class="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100" style="background:linear-gradient(120deg, transparent, rgba(14,165,233,0.08), transparent);"></div>
+            <span class="kpi-glow glow-cyan"></span>
+        </div>
+        <div class="fade-in ui-card group relative overflow-hidden p-5">
+            <div class="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                    <path d="M4 12h16M7 7h10M6 17h12" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Siniestros en proceso
+            </div>
+            <div id="metric-siniestros" class="ui-kpi mt-3">{{ dashboard_data.siniestros_en_proceso }}</div>
+            <div class="mt-2 text-xs text-slate-400">Casos en revision y aprobacion.</div>
+            <div class="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100" style="background:linear-gradient(120deg, transparent, rgba(249,115,22,0.12), transparent);"></div>
+            <span class="kpi-glow glow-amber"></span>
+        </div>
+        <div class="fade-in ui-card group relative overflow-hidden p-5">
+            <div class="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                    <path d="M6 7h12M6 12h8M6 17h10" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Facturas pendientes
+            </div>
+            <div id="metric-facturas" class="ui-kpi mt-3">{{ dashboard_data.facturas_pendientes }}</div>
+            <div class="mt-2 text-xs text-slate-400">Pagos por liberar.</div>
+            <div class="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100" style="background:linear-gradient(120deg, transparent, rgba(244,63,94,0.12), transparent);"></div>
+            <span class="kpi-glow glow-rose"></span>
+        </div>
+        <div class="fade-in ui-card group relative overflow-hidden p-5">
+            <div class="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                    <path d="M4 12h16M8 8h8M6 16h12" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Total pagado del mes
+            </div>
+            <div id="metric-pagado" class="ui-kpi mt-3">${{ dashboard_data.total_pagado_mes|floatformat:2 }}</div>
+            <div class="mt-2 text-xs text-slate-400">Suma del periodo actual.</div>
+            <div class="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100" style="background:linear-gradient(120deg, transparent, rgba(16,185,129,0.12), transparent);"></div>
+            <span class="kpi-glow glow-emerald"></span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-5 xl:grid-cols-3">
+        <div class="fade-in ui-card rounded-3xl p-6 xl:col-span-2">
+            <div class="text-lg font-bold text-slate-900">Tendencia de siniestros</div>
+            <div class="text-xs uppercase tracking-[0.18em] text-slate-400">Ultimos 6 meses</div>
+            <div class="mt-5 h-64">
+                <canvas id="siniestrosChart"></canvas>
+            </div>
+        </div>
+        <div class="fade-in ui-card rounded-3xl p-6">
+            <div class="text-lg font-bold text-slate-900">Polizas creadas</div>
+            <div class="text-xs uppercase tracking-[0.18em] text-slate-400">Ultimos 6 meses</div>
+            <div class="mt-5 h-64">
+                <canvas id="polizasChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ dashboard_data|json_script:"dashboard-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const dashboardData = JSON.parse(document.getElementById('dashboard-data').textContent);
+    const metricsUrl = "{% url 'asesor_dashboard_metrics' %}";
+
+    const siniestrosCtx = document.getElementById('siniestrosChart').getContext('2d');
+    const siniestrosChart = new Chart(siniestrosCtx, {
+        type: 'line',
+        data: {
+            labels: dashboardData.labels,
+            datasets: [{
+                label: 'Siniestros',
+                data: dashboardData.siniestros_series,
+                borderColor: '#06b6d4',
+                backgroundColor: 'rgba(6, 182, 212, 0.15)',
+                tension: 0.35,
+                fill: true,
+                pointBackgroundColor: '#06b6d4',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(2, 6, 23, 0.92)',
+                    titleColor: '#e2e8f0',
+                    bodyColor: '#cbd5e1',
+                    padding: 12,
+                    cornerRadius: 12,
+                    displayColors: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(148,163,184,0.22)', drawBorder: false },
+                    ticks: { color: '#64748b', font: { size: 11 } }
+                },
+                x: {
+                    grid: { color: 'rgba(148,163,184,0.22)', drawBorder: false },
+                    ticks: { color: '#64748b', font: { size: 11 } }
+                }
+            }
+        }
+    });
+
+    const polizasCtx = document.getElementById('polizasChart').getContext('2d');
+    const polizasChart = new Chart(polizasCtx, {
+        type: 'bar',
+        data: {
+            labels: dashboardData.labels,
+            datasets: [{
+                data: dashboardData.polizas_series,
+                backgroundColor: '#0ea5e9',
+                borderRadius: 8,
+                barThickness: 22
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(2, 6, 23, 0.92)',
+                    titleColor: '#e2e8f0',
+                    bodyColor: '#cbd5e1',
+                    padding: 12,
+                    cornerRadius: 12,
+                    displayColors: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(148,163,184,0.22)', drawBorder: false },
+                    ticks: { color: '#64748b', font: { size: 11 } }
+                },
+                x: {
+                    grid: { color: 'rgba(148,163,184,0.22)', drawBorder: false },
+                    ticks: { color: '#64748b', font: { size: 11 } }
+                }
+            }
+        }
+    });
+
+    const numberFormatter = new Intl.NumberFormat('es-EC', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+
+    function updateMetrics(data) {
+        document.getElementById('metric-polizas').textContent = data.polizas_activas;
+        document.getElementById('metric-siniestros').textContent = data.siniestros_en_proceso;
+        document.getElementById('metric-facturas').textContent = data.facturas_pendientes;
+        document.getElementById('metric-pagado').textContent = `$${numberFormatter.format(data.total_pagado_mes)}`;
+
+        siniestrosChart.data.labels = data.labels;
+        siniestrosChart.data.datasets[0].data = data.siniestros_series;
+        siniestrosChart.update();
+
+        polizasChart.data.labels = data.labels;
+        polizasChart.data.datasets[0].data = data.polizas_series;
+        polizasChart.update();
+    }
+
+    function updateTimestamp() {
+        const now = new Date();
+        document.getElementById('lastUpdated').textContent = now.toLocaleTimeString('es-EC', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    async function refreshMetrics() {
+        try {
+            const response = await fetch(metricsUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!response.ok) {
+                return;
+            }
+            const data = await response.json();
+            updateMetrics(data);
+            updateTimestamp();
+        } catch (error) {
+            console.warn('No se pudo actualizar el dashboard', error);
+        }
+    }
+
+    updateTimestamp();
+    setInterval(refreshMetrics, 15000);
+</script>
+{% endblock %}
+

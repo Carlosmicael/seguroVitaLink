@@ -1,0 +1,52 @@
+{% extends "master/sideBar/sidebar_admin.html" %}
+
+{% block title %}Politica{% endblock %}
+
+{% block content %}
+{% include "master/appBar/appBar.html" %}
+
+<div class="space-y-6">
+    <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">
+                {% if modo == 'editar' %}Editar politica{% else %}Nueva version de politica{% endif %}
+            </h1>
+            <p class="mt-2 text-sm text-slate-500">Aseguradora: {{ aseguradora.nombre }}</p>
+        </div>
+        <a href="{% url 'politicas_list' aseguradora.id_aseguradora %}" class="text-sm font-semibold text-slate-500 hover:text-slate-700">
+            Volver a politicas
+        </a>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        {% csrf_token %}
+
+        <div>
+            <label class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Documento PDF</label>
+            {{ form.documento }}
+            {{ form.documento.errors }}
+        </div>
+
+        <div>
+            <label class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Terminos y condiciones</label>
+            {{ form.terminos }}
+            {{ form.terminos.errors }}
+        </div>
+
+        <div>
+            <label class="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Fecha de version</label>
+            {{ form.fecha_version }}
+            {{ form.fecha_version.errors }}
+        </div>
+
+        <div class="flex justify-end gap-3">
+            <a href="{% url 'politicas_list' aseguradora.id_aseguradora %}" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">
+                Cancelar
+            </a>
+            <button type="submit" class="rounded-lg bg-slate-900 px-6 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-white hover:bg-slate-800">
+                Guardar
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -11,14 +11,23 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+<<<<<<< HEAD
 import os
 from dotenv import load_dotenv
 
 # Cargar variables desde .env en la raíz (si existe)
 load_dotenv(os.path.join(Path(__file__).resolve().parent.parent, '.env'))
+=======
+from dotenv import load_dotenv
+import os
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / ".env")
+>>>>>>> main
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -42,7 +51,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_recaptcha',
     'core',
+<<<<<<< HEAD
     # app siniestros creada por kriss
     'apps.siniestros',
     'django_recaptcha',
@@ -50,6 +61,12 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
 ]
 
+=======
+    'django.contrib.humanize',
+]
+
+
+>>>>>>> main
 JAZZMIN_SETTINGS = {
     # Título que se muestra en el navegador
     "site_title": "VitaLink Admin",
@@ -116,7 +133,10 @@ JAZZMIN_UI_TWEAKS = {
     }
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -194,15 +214,20 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
+# https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'es-es'
 
+<<<<<<< HEAD
 TIME_ZONE = 'America/Guayaquil' # o tu zona horaria específica de Ecuador
+=======
+TIME_ZONE = 'America/Guayaquil'
+>>>>>>> main
 
 USE_I18N = True
 
 USE_TZ = True
+
 
 
 # Static files (CSS, JavaScript, Images)
@@ -210,11 +235,42 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+<<<<<<< HEAD
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files (uploaded files)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+=======
+
+
+
+# Aquí le decimos a Celery que use Redis.
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
+#Pusher
+
+PUSHER_APP_ID = "2028408"
+PUSHER_KEY = "3e0fb7f926cfffecfe16"
+PUSHER_SECRET = "0f37afa61a6ead39c961"
+PUSHER_CLUSTER = "us2"
+
+import pusher
+
+pusher_client = pusher.Pusher(app_id=PUSHER_APP_ID,key=PUSHER_KEY,secret=PUSHER_SECRET,cluster=PUSHER_CLUSTER,ssl=True)
+
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  
+EMAIL_PORT = 587 
+EMAIL_USE_TLS = True  
+EMAIL_HOST_USER = 'carlosmlo381@gmail.com' 
+EMAIL_HOST_PASSWORD = 'sraj uiwt xzpf llvu' 
+
+
+>>>>>>> main
 
 # reCAPTCHA keys (se leen de variables de entorno / .env)
 # Keep legacy names and provide keys expected by the installed package
@@ -225,3 +281,14 @@ RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_SITE_KEY', RECAPTCHA_SITE_KEY)
 RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_SECRET_KEY', RECAPTCHA_SECRET_KEY)
 
 
+<<<<<<< HEAD
+=======
+
+
+
+
+
+
+
+
+>>>>>>> main
