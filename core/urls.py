@@ -9,7 +9,6 @@ from .administrador import views as administrador_views
 
 
 
-
 urlpatterns = [
     path('login/', views.login_view, name='login'),
 
@@ -54,6 +53,13 @@ urlpatterns = [
     path('documentos/crear/', administrador_views.crear_documento, name='crear_documento'),
     path('documentos/detalle/<int:id_doc>/', administrador_views.detalle_documento, name='detalle_documento'),
     path('documentos/eliminar/<int:id_doc>/', administrador_views.eliminar_documento, name='eliminar_documento'),
+
+    # === ASEGURADORAS ===
+    path('administrador/aseguradoras/', administrador_views.aseguradoras_list, name='aseguradoras_list'),
+    path('administrador/aseguradoras/crear/', administrador_views.aseguradora_create, name='aseguradora_create'),
+    path('administrador/aseguradoras/<int:aseguradora_id>/editar/', administrador_views.aseguradora_edit, name='aseguradora_edit'),
+    path('administrador/aseguradoras/<int:aseguradora_id>/toggle/', administrador_views.aseguradora_toggle, name='aseguradora_toggle'),
+    path('administrador/aseguradoras/<int:aseguradora_id>/politicas/', administrador_views.politicas_list, name='politicas_list'),
 
     path('trigger-event/<int:user_id>/', administrador_views.trigger_event, name='trigger_event'),
     path('pusher/auth/', administrador_views.pusher_auth, name='pusher_auth'),

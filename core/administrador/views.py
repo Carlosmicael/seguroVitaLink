@@ -2,10 +2,24 @@ from core.decorators import role_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
 from django.utils import timezone
 from datetime import timedelta, datetime
-from core.models import (Poliza, Estudiante, Aseguradora, Siniestro, DocumentosAseguradora, ConfiguracionSiniestro, ReglasPoliza, Notificaciones, Profile)
+from core.models import (
+    Poliza,
+    Estudiante,
+    Aseguradora,
+    Siniestro,
+    DocumentosAseguradora,
+    ConfiguracionSiniestro,
+    ReglasPoliza,
+    Notificaciones,
+    Profile,
+    Solicitud,
+    Factura,
+    Pago,
+    TcasDocumentos,
+)
 from django.views.decorators.http import require_http_methods
 from datetime import date, datetime, timedelta
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest
@@ -31,12 +45,47 @@ from core.forms import AseguradoraForm, PoliticaAseguradoraForm
 @login_required(login_url='login')
 @role_required(['administrador'])
 def administrador_dashboard(request):
+    polizas_qs = Poliza.objects.all()
+    siniestros_qs = Siniestro.objects.all()
+    solicitudes_qs = Solicitud.objects.all()
+
+    total_facturado = Factura.objects.aggregate(total=Sum('monto'))['total'] or 0
+    total_pagado = Pago.objects.aggregate(total=Sum('monto_pagado'))['total'] or 0
+
     context = {
-        'total_polizas': Poliza.objects.count(),
-        'polizas_activas': Poliza.objects.filter(estado='activa').count(),
-        'total_siniestros': Siniestro.objects.count(),
-        'siniestros_pendientes': Siniestro.objects.filter(estado='pendiente').count(),
-        'total_estudiantes': Estudiante.objects.filter(estado='activo').count(),
+        'total_polizas': polizas_qs.count(),
+        'polizas_activas': polizas_qs.filter(estado='activa').count(),
+        'polizas_pendientes': polizas_qs.filter(estado='pendiente').count(),
+        'polizas_vencidas': polizas_qs.filter(estado='vencida').count(),
+        'total_siniestros': siniestros_qs.count(),
+        'siniestros_pendientes': siniestros_qs.filter(estado='pendiente').count(),
+        'siniestros_aprobados': siniestros_qs.filter(estado='aprobado').count(),
+        'siniestros_rechazados': siniestros_qs.filter(estado='rechazado').count(),
+        'siniestros_pagados': siniestros_qs.filter(estado='pagado').count(),
+        'total_estudiantes': Estudiante.objects.count(),
+        'estudiantes_activos': Estudiante.objects.filter(estado='activo').count(),
+        'aseguradoras_total': Aseguradora.objects.count(),
+        'aseguradoras_activas': Aseguradora.objects.filter(is_active=True).count(),
+        'aseguradoras_inactivas': Aseguradora.objects.filter(is_active=False).count(),
+        'total_solicitudes': solicitudes_qs.count(),
+        'solicitudes_pendientes': solicitudes_qs.filter(estado='pendiente').count(),
+        'solicitudes_en_proceso': solicitudes_qs.filter(estado='en_proceso').count(),
+        'solicitudes_aprobadas': solicitudes_qs.filter(estado='aprobada').count(),
+        'solicitudes_rechazadas': solicitudes_qs.filter(estado='rechazada').count(),
+        'documentos_requeridos': DocumentosAseguradora.objects.count(),
+        'documentos_activos': DocumentosAseguradora.objects.filter(activo=True).count(),
+        'documentos_pendientes': TcasDocumentos.objects.filter(estado='pendiente').count(),
+        'documentos_aprobados': TcasDocumentos.objects.filter(estado='aprobado').count(),
+        'documentos_rechazados': TcasDocumentos.objects.filter(estado='rechazado').count(),
+        'total_facturado': total_facturado,
+        'total_pagado': total_pagado,
+        'saldo_pendiente': total_facturado - total_pagado,
+        'facturas_total': Factura.objects.count(),
+        'pagos_total': Pago.objects.count(),
+        'notificaciones_pendientes': Notificaciones.objects.filter(not_read=False).count(),
+        'recent_polizas': polizas_qs.select_related('aseguradora').prefetch_related('estudiantes').order_by('-fecha_creacion')[:5],
+        'recent_siniestros': siniestros_qs.select_related('poliza').order_by('-fecha_reporte')[:5],
+        'recent_solicitudes': solicitudes_qs.select_related('estudiante').order_by('-fecha_solicitud')[:5],
     }
     return render(request, 'administrador/components/dashboard/dashboard.html', context)
 

@@ -3,12 +3,11 @@ from decimal import Decimal
 from datetime import timedelta
 
 import django
+from django.db import models
 from django.utils import timezone
-
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
-
 
 from django.contrib.auth.models import User  # noqa: E402
 from core.models import (  # noqa: E402
@@ -21,6 +20,9 @@ from core.models import (  # noqa: E402
     Beneficiario,
     DocumentosAseguradora,
     TcasDocumentos,
+    Factura,
+    Pago,
+    Notificaciones,
 )
 
 
@@ -37,6 +39,8 @@ def create_user_with_role(username, email, password, role):
 
 
 def clear_data():
+    Pago.objects.all().delete()
+    Factura.objects.all().delete()
     TcasDocumentos.objects.all().delete()
     Beneficiario.objects.all().delete()
     Siniestro.objects.all().delete()
@@ -45,6 +49,7 @@ def clear_data():
     DocumentosAseguradora.objects.all().delete()
     Estudiante.objects.all().delete()
     Aseguradora.objects.all().delete()
+    Notificaciones.objects.all().delete()
     Profile.objects.all().delete()
     User.objects.filter(is_superuser=False).delete()
 
@@ -54,26 +59,29 @@ def seed():
     password = "123"
     clear_data()
 
-    asesor_user, asesor_created = create_user_with_role(
-        "asesor", "asesor@example.com", password, "asesor"
-    )
-    solicitante_user, solicitante_created = create_user_with_role(
+    asesor_user, _ = create_user_with_role("asesor", "asesor@example.com", password, "asesor")
+    solicitante_user, _ = create_user_with_role(
         "solicitante", "solicitante@example.com", password, "solicitante"
     )
-    beneficiario_user, beneficiario_created = create_user_with_role(
+    beneficiario_user, _ = create_user_with_role(
         "beneficiario", "beneficiario@example.com", password, "beneficiario"
     )
+    admin_user, _ = create_user_with_role("admin", "admin@example.com", password, "administrador")
 
     aseguradoras = [
         Aseguradora.objects.create(
             nombre="Andes Seguros",
             direccion="Av. Central 123",
             telefono="0991234567",
+            email="contacto@andes.example.com",
+            politicas="Cobertura general y condiciones base.",
         ),
         Aseguradora.objects.create(
             nombre="Pacifico Vida",
             direccion="Calle 10 y Loja",
             telefono="0987654321",
+            email="soporte@pacifico.example.com",
+            politicas="Coberturas ampliadas y requisitos especiales.",
         ),
     ]
 
@@ -83,7 +91,7 @@ def seed():
         ("Carlos", "Mena", "0303030303", "UTPL0003", "carlos.mena@example.com"),
         ("Ana", "Vera", "0404040404", "UTPL0004", "ana.vera@example.com"),
         ("Luis", "Soto", "0505050505", "UTPL0005", "luis.soto@example.com"),
-        ("Diana", "Rios", "0606060606", "UTPL0006", "diana.rios@example.com"),
+        ("Diana", "Rios", "0606060606", "UTPL0006", solicitante_user.email),
     ]
     estudiantes = []
     for i, (nombres, apellidos, cedula, codigo, email) in enumerate(estudiantes_data):
@@ -107,7 +115,6 @@ def seed():
         aseguradora = aseguradoras[i % len(aseguradoras)]
         estado = "activa" if i % 3 != 0 else "pendiente"
         poliza = Poliza.objects.create(
-            estudiante=estudiante,
             aseguradora=aseguradora,
             numero_poliza=f"POL-{suffix}-{i + 1:03d}",
             numero=f"NUM-{suffix}-{i + 1:03d}",
@@ -118,10 +125,11 @@ def seed():
             fecha_fin=timezone.now() + timedelta(days=365 + i * 7),
             prima_neta=Decimal("25.00"),
         )
+        poliza.estudiantes.add(estudiante)
         polizas.append(poliza)
 
     siniestros = []
-    estados_siniestro = ["pendiente", "aprobado", "pagado"]
+    estados_siniestro = ["pendiente", "aprobado"]
     tipos_siniestro = ["accidente", "enfermedad", "hospitalizacion"]
     for i, poliza in enumerate(polizas):
         for j in range(2):
@@ -139,30 +147,79 @@ def seed():
             )
             siniestros.append(siniestro)
 
-    start_month = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    for siniestro in siniestros:
-        if siniestro.estado == "pagado":
-            Siniestro.objects.filter(pk=siniestro.pk).update(
-                fecha_actualizacion=start_month + timedelta(days=2)
-            )
-
+    beneficiarios = []
     beneficiario_profile = Profile.objects.get(user=beneficiario_user)
     for i, siniestro in enumerate(siniestros):
-        Beneficiario.objects.create(
+        cantidad = 2 if i % 3 == 0 else 1
+        for j in range(cantidad):
+            beneficiario = Beneficiario.objects.create(
+                siniestro=siniestro,
+                nombre=f"Beneficiario {i + 1}-{j + 1}",
+                correo=f"beneficiario{i + 1}_{j + 1}@example.com",
+                numero_cuenta=f"001-000{i + 1:03d}{j + 1}",
+                telefono=f"09950000{i + 1}{j + 1}",
+                profile=beneficiario_profile,
+            )
+            beneficiarios.append(beneficiario)
+
+    facturas = []
+    pagos = []
+    for i, beneficiario in enumerate(beneficiarios):
+        siniestro = beneficiario.siniestro
+        if siniestro.estado == "pendiente":
+            continue
+        monto_factura = Decimal("1200.00") + Decimal(str(i * 100))
+        factura = Factura.objects.create(
             siniestro=siniestro,
-            nombre=f"Beneficiario {i + 1}",
-            correo=f"beneficiario{i + 1}@example.com",
-            numero_cuenta=f"001-000{i + 1:03d}",
-            telefono=f"09950000{i + 1}",
-            profile=beneficiario_profile,
+            beneficiario=beneficiario,
+            numero_factura=f"FAC-{suffix}-{i + 1:03d}",
+            monto=monto_factura,
+            fecha=timezone.now().date() - timedelta(days=5),
         )
+        facturas.append(factura)
+
+        if i % 3 == 0:
+            pagos.append(
+                Pago.objects.create(
+                    siniestro=siniestro,
+                    factura=factura,
+                    monto_pagado=monto_factura,
+                    fecha_pago=timezone.now().date() - timedelta(days=2),
+                    metodo_pago="transferencia",
+                )
+            )
+        elif i % 3 == 1:
+            pagos.append(
+                Pago.objects.create(
+                    siniestro=siniestro,
+                    factura=factura,
+                    monto_pagado=(monto_factura / 2).quantize(Decimal("0.01")),
+                    fecha_pago=timezone.now().date() - timedelta(days=1),
+                    metodo_pago="cheque",
+                )
+            )
+
+    for siniestro in siniestros:
+        facturas_siniestro = Factura.objects.filter(siniestro=siniestro)
+        if not facturas_siniestro.exists():
+            continue
+        completo = True
+        for factura in facturas_siniestro:
+            total_pagado = factura.pagos.aggregate(total=models.Sum("monto_pagado"))["total"] or Decimal("0")
+            if total_pagado < factura.monto:
+                completo = False
+                break
+        if completo:
+            siniestro.estado = "pagado"
+            siniestro.save(update_fields=["estado"])
 
     solicitante_profile = Profile.objects.get(user=solicitante_user)
     for i, estudiante in enumerate(estudiantes[:4]):
+        estado = "pendiente" if i % 2 == 0 else "aprobada"
         Solicitud.objects.create(
             estudiante=estudiante,
             profile=solicitante_profile,
-            estado="pendiente",
+            estado=estado,
             tipo_poliza="Basica",
             monto_solicitado=Decimal("2500.00"),
             motivo="Solicitud de prueba",
@@ -181,19 +238,43 @@ def seed():
                 obligatorio=True,
             )
 
-    for i in range(3):
+    for i, beneficiario in enumerate(beneficiarios[:6]):
+        estado = "pendiente" if i % 2 == 0 else "aprobado"
         TcasDocumentos.objects.create(
             doc_descripcion=f"Documento de prueba {i + 1}",
+            estado=estado,
+            beneficiario=beneficiario,
         )
+
+    Notificaciones.objects.create(
+        not_codcli=solicitante_profile,
+        not_mensaje="Solicitud recibida y en revision.",
+        not_read=False,
+    )
+    Notificaciones.objects.create(
+        not_codcli=solicitante_profile,
+        not_mensaje="Tienes documentos pendientes por subir.",
+        not_read=False,
+    )
+    Notificaciones.objects.create(
+        not_codcli=solicitante_profile,
+        not_mensaje="Solicitud aprobada.",
+        not_read=True,
+    )
 
     print("Seed completo.")
     print(f"Usuario asesor: {asesor_user.username}")
     print(f"Usuario solicitante: {solicitante_user.username}")
     print(f"Usuario beneficiario: {beneficiario_user.username}")
+    print(f"Usuario administrador: {admin_user.username}")
     print(f"Password para los usuarios creados: {password}")
     print(f"Polizas creadas: {len(polizas)}")
     print(f"Siniestros creados: {len(siniestros)}")
+    print(f"Facturas creadas: {len(facturas)}")
+    print(f"Pagos creados: {len(pagos)}")
 
 
 if __name__ == "__main__":
     seed()
+
+
