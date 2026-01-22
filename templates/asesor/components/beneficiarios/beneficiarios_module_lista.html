@@ -1,0 +1,516 @@
+{% extends "master/sideBar/sidebar_asesor.html" %}
+{% load static %}
+{% block title %}Gestión de Beneficiarios{% endblock %}
+
+{% block content %}
+{% include "master/appBar/appBar.html" %}
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #f8f9fc; }
+    
+    .fade-in { animation: fadeIn 0.5s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .fade-out { animation: fadeOut 0.2s ease-out forwards; }
+    @keyframes fadeOut {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(10px); }
+    }
+    
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+
+<script>
+let tabla;
+
+$(document).ready(function() {
+    // Inicializar DataTable
+    tabla = $('#tablaBeneficiarios').DataTable({
+        language: {
+            search: "Buscar:",
+            lengthMenu: "Mostrar _MENU_ registros",
+            info: "Mostrando _START_ a _END_ de _TOTAL_ beneficiarios",
+            infoEmpty: "No hay registros disponibles",
+            infoFiltered: "(filtrado de _MAX_ registros totales)",
+            paginate: {
+                first: "Primero",
+                last: "Último",
+                next: "Siguiente",
+                previous: "Anterior"
+            }
+        },
+        pageLength: 10,
+        order: [[0, 'desc']],
+        columnDefs: [
+            { orderable: false, targets: 6 }
+        ]
+    });
+
+    // Cerrar modales al hacer clic fuera
+    $('#modalDetalle, #modalCrear').on('click', function(e) {
+        if (e.target.id === 'modalDetalle' || e.target.id === 'modalCrear') {
+            cerrarModal();
+            cerrarModalCrear();
+        }
+    });
+    
+    // Cerrar con ESC
+    $(document).on('keydown', function(e) {
+        if (e.key === 'Escape') {
+            cerrarModal();
+            cerrarModalCrear();
+        }
+    });
+});
+
+function abrirModalCrear() {
+    document.getElementById('modalCrear').style.display = 'block';
+    document.body.style.overflow = 'hidden'; // Evitar scroll en body
+}
+
+function cerrarModalCrear() {
+    document.getElementById('modalCrear').style.display = 'none';
+    document.body.style.overflow = ''; // Restaurar scroll
+    $('#formCrearBeneficiario')[0].reset();
+    $('#mensajeError').hide();
+}
+
+function enviarFormulario() {
+    const form = $('#formCrearBeneficiario')[0];
+    const formData = new FormData(form);
+    
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    const btnGuardar = $('#btnGuardar');
+    btnGuardar.prop('disabled', true);
+    btnGuardar.html('<i class="fas fa-spinner fa-spin" style="margin-right: 6px;"></i>Creando...');
+    
+    $.ajax({
+        url: "{% url 'beneficiarios_module_crear' %}",
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                alert(response.message);
+                cerrarModalCrear();
+                location.reload();
+            }
+        },
+        error: function(xhr) {
+            const error = xhr.responseJSON;
+            let mensaje = 'Error al crear el beneficiario';
+            
+            if (error.errors) {
+                mensaje = Object.values(error.errors).flat().join(', ');
+            } else if (error.message) {
+                mensaje = error.message;
+            }
+            
+            $('#mensajeError p').text(mensaje);
+            $('#mensajeError').show();
+        },
+        complete: function() {
+            btnGuardar.prop('disabled', false);
+            btnGuardar.html('<i class="fas fa-save" style="margin-right: 6px;"></i>Crear Beneficiario');
+        }
+    });
+}
+
+function verDetalle(id) {
+    $.ajax({
+        url: `/beneficiarios/${id}/`,
+        type: 'GET',
+        success: function(data) {
+            $('#modal-numero').text(`Beneficiario #${data.id}`);
+            $('#modal-nombre').text(data.nombre);
+            $('#modal-correo').text(data.correo);
+            $('#modal-telefono').text(data.telefono);
+            $('#modal-numero-cuenta').text(data.numero_cuenta);
+            $('#modal-siniestro-id').text(`#${data.siniestro.id}`);
+            $('#modal-siniestro-tipo').text(data.siniestro.tipo);
+            $('#modal-siniestro-poliza').text(data.siniestro.poliza);
+            $('#modal-fecha-creacion').text(data.fecha_creacion);
+            
+            // Estado del siniestro badge
+            let estadoBadge = '';
+            if (data.siniestro.estado === 'Pendiente de revisión') {
+                estadoBadge = '<span style="display: inline-block; padding: 4px 12px; background: #fef3c7; color: #92400e; border-radius: 16px; font-size: 11px; font-weight: 600;">Pendiente</span>';
+            } else if (data.siniestro.estado === 'Aprobado') {
+                estadoBadge = '<span style="display: inline-block; padding: 4px 12px; background: #d1fae5; color: #065f46; border-radius: 16px; font-size: 11px; font-weight: 600;">Aprobado</span>';
+            } else if (data.siniestro.estado === 'Rechazado') {
+                estadoBadge = '<span style="display: inline-block; padding: 4px 12px; background: #fee2e2; color: #991b1b; border-radius: 16px; font-size: 11px; font-weight: 600;">Rechazado</span>';
+            } else if (data.siniestro.estado === 'Pagado') {
+                estadoBadge = '<span style="display: inline-block; padding: 4px 12px; background: #e0e7ff; color: #3730a3; border-radius: 16px; font-size: 11px; font-weight: 600;">Pagado</span>';
+            }
+            $('#modal-siniestro-estado').html(estadoBadge);
+            
+            if (data.tiene_cuenta) {
+                $('#modal-estado-cuenta-badge').html('<span style="display: inline-block; padding: 6px 16px; background: #d1fae5; color: #065f46; border-radius: 20px; font-size: 13px; font-weight: 600;"><i class="fas fa-check-circle"></i> Cuenta Activa</span>');
+                $('#modal-username-display').html(`Usuario: <strong>${data.username}</strong>`);
+            } else {
+                $('#modal-estado-cuenta-badge').html('<span style="display: inline-block; padding: 6px 16px; background: #fef3c7; color: #92400e; border-radius: 20px; font-size: 13px; font-weight: 600;"><i class="fas fa-clock"></i> Sin Cuenta</span>');
+                $('#modal-username-display').text('');
+            }
+            
+            $('#modalDetalle').fadeIn(300);
+        },
+        error: function() {
+            alert('Error al cargar los detalles del beneficiario');
+        }
+    });
+}
+
+function cerrarModal() {
+    $('#modalDetalle').fadeOut(300);
+}
+</script>
+
+<div style="padding: 32px; background: #f8f9fc; min-height: 100vh;" class="fade-in">
+
+    <!-- Header -->
+    <div style="margin-bottom: 32px;">
+        <h1 style="font-size: 32px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">
+            <i class="fas fa-users" style="color: #10b981; margin-right: 12px;"></i>
+            Gestión de Beneficiarios
+        </h1>
+        <p style="color: #64748b; font-size: 15px;">Administra todos los beneficiarios de siniestros aprobados</p>
+    </div>
+
+
+
+
+    <!-- Modal Detalle de Beneficiario -->
+    <div id="modalDetalle" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; backdrop-filter: blur(8px); background: rgba(0, 0, 0, 0.4); animation: fadeIn 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+            <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 700px; width: 100%; max-height: 90vh; padding: 0; overflow: hidden; animation: slideUp 0.3s ease-out; display: flex; flex-direction: column;">
+                
+                <!-- Header Modal -->
+                <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 28px; position: relative;">
+                    <button onclick="cerrarModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.2); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; color: white; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h2 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">
+                        <i class="fas fa-user-circle" style="margin-right: 10px;"></i>
+                        Detalle del Beneficiario
+                    </h2>
+                    <p style="color: rgba(255, 255, 255, 0.9); margin-top: 8px; font-size: 14px;" id="modal-numero"></p>
+                </div>
+
+                <!-- Body Modal -->
+                <div style="padding: 30px; overflow-y: auto; max-height: calc(90vh - 180px);">
+                    
+                    <!-- Información Personal -->
+                    <div style="margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <i class="fas fa-user" style="color: #10b981; font-size: 20px; margin-right: 12px;"></i>
+                            <h3 style="color: #1e293b; font-size: 16px; font-weight: 600; margin: 0;">Información Personal</h3>
+                        </div>
+                        <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #10b981;">
+                            <p style="color: #1e293b; font-weight: 600; font-size: 15px; margin-bottom: 4px;" id="modal-nombre"></p>
+                            <p style="color: #64748b; font-size: 14px; margin: 0;" id="modal-correo"></p>
+                        </div>
+                    </div>
+
+                    <!-- Grid de Información de Contacto -->
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+                        <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                            <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Teléfono</p>
+                            <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-telefono"></p>
+                        </div>
+                        <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                            <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Número de Cuenta</p>
+                            <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-numero-cuenta"></p>
+                        </div>
+                    </div>
+
+                    <!-- Información del Siniestro -->
+                    <div style="margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <i class="fas fa-exclamation-triangle" style="color: #10b981; font-size: 20px; margin-right: 12px;"></i>
+                            <h3 style="color: #1e293b; font-size: 16px; font-weight: 600; margin: 0;">Siniestro Relacionado</h3>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                            <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                                <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">ID Siniestro</p>
+                                <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-siniestro-id"></p>
+                            </div>
+                            <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                                <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Tipo</p>
+                                <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-siniestro-tipo"></p>
+                            </div>
+                            <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                                <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Estado</p>
+                                <p style="margin: 0;" id="modal-siniestro-estado"></p>
+                            </div>
+                        </div>
+                        <div style="background: #f8fafc; padding: 14px; border-radius: 10px; margin-top: 16px;">
+                            <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Póliza</p>
+                            <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-siniestro-poliza"></p>
+                        </div>
+                    </div>
+
+                    <!-- Estado de Cuenta -->
+                    <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #10b981; margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                            <i class="fas fa-shield-alt" style="color: #10b981; font-size: 20px;"></i>
+                            <h3 style="color: #1e293b; font-size: 16px; font-weight: 600; margin: 0;">Estado de Cuenta</h3>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px;">
+                            <span id="modal-estado-cuenta-badge"></span>
+                            <span id="modal-username-display" style="color: #64748b; font-size: 14px;"></span>
+                        </div>
+                    </div>
+
+                    <!-- Fecha de Creación -->
+                    <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 20px; border-radius: 12px; text-align: center; border: 2px solid #86efac;">
+                        <i class="fas fa-calendar-check" style="color: #059669; font-size: 32px; margin-bottom: 12px;"></i>
+                        <p style="color: #059669; font-size: 13px; font-weight: 500; margin-bottom: 6px;">Fecha de Registro</p>
+                        <p style="color: #059669; font-size: 20px; font-weight: 700; margin: 0;" id="modal-fecha-creacion"></p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    
+    <!-- Modal Crear Beneficiario -->
+    <div id="modalCrear" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; backdrop-filter: blur(8px); background: rgba(0, 0, 0, 0.4); animation: fadeIn 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+            <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 650px; width: 100%; max-height: 90vh; padding: 0; overflow: hidden; animation: slideUp 0.3s ease-out; display: flex; flex-direction: column;">
+                
+                <!-- Header Modal -->
+                <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 28px; position: relative;">
+                    <button onclick="cerrarModalCrear()" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.2); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; color: white; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h2 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">
+                        <i class="fas fa-user-plus" style="margin-right: 10px;"></i>
+                        Registrar Nuevo Beneficiario
+                    </h2>
+                    <p style="color: rgba(255, 255, 255, 0.9); margin-top: 8px; font-size: 14px;">Complete el formulario para crear un nuevo beneficiario</p>
+                </div>
+
+                <!-- Body Modal con Scroll -->
+                <div style="padding: 24px; overflow-y: auto; max-height: calc(90vh - 180px);">
+                    <form id="formCrearBeneficiario" method="POST">
+                        {% csrf_token %}
+                        
+                        <!-- Siniestro Aprobado -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                <i class="fas fa-exclamation-triangle" style="color: #10b981; margin-right: 6px;"></i>
+                                {{ form.siniestro.label }} *
+                            </label>
+                            {{ form.siniestro }}
+                            <p style="color: #64748b; font-size: 12px; margin-top: 6px;">Solo se muestran siniestros con estado "Aprobado"</p>
+                        </div>
+
+                        <!-- Nombre Completo -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                <i class="fas fa-user" style="color: #10b981; margin-right: 6px;"></i>
+                                {{ form.nombre.label }} *
+                            </label>
+                            {{ form.nombre }}
+                        </div>
+
+                        <!-- Correo Electrónico -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                <i class="fas fa-envelope" style="color: #10b981; margin-right: 6px;"></i>
+                                {{ form.correo.label }} *
+                            </label>
+                            {{ form.correo }}
+                            <p style="color: #64748b; font-size: 12px; margin-top: 6px;">Las credenciales de acceso se enviarán a este correo</p>
+                        </div>
+
+                        <!-- Grid: Teléfono y Número de Cuenta -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                            <div>
+                                <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                    <i class="fas fa-phone" style="color: #10b981; margin-right: 6px;"></i>
+                                    {{ form.telefono.label }}
+                                </label>
+                                {{ form.telefono }}
+                            </div>
+                            <div>
+                                <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                    <i class="fas fa-credit-card" style="color: #10b981; margin-right: 6px;"></i>
+                                    {{ form.numero_cuenta.label }}
+                                </label>
+                                {{ form.numero_cuenta }}
+                            </div>
+                        </div>
+
+                        <!-- Información Importante -->
+                        <div style="background: #f0fdf4; border: 2px solid #86efac; padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: start; gap: 12px;">
+                                <i class="fas fa-info-circle" style="color: #059669; font-size: 20px; margin-top: 2px;"></i>
+                                <div>
+                                    <p style="color: #059669; font-size: 14px; font-weight: 600; margin-bottom: 8px;">Información Importante</p>
+                                    <ul style="color: #047857; font-size: 13px; line-height: 1.6; margin: 0; padding-left: 20px;">
+                                        <li>Se creará automáticamente un usuario y contraseña</li>
+                                        <li>Las credenciales se enviarán al correo electrónico proporcionado</li>
+                                        <li>El beneficiario podrá acceder al sistema con estas credenciales</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mensaje de Error -->
+                        <div id="mensajeError" style="display: none; background: #fee2e2; border: 2px solid #ef4444; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+                            <p style="color: #991b1b; font-size: 14px; margin: 0;"></p>
+                        </div>
+
+                    </form>
+                </div>
+
+                <!-- Footer Modal -->
+                <div style="padding: 20px 24px; border-top: 2px solid #f1f5f9; background: #f8fafc; display: flex; gap: 12px; justify-content: flex-end;">
+                    <button onclick="cerrarModalCrear()" style="padding: 12px 24px; background: #e2e8f0; color: #475569; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s;">
+                        <i class="fas fa-times" style="margin-right: 6px;"></i>
+                        Cancelar
+                    </button>
+                    <button onclick="enviarFormulario()" id="btnGuardar" style="padding: 12px 24px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.2s;">
+                        <i class="fas fa-save" style="margin-right: 6px;"></i>
+                        Crear Beneficiario
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Card -->
+    <div style="background: white; padding: 28px; border-radius: 16px; margin-bottom: 32px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;">
+            
+            <div style="flex: 1; min-width: 140px; text-align: center;">
+                <div style="color: #94a3b8; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Total Beneficiarios</div>
+                <div style="color: #10b981; font-size: 42px; font-weight: 700; line-height: 1;">{{ total }}</div>
+            </div>
+
+            <div style="flex: 1; min-width: 140px; text-align: center;">
+                <div style="color: #94a3b8; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Con Cuenta Activa</div>
+                <div style="color: #3b82f6; font-size: 42px; font-weight: 700; line-height: 1;">{{ activos }}</div>
+            </div>
+
+            <div style="flex: 1; min-width: 140px; text-align: center;">
+                <div style="color: #94a3b8; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Pendientes</div>
+                <div style="color: #f59e0b; font-size: 42px; font-weight: 700; line-height: 1;">{{ pendientes }}</div>
+            </div>
+
+            <button onclick="abrirModalCrear()" style="padding: 14px 28px; background: #10b981; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.2s;">
+                <i class="fas fa-user-plus" style="margin-right: 8px;"></i>
+                Nuevo Beneficiario
+            </button>
+        </div>
+    </div>
+
+    <!-- Tabla -->
+    <div style="background: white; padding: 24px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto;">
+        <table id="tablaBeneficiarios" class="display" style="width: 100%; border-collapse: separate; border-spacing: 0;">
+            <thead>
+                <tr style="background: #f8fafc;">
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">ID</th>
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Nombre</th>
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Correo</th>
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Siniestro</th>
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Fecha Registro</th>
+                    <th style="padding: 16px; text-align: center; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Estado</th>
+                    <th style="padding: 16px; text-align: center; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for beneficiario in beneficiarios %}
+                <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" 
+                    onmouseover="this.style.background='#f8fafc'" 
+                    onmouseout="this.style.background='white'">
+                    
+                    <td style="padding: 16px;">
+                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px;">
+                            {{ beneficiario.id_beneficiario }}
+                        </div>
+                    </td>
+                    
+                    <td style="padding: 16px;">
+                        <div style="color: #1e293b; font-weight: 600; font-size: 14px;">{{ beneficiario.nombre }}</div>
+                    </td>
+                    
+                    <td style="padding: 16px; color: #475569; font-size: 14px;">
+                        {{ beneficiario.correo }}
+                    </td>
+                    
+                    <td style="padding: 16px; white-space: nowrap;">
+                        <div style="color: #1e293b; font-weight: 500; font-size: 14px;">Siniestro #{{ beneficiario.siniestro.id }}</div>
+                        <div style="color: #94a3b8; font-size: 12px; margin-top: 2px;">{{ beneficiario.siniestro.get_tipo_display }}</div>
+                    </td>
+                    
+                    <td style="padding: 16px; color: #475569; font-size: 14px; white-space: nowrap;">
+                        {{ beneficiario.fecha_creacion|date:"d/m/Y" }}
+                        <div style="color: #94a3b8; font-size: 12px;">{{ beneficiario.fecha_creacion|date:"h:i A" }}</div>
+                    </td>
+                    
+                    <td style="padding: 16px; text-align: center; white-space: nowrap;">
+                        {% if beneficiario.profile %}
+                            <span style="display: inline-block; padding: 6px 16px; background: #d1fae5; color: #065f46; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                <i class="fas fa-check-circle"></i> Cuenta Activa
+                            </span>
+                        {% else %}
+                            <span style="display: inline-block; padding: 6px 16px; background: #fef3c7; color: #92400e; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                <i class="fas fa-clock"></i> Pendiente
+                            </span>
+                        {% endif %}
+                    </td>
+                    
+                    <td style="padding: 16px; text-align: center; white-space: nowrap;">
+                        <button onclick="verDetalle({{ beneficiario.id_beneficiario }})" style="padding: 10px 14px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25); transition: all 0.2s;" title="Ver Detalle">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 60px 20px; color: #94a3b8;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">
+                            <i class="fas fa-users-slash"></i>
+                        </div>
+                        <div style="font-size: 18px; font-weight: 600;">No hay beneficiarios registrados</div>
+                        <div style="font-size: 14px; margin-top: 8px;">Comience registrando un nuevo beneficiario</div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- jQuery y DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+
+{% endblock %}
+

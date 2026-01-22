@@ -12,6 +12,55 @@ from django.utils import timezone
 from datetime import timedelta
 from core.forms import ActivacionPolizaForm, BeneficiarioLoginForm, GestionSolicitudForm
 from core.models import Siniestro, Poliza, Estudiante
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import ReporteEvento
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+
+
+
+
+
+import os
+import io
+import json
+import re
+import zipfile
+import requests
+import traceback
+import logging
+from datetime import datetime
+
+# Django Core
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse, FileResponse, Http404, HttpResponseNotAllowed
+from django.utils import timezone
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+
+# Terceros (Documentos y Drive)
+from docx import Document
+from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
+
+# Formularios y Modelos locales
+from .forms import TcasDocumentosForm
+from .models import TcasDocumentos
+from .models import Profile
+from core.tasks import ejecutar_recordatorio
+from .models import Notificaciones
+from django.utils import timezone
+
+
+
+
+
+logger = logging.getLogger(__name__)
+
 
 
 
@@ -27,7 +76,7 @@ def login_view(request):
 
             rol = user.profile.rol
             if rol == 'administrador':
-                return redirect('aseguradoras_list')
+                return redirect('administrador_dashboard')
 
             if rol == 'asesor':
                 return redirect('asesor_dashboard')
@@ -47,6 +96,99 @@ def login_view(request):
 
 
 
+def reportar_evento(request):
+    print("Entrando al reportar_evento")
+    form_class = ActivacionPolizaForm
+    success_url = reverse_lazy('inicio')
+    if request.method == 'POST':
+
+        try:
+            descripcion = request.POST.get('descripcion')
+            nombre_beneficiario = request.POST.get('nombre_beneficiario')
+            relacion_beneficiario = request.POST.get('relacion_beneficiario')
+            telefono = request.POST.get('telefono')
+            email = request.POST.get('email')
+            archivo_documento = request.FILES.get('archivo_documento')
+
+            reporte = ReporteEvento.objects.create(
+                descripcion=descripcion,
+                nombre_beneficiario=nombre_beneficiario,
+                relacion_beneficiario=relacion_beneficiario,
+                telefono=telefono,
+                email=email,
+                estado='nuevo',
+                evaluado=False,
+                archivo_documento=archivo_documento
+            )
+            reporte.save()
+
+            print("Reporte guardado correctamente")
+
+            fecha_hora_str = timezone.now() + timedelta(minutes=1)
+            print(f"Programando tarea para: {fecha_hora_str}")
+            task = ejecutar_recordatorio.apply_async(eta=fecha_hora_str)
+
+            profileFilter = Profile.objects.filter(rol='asesor')   
+            profile = profileFilter.first()
+
+            recordatorio = Notificaciones.objects.create(
+                not_codcli=profile,
+                not_fecha_proceso=fecha_hora_str, 
+                not_fecha_creacion=timezone.now(),
+                not_mensaje=f"Recordatorio de reporte se ha mandado un reporte de evento para {reporte.id}",
+                not_read=False,
+                not_estado=False,
+                not_celery_task_id=task.id,
+            )
+
+            recordatorio.save()
+
+            messages.success(request, "Reporte enviado correctamente.")
+            return redirect('inicio')
+
+        except Exception as e:
+            print(f"Error al enviar el reporte: {str(e)}")
+            messages.error(request, f"Error al enviar el reporte: {str(e)}")
+            return redirect('inicio')
+
+    return render(request, 'siniestros/formulario_activacion.html', {'form': form_class, 'success_url': success_url})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -55,14 +197,17 @@ class SiniestrosInicioView(TemplateView):
 
     print("SiniestrosInicioView")
 
-    """Vista para la página de inicio de gestión de siniestros"""
-    template_name = 'siniestros/siniestro_report.html' #activacion request reception page
+    template_name = 'siniestros/siniestro_report.html' 
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         print("SiniestrosInicioView - get_context_data")
         context['titulo'] = 'Gestión de Siniestros - VitaLink'
         return context
+
+
+
+
 
 
 
@@ -219,6 +364,9 @@ class AdminSolicitudDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailVi
         return context
 
 
+
+
+
 class AdminGestionSolicitudView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """Vista para gestionar una solicitud (asignar tipo, estudiante, etc.)"""
     model = Siniestro
@@ -345,43 +493,19 @@ class AdminGestionSolicitudView(LoginRequiredMixin, UserPassesTestMixin, UpdateV
 
 
 
-import os
-import io
-import json
-import re
-import zipfile
-import requests
-import traceback
-import logging
-from datetime import datetime
-
-# Django Core
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, FileResponse, Http404, HttpResponseNotAllowed
-from django.utils import timezone
-from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
-
-# Terceros (Documentos y Drive)
-from docx import Document
-from google.oauth2.credentials import Credentials
-from google.auth.transport.requests import Request
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
-
-# Formularios y Modelos locales
-from .forms import TcasDocumentosForm
-from .models import TcasDocumentos
 
 
-logger = logging.getLogger(__name__)
+
+
+
+
+
+
+
 
 # --- CONFIGURACIÓN GOOGLE DRIVE ---
 TOKEN_PATH = os.getenv("TOKEN_PATH")
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
-
-
 
 
 

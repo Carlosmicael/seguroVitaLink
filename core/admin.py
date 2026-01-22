@@ -1,19 +1,6 @@
 from django.contrib import admin
-from .models import (
-    Poliza,
-    Profile,
-    Estudiante,
-    Notificaciones,
-    Solicitud,
-    TcasDocumentos,
-    Siniestro,
-    Aseguradora,
-    Beneficiario,
-    DocumentosAseguradora,
-    Factura, # FACTURA - RONAL
-    Pago, # PAGO - RONAL
-    PoliticaAseguradora, # POLITICAS - RONAL
-)
+from .models import Poliza, Profile, Estudiante , Notificaciones, Solicitud, TcasDocumentos, Siniestro, Aseguradora, Beneficiario, DocumentosAseguradora, ReglasPoliza, ConfiguracionSiniestro, ReporteEvento,Factura,Pago,PoliticaAseguradora
+
 
 # Register your models here.
 admin.site.register(Profile)
@@ -22,47 +9,41 @@ admin.site.register(Solicitud)
 admin.site.register(TcasDocumentos)
 admin.site.register(Aseguradora)
 admin.site.register(Beneficiario)
-admin.site.register(DocumentosAseguradora) 
+admin.site.register(DocumentosAseguradora)
+admin.site.register(ReglasPoliza)
+admin.site.register(ConfiguracionSiniestro)
+admin.site.register(Estudiante)
+admin.site.register(ReporteEvento)
 admin.site.register(Factura) # FACTURA - RONAL
 admin.site.register(Pago) # PAGO - RONAL
 admin.site.register(PoliticaAseguradora) # POLITICAS - RONAL
 
 
 
-
-@admin.register(Estudiante)
-class EstudianteAdmin(admin.ModelAdmin):
-    list_display = ('codigo_estudiante', 'nombre_completo', 'cedula', 'carrera', 'estado', 'email')
-    list_filter = ('estado', 'carrera', 'fecha_ingreso')
-    search_fields = ('codigo_estudiante', 'cedula', 'nombres', 'apellidos', 'email')
-    date_hierarchy = 'fecha_creacion'
-    readonly_fields = ('fecha_creacion', 'fecha_actualizacion')
-    
-    fieldsets = (
-        ('Identificación', {
-            'fields': ('cedula', 'codigo_estudiante')
-        }),
-        ('Información Personal', {
-            'fields': ('nombres', 'apellidos', 'email', 'telefono')
-        }),
-        ('Información Académica', {
-            'fields': ('carrera', 'nivel', 'estado', 'fecha_ingreso')
-        }),
-        ('Auditoría', {
-            'fields': ('fecha_creacion', 'fecha_actualizacion'),
-            'classes': ('collapse',)
-        }),
-    )
-
-
 @admin.register(Poliza)
 class PolizaAdmin(admin.ModelAdmin):
-    list_display = ('numero', 'estudiante', 'estado', 'monto_cobertura', 'fecha_creacion')
+    list_display = ('numero_poliza', 'get_estudiantes', 'estado', 'monto_cobertura', 'fecha_creacion')
     list_filter = ('estado', 'fecha_creacion')
-    search_fields = ('numero', 'estudiante__codigo_estudiante', 'estudiante__nombres', 'estudiante__apellidos', 'estudiante__cedula')
+    search_fields = ('numero_poliza', 'numero', 'estudiantes__codigo_estudiante', 'estudiantes__nombres', 'estudiantes__apellidos', 'estudiantes__cedula')
     date_hierarchy = 'fecha_creacion'
     readonly_fields = ('fecha_creacion',)
+    filter_horizontal = ('estudiantes',)  
+    
+    def get_estudiantes(self, obj):
+        estudiantes = obj.estudiantes.all()[:3]  
+        if estudiantes:
+            nombres = ", ".join([f"{e.nombres} {e.apellidos}" for e in estudiantes])
+            total = obj.estudiantes.count()
+            if total > 3:
+                return f"{nombres}... (+{total-3} más)"
+            return nombres
+        return "Sin estudiantes"
+    get_estudiantes.short_description = 'Estudiantes'
 
+
+
+
+    
 
 @admin.register(Siniestro)
 class SiniestroAdmin(admin.ModelAdmin):

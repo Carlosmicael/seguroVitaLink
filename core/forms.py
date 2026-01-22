@@ -1,21 +1,57 @@
 from django import forms
-from .models import (
-    Poliza,
-    Estudiante,
-    Solicitud,
-    TcasDocumentos,
-    Factura,
-    Pago,
-    Aseguradora,
-    PoliticaAseguradora,
-)
+from .models import Poliza, Estudiante, Solicitud,TcasDocumentos,Siniestro,Beneficiario,Factura,Pago,Aseguradora,PoliticaAseguradora
+
+
+
+
+class BeneficiarioForm(forms.ModelForm):
+    class Meta:
+        model = Beneficiario
+        fields = ['siniestro', 'nombre', 'correo', 'numero_cuenta', 'telefono']
+        widgets = {
+            'siniestro': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all',
+            }),
+            'nombre': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all',
+                'placeholder': 'Nombre completo del beneficiario'
+            }),
+            'correo': forms.EmailInput(attrs={
+                'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all',
+                'placeholder': 'correo@ejemplo.com'
+            }),
+            'numero_cuenta': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all',
+                'placeholder': 'Número de cuenta bancaria'
+            }),
+            'telefono': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all',
+                'placeholder': '0999999999'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Solo mostrar siniestros aprobados
+        from .models import Siniestro
+        self.fields['siniestro'].queryset = Siniestro.objects.filter(estado='aprobado')
+        self.fields['siniestro'].label = 'Siniestro Aprobado'
+        self.fields['nombre'].label = 'Nombre Completo'
+        self.fields['correo'].label = 'Correo Electrónico'
+        self.fields['numero_cuenta'].label = 'Número de Cuenta'
+        self.fields['numero_cuenta'].required = False
+        self.fields['telefono'].label = 'Teléfono'
+        self.fields['telefono'].required = False
+
+
+
 
 class PolizaForm(forms.ModelForm):
         
     class Meta:
         model = Poliza
-        fields = ['estudiante', 'numero_poliza', 'estado', 'tipo_cobertura', 'fecha_inicio', 'prima_neta']
-        widgets = {'fecha_inicio': forms.DateInput(attrs={'type': 'date'}),'estudiante': forms.Select(attrs={'class': 'form-select'}),}
+        fields = ['estudiantes','numero_poliza', 'estado', 'tipo_cobertura', 'fecha_inicio', 'prima_neta']
+        widgets = {'fecha_inicio': forms.DateInput(attrs={'type': 'date'}),'estudiantes': forms.CheckboxSelectMultiple(attrs={'class': 'form-select'}),}
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -52,7 +88,6 @@ class TcasDocumentosForm(forms.ModelForm):
         labels = {
             "doc_descripcion": "Descripción",
         }
-
 
 
 
@@ -114,6 +149,9 @@ class PagoForm(forms.ModelForm):
             "fecha_pago": forms.DateInput(attrs={"type": "date", "class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
             "metodo_pago": forms.Select(attrs={"class": "w-full px-4 py-2 border border-gray-300 rounded-lg"}),
         }
+
+
+
 
 
 from django import forms
@@ -266,3 +304,8 @@ class GestionSolicitudForm(forms.ModelForm):
         if self.instance and self.instance.pk and self.instance.poliza and self.instance.poliza.estudiante:
             # Pre-seleccionar el estudiante actual si existe
             self.fields['estudiante'].initial = self.instance.poliza.estudiante
+
+
+
+
+

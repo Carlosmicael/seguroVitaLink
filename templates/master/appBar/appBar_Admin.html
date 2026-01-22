@@ -22,7 +22,7 @@
                             <div class="w-2 h-6 bg-emerald-400 rounded-sm transform -skew-x-12"></div>
                             <div class="w-2 h-6 bg-emerald-500 rounded-sm transform -skew-x-12"></div>
                         </div>
-                        <h3 class="text-xl font-bold tracking-wide text-white">VitaLink Asesor</h3>
+                        <h3 class="text-xl font-bold tracking-wide text-white">VitaLink Admin</h3>
                     </div>
                 </div>
 
@@ -273,7 +273,7 @@
 
     //notificaciones y el resto//
     const userId = {{ user.id }};
-    const pusher = new Pusher('3e0fb7f926cfffecfe16', {cluster: 'us2', encrypted: true, authEndpoint: '/pusher/auth/asesor'});
+    const pusher = new Pusher('3e0fb7f926cfffecfe16', {cluster: 'us2', encrypted: true, authEndpoint: '/pusher/auth/'});
     const channel = pusher.subscribe(`private-user-${userId}`);
 
 
@@ -328,7 +328,7 @@
     //funcion para verificar los mensajes nuevos
     async function fetchMensajes() {
         
-        fetch(`/obtener-notificaciones-usuario/asesor/${userId}/`)
+        fetch(`/obtener-notificaciones-usuario/${userId}/`)
             .then(response => response.json())
             .then(data => {
                 mensajes = data;
@@ -351,7 +351,7 @@
     //marcar todos los mensajes como leidos
     function marcarNotificacionesLeidas() {
       cantidad = 0;
-      fetch(`/marcar-notificaciones-leidas/asesor/${userId}`)
+      fetch(`/marcar-notificaciones-leidas/${userId}`)
       .then(data => {console.log(data);})
       .catch(error => {
         console.error('Error al marcar notificaciones como leidas:', error);
@@ -375,7 +375,7 @@
   notificationContent.innerHTML = '';
   marcarNotificacionesLeidas();
   
-  fetch(`/obtener-notificaciones-usuario/asesor/${userId}/`)
+  fetch(`/obtener-notificaciones-usuario/${userId}/`)
     .then(response => response.json())
     .then(data => {
       mensajes = data;

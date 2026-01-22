@@ -195,7 +195,7 @@ select.input-field {
 
         <!-- Main Form Card -->
         <div style="background: rgba(15, 118, 110, 0.15); backdrop-filter: blur(20px); border-radius: 20px; padding: 50px 40px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
-            <form method="POST" enctype="multipart/form-data" id="activacionForm">
+            <form method="POST" enctype="multipart/form-data" id="activacionForm" url="reportar_evento">
                 {% csrf_token %}
 
                 <!-- Sección 1: Detalles del Evento -->
@@ -341,7 +341,7 @@ select.input-field {
 
                 <!-- Botones de Acción -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 50px;">
-                    <button type="submit" class="btn-primary">
+                    <button type="submit" class="btn-primary" >
                         <svg style="display: inline-block; width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
@@ -383,9 +383,7 @@ select.input-field {
 </main>
 
 <script>
-// Aplicar estilos a los campos del formulario generados por Django
 document.addEventListener('DOMContentLoaded', function() {
-    // Aplicar clase a todos los inputs, selects y textareas generados por Django
     const formFields = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], select, textarea');
     formFields.forEach(field => {
         if (!field.classList.contains('input-field')) {
@@ -393,7 +391,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Estilo específico para el input de archivo
     const fileInput = document.querySelector('input[type="file"]');
     if (fileInput && !fileInput.classList.contains('input-field')) {
         fileInput.style.cssText = `

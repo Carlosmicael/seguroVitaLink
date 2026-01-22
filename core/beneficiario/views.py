@@ -15,12 +15,14 @@ def beneficiario_dashboard(request):
 
 
 
+
+
+
 @login_required
 def mis_siniestros_view(request):
     user = request.user
     profile = getattr(user, 'profile', None) 
 
-    # Todos los beneficiarios que pertenecen a mi profile
     beneficiarios = Beneficiario.objects.filter(profile=profile)
 
     siniestros_list = []
@@ -46,9 +48,15 @@ def mis_siniestros_view(request):
 
 
 
-def documentos_aseguradora_api(request, poliza_id):
+
+
+
+def documentos_aseguradora_api(request, poliza_numero):
+    print("=== POLIZA NUMERO ===")
+    print(poliza_numero)
+    print("=== FIN POLIZA NUMERO ===")
     try:
-        poliza = Poliza.objects.get(numero_poliza=poliza_id)
+        poliza = Poliza.objects.get(numero_poliza=poliza_numero)
         aseguradora = poliza.aseguradora 
         docs = DocumentosAseguradora.objects.filter(aseguradora=aseguradora)
         data = [{
@@ -58,11 +66,10 @@ def documentos_aseguradora_api(request, poliza_id):
             "obligatorio": d.obligatorio,
             "fecha_version": d.fecha_version
         } for d in docs]
+        
         return JsonResponse(data, safe=False)
     except Poliza.DoesNotExist:
         return JsonResponse([], safe=False)
-
-
 
 
 

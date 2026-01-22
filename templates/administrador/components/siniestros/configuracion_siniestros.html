@@ -1,0 +1,345 @@
+{% extends "master/sideBar/sidebar_administrador.html" %}
+{% block title %}Configuración de Siniestros - Administrador{% endblock %}
+
+{% block content %}
+{% include "master/appBar/appBar_Admin.html" %}
+
+
+<style>
+    .fade-in { animation: fadeIn 0.5s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .switch-container {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        background: #f8fafc;
+        padding: 12px 20px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid #e2e8f0;
+    }
+    
+    .switch-container:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+    }
+    
+    .switch-container.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: #667eea;
+    }
+    
+    .switch-container.active .switch-label {
+        color: white;
+    }
+    
+    .switch-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+        transition: all 0.2s;
+    }
+</style>
+
+<div style="padding: 32px; background: #f8f9fc; min-height: 100vh;" class="fade-in">
+
+    <!-- Header -->
+    <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1 style="font-size: 32px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">
+                <i class="fas fa-cog" style="color: #667eea; margin-right: 12px;"></i>
+                Configuración de Siniestros
+            </h1>
+            <p style="color: #64748b; font-size: 15px;">Configura los tiempos máximos para reportes y documentación</p>
+        </div>
+        <a href="{% url 'admin_lista_siniestros' %}" style="padding: 12px 24px; background: #e2e8f0; color: #475569; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s; text-decoration: none; display: inline-block;">
+            <i class="fas fa-arrow-left" style="margin-right: 8px;"></i>
+            Volver
+        </a>
+    </div>
+
+    <div style="max-width: 800px; margin: 0 auto;">
+        
+        <!-- Card de Configuración -->
+        <div style="background: white; padding: 32px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 24px;">
+            
+            <div style="text-align: center; margin-bottom: 32px;">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-clock" style="color: white; font-size: 36px;"></i>
+                </div>
+                <h2 style="color: #1e293b; font-size: 24px; font-weight: 700; margin-bottom: 8px;">Tiempos de Gestión</h2>
+                <p style="color: #64748b; font-size: 14px;">Establece los plazos para el proceso de siniestros</p>
+            </div>
+
+            <form id="formConfig">
+                {% csrf_token %}
+
+                <!-- Aseguradora -->
+                <div style="margin-bottom: 32px;">
+                    <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                        <i class="fas fa-building" style="color: #667eea; margin-right: 6px;"></i>
+                        Aseguradora (Opcional)
+                    </label>
+                    <select name="aseguradora" style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white; cursor: pointer;">
+                        <option value="">Configuración General</option>
+                        {% for aseg in aseguradoras %}
+                        <option value="{{ aseg.id_aseguradora }}">{{ aseg.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <p style="color: #94a3b8; font-size: 12px; margin-top: 6px;">Deja vacío para aplicar a todas las aseguradoras</p>
+                </div>
+
+                <!-- Tipo de Siniestro -->
+                <select name="tipo_siniestro"
+                    style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px;">
+                    
+                    <option value="">Tipo de Siniestro (Opcional)</option>
+
+                    {% for value, label in tipos_siniestro %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+
+                <br>
+
+
+
+                
+
+                <!-- Días para Reporte -->
+                <div style="margin-bottom: 32px;">
+                    <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 16px;">
+                        <i class="fas fa-paper-plane" style="color: #667eea; margin-right: 6px;"></i>
+                        Días Máximos para Enviar Reporte a Aseguradora *
+                    </label>
+                    
+                    <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                        <div class="switch-container" onclick="seleccionarDias(this, 'reporte', 1)">
+                            <div style="width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <span style="color: #667eea; font-size: 18px; font-weight: 700;">1</span>
+                            </div>
+                            <span class="switch-label">1 día</span>
+                        </div>
+                        
+                        <div class="switch-container" onclick="seleccionarDias(this, 'reporte', 2)">
+                            <div style="width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <span style="color: #667eea; font-size: 18px; font-weight: 700;">2</span>
+                            </div>
+                            <span class="switch-label">2 días</span>
+                        </div>
+                        
+                        <div class="switch-container active" onclick="seleccionarDias(this, 'reporte', 3)">
+                            <div style="width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <span style="color: #667eea; font-size: 18px; font-weight: 700;">3</span>
+                            </div>
+                            <span class="switch-label">3 días</span>
+                        </div>
+                        
+                        <div class="switch-container" onclick="seleccionarDias(this, 'reporte', 4)">
+                            <div style="width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <span style="color: #667eea; font-size: 18px; font-weight: 700;">4</span>
+                            </div>
+                            <span class="switch-label">4 días</span>
+                        </div>
+                        
+                        <div class="switch-container" onclick="seleccionarDias(this, 'reporte', 5)">
+                            <div style="width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <span style="color: #667eea; font-size: 18px; font-weight: 700;">5</span>
+                            </div>
+                            <span class="switch-label">5 días</span>
+                        </div>
+                        
+                        <div class="switch-container" onclick="seleccionarDias(this, 'reporte', 7)">
+                            <div style="width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <span style="color: #667eea; font-size: 18px; font-weight: 700;">7</span>
+                            </div>
+                            <span class="switch-label">7 días</span>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="dias_max_reporte" id="dias_max_reporte" value="{% if config %}{{ config.dias_max_reporte }}{% else %}3{% endif %}">
+                </div>
+
+                <!-- Días para Documentación -->
+                <div style="margin-bottom: 32px;">
+                    <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 16px;">
+                        <i class="fas fa-file-alt" style="color: #667eea; margin-right: 6px;"></i>
+                        Días Máximos para Completar Documentación *
+                    </label>
+                    
+                    <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                        <div class="switch-container" onclick="seleccionarDias(this, 'documentacion', 3)">
+                            <div style="width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <span style="color: #667eea; font-size: 18px; font-weight: 700;">3</span>
+                            </div>
+                            <span class="switch-label">3 días</span>
+                        </div>
+                        
+                        <div class="switch-container" onclick="seleccionarDias(this, 'documentacion', 5)">
+                            <div style="width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <span style="color: #667eea; font-size: 18px; font-weight: 700;">5</span>
+                            </div>
+                            <span class="switch-label">5 días</span>
+                        </div>
+                        
+                        <div class="switch-container active" onclick="seleccionarDias(this, 'documentacion', 7)">
+                            <div style="width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <span style="color: #667eea; font-size: 18px; font-weight: 700;">7</span>
+                            </div>
+                            <span class="switch-label">7 días</span>
+                        </div>
+                        
+                        <div class="switch-container" onclick="seleccionarDias(this, 'documentacion', 10)">
+                            <div style="width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <span style="color: #667eea; font-size: 18px; font-weight: 700;">10</span>
+                            </div>
+                            <span class="switch-label">10 días</span>
+                        </div>
+                        
+                        <div class="switch-container" onclick="seleccionarDias(this, 'documentacion', 15)">
+                            <div style="width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <span style="color: #667eea; font-size: 18px; font-weight: 700;">15</span>
+                            </div>
+                            <span class="switch-label">15 días</span>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="dias_max_documentacion" id="dias_max_documentacion" value="{% if config %}{{ config.dias_max_documentacion }}{% else %}7{% endif %}">
+                </div>
+
+                <!-- Mensaje de Error -->
+                <div id="mensajeError" style="display: none; background: #fee2e2; border: 2px solid #ef4444; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+                    <p style="color: #991b1b; font-size: 14px; margin: 0;"></p>
+                </div>
+
+                <!-- Mensaje de Éxito -->
+                <div id="mensajeExito" style="display: none; background: #d1fae5; border: 2px solid #10b981; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+                    <p style="color: #065f46; font-size: 14px; margin: 0;">✓ Configuración guardada exitosamente</p>
+                </div>
+
+                <!-- Botones -->
+                <div style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 24px; border-top: 2px solid #f1f5f9;">
+                    <button type="button" onclick="window.location.href='{% url 'admin_lista_siniestros' %}'" style="padding: 12px 24px; background: #e2e8f0; color: #475569; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s;">
+                        <i class="fas fa-times" style="margin-right: 6px;"></i>
+                        Cancelar
+                    </button>
+                    <button type="submit" id="btnGuardar" style="padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.2s;">
+                        <i class="fas fa-save" style="margin-right: 6px;"></i>
+                        Guardar Configuración
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+        <!-- Info Card -->
+        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 24px; border-radius: 16px; border: 2px solid #fbbf24;">
+            <div style="display: flex; gap: 16px; align-items: start;">
+                <div style="flex-shrink: 0;">
+                    <i class="fas fa-info-circle" style="color: #92400e; font-size: 24px;"></i>
+                </div>
+                <div>
+                    <p style="color: #92400e; font-size: 14px; font-weight: 600; margin-bottom: 8px;">Información Importante</p>
+                    <ul style="color: #92400e; font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.8;">
+                        <li>Los tiempos se aplicarán a todos los nuevos siniestros creados después de guardar.</li>
+                        <li>El tiempo para reporte determina cuándo un siniestro se considera retrasado.</li>
+                        <li>El tiempo de documentación define el plazo para completar todos los documentos requeridos.</li>
+                        <li>Estas configuraciones pueden cambiarse en cualquier momento.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+// Inicializar con valores actuales
+{% if config %}
+$(document).ready(function() {
+    seleccionarDiasInicial('reporte', {{ config.dias_max_reporte }});
+    seleccionarDiasInicial('documentacion', {{ config.dias_max_documentacion }});
+});
+{% endif %}
+
+function seleccionarDias(elemento, tipo, dias) {
+    const contenedor = elemento.parentElement;
+    const switches = contenedor.querySelectorAll('.switch-container');
+    
+    switches.forEach(sw => sw.classList.remove('active'));
+    
+    elemento.classList.add('active');
+    
+    if (tipo === 'reporte') {
+        document.getElementById('dias_max_reporte').value = dias;
+    } else {
+        document.getElementById('dias_max_documentacion').value = dias;
+    }
+}
+
+function seleccionarDiasInicial(tipo, dias) {
+    const contenedores = document.querySelectorAll('.switch-container');
+    contenedores.forEach(cont => {
+        const numero = cont.querySelector('span[style*="font-size: 18px"]');
+        if (numero && parseInt(numero.textContent) === dias) {
+            const label = cont.querySelector('.switch-label').textContent;
+            if ((tipo === 'reporte' && label.includes('Enviar Reporte')) || 
+                (tipo === 'documentacion' && label.includes('Documentación'))) {
+                cont.classList.add('active');
+            }
+        }
+    });
+}
+
+$('#formConfig').on('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const btnGuardar = $('#btnGuardar');
+    
+    btnGuardar.prop('disabled', true);
+    btnGuardar.html('<i class="fas fa-spinner fa-spin" style="margin-right: 6px;"></i>Guardando...');
+    
+    $('#mensajeError').hide();
+    $('#mensajeExito').hide();
+    
+    $.ajax({
+        url: "{% url 'admin_guardar_config_siniestro' %}",
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                $('#mensajeExito').fadeIn(300);
+                
+                setTimeout(() => {
+                    window.location.href = "{% url 'admin_lista_siniestros' %}";
+                }, 1500);
+            }
+        },
+        error: function(xhr) {
+            const error = xhr.responseJSON;
+            let mensaje = 'Error al guardar la configuración';
+            
+            if (error.message) {
+                mensaje = error.message;
+            }
+            
+            $('#mensajeError p').text(mensaje);
+            $('#mensajeError').fadeIn(300);
+        },
+        complete: function() {
+            btnGuardar.prop('disabled', false);
+            btnGuardar.html('<i class="fas fa-save" style="margin-right: 6px;"></i>Guardar Configuración');
+        }
+    });
+});
+</script>
+
+{% endblock %}

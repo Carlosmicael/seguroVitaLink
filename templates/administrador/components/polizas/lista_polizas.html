@@ -1,0 +1,1109 @@
+{% extends "master/sideBar/sidebar_administrador.html" %}
+{% block title %}Gestión de Pólizas - Administrador{% endblock %}
+
+{% block content %}
+{% include "master/appBar/appBar_Admin.html" %}
+
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #f8f9fc; }
+    
+    .fade-in { animation: fadeIn 0.5s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .btn-notify:hover { transform: scale(1.05); }
+    .btn-notify { transition: all 0.2s ease; }
+    
+    #tablaPolizas tbody tr {
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .fade-out {
+        animation: fadeOut 0.2s ease-out forwards;
+    }
+    
+    @keyframes fadeOut {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(10px); }
+    }
+    
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* DataTables */
+    .dataTables_wrapper .dataTables_length select {
+        padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 8px;
+        background: white; color: #1e293b; margin: 0 8px;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input {
+        padding: 10px 16px; border: 2px solid #e2e8f0; border-radius: 10px;
+        margin-left: 8px; font-size: 14px; background: #f8fafc;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 8px 16px !important; margin: 0 4px !important; border-radius: 8px !important;
+        border: none !important; background: #f8fafc !important; color: #1e293b !important;
+        font-weight: 600 !important;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: #667eea !important; color: white !important;
+    }
+    
+    .dataTables_wrapper .dataTables_info {
+        color: #64748b; font-size: 14px; font-weight: 500; padding: 16px 0;
+    }
+    
+    /* Estilos para selección múltiple */
+    .estudiante-seleccionado {
+        display: inline-flex; align-items: center; background: #667eea; color: white;
+        padding: 6px 12px; border-radius: 20px; margin: 4px; font-size: 13px;
+    }
+    
+    .estudiante-seleccionado button {
+        background: none; border: none; color: white; margin-left: 8px;
+        cursor: pointer; padding: 0; font-size: 14px;
+    }
+    
+    #listaEstudiantesSeleccionados {
+        min-height: 60px; border: 2px solid #e2e8f0; border-radius: 10px;
+        padding: 12px; margin-top: 8px; background: #f8fafc;
+    }
+</style>
+
+<div style="padding: 32px; background: #f8f9fc; min-height: 100vh;" class="fade-in">
+
+    <!-- Header -->
+    <div style="margin-bottom: 32px;">
+        <h1 style="font-size: 32px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">
+            <i class="fas fa-file-contract" style="color: #667eea; margin-right: 12px;"></i>
+            Gestión de Pólizas
+        </h1>
+        <p style="color: #64748b; font-size: 15px;">Administra y configura todas las pólizas del sistema</p>
+    </div>
+
+    <!-- Modal Detalle -->
+    <div id="modalDetalle" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; backdrop-filter: blur(8px); background: rgba(0, 0, 0, 0.4); animation: fadeIn 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+            <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 650px; width: 100%; max-height: 85vh; padding: 0; overflow: hidden; animation: slideUp 0.3s ease-out; display: flex; flex-direction: column;">
+                
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 28px; position: relative;">
+                    <button onclick="cerrarModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.2); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; color: white; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h2 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">
+                        <i class="fas fa-file-contract" style="margin-right: 10px;"></i>
+                        Detalle de Póliza
+                    </h2>
+                    <p style="color: rgba(255, 255, 255, 0.9); margin-top: 8px; font-size: 14px;" id="modal-numero"></p>
+                </div>
+
+                <div style="padding: 24px; overflow-y: auto; max-height: calc(85vh - 100px);">
+                    
+                    <div style="margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <i class="fas fa-user-graduate" style="color: #667eea; font-size: 20px; margin-right: 12px;"></i>
+                            <h3 style="color: #1e293b; font-size: 16px; font-weight: 600; margin: 0;">Información de Estudiantes</h3>
+                        </div>
+                        <div id="modal-estudiantes-lista" style="background: #f8fafc; padding: 16px; border-radius: 12px; border-left: 4px solid #667eea;">
+                            <!-- Los estudiantes se llenarán dinámicamente -->
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <i class="fas fa-shield-alt" style="color: #667eea; font-size: 20px; margin-right: 12px;"></i>
+                            <h3 style="color: #1e293b; font-size: 16px; font-weight: 600; margin: 0;">Cobertura y Valores</h3>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                                <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Tipo de Cobertura</p>
+                                <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-cobertura"></p>
+                            </div>
+                            <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                                <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Estado</p>
+                                <p style="margin: 0;" id="modal-estado"></p>
+                            </div>
+                            <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                                <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Prima Neta</p>
+                                <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-prima"></p>
+                            </div>
+                            <div style="background: #f8fafc; padding: 14px; border-radius: 10px;">
+                                <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Valor Total</p>
+                                <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-total"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <i class="fas fa-calendar-alt" style="color: #667eea; font-size: 20px; margin-right: 12px;"></i>
+                            <h3 style="color: #1e293b; font-size: 16px; font-weight: 600; margin: 0;">Fechas Importantes</h3>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                            <div style="text-align: center; padding: 12px; background: #f8fafc; border-radius: 10px;">
+                                <p style="color: #64748b; font-size: 11px; margin-bottom: 4px;">Inicio</p>
+                                <p style="color: #1e293b; font-weight: 600; font-size: 13px; margin: 0;" id="modal-inicio"></p>
+                            </div>
+                            <div style="text-align: center; padding: 12px; background: #f8fafc; border-radius: 10px;">
+                                <p style="color: #64748b; font-size: 11px; margin-bottom: 4px;">Fin</p>
+                                <p style="color: #1e293b; font-weight: 600; font-size: 13px; margin: 0;" id="modal-fin"></p>
+                            </div>
+                            <div style="text-align: center; padding: 12px; background: #f8fafc; border-radius: 10px;">
+                                <p style="color: #64748b; font-size: 11px; margin-bottom: 4px;">Vencimiento</p>
+                                <p style="color: #1e293b; font-weight: 600; font-size: 13px; margin: 0;" id="modal-vencimiento"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 24px;" id="modal-info-regla">
+                        <!-- Información de la regla se llenará dinámicamente -->
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 20px; border-radius: 12px; text-align: center; border: 2px solid #fbbf24;">
+                        <i class="fas fa-clock" style="color: #92400e; font-size: 32px; margin-bottom: 12px;"></i>
+                        <p style="color: #92400e; font-size: 13px; font-weight: 500; margin-bottom: 6px;">Días para Vencimiento</p>
+                        <p style="color: #92400e; font-size: 36px; font-weight: 700; margin: 0;" id="modal-dias-vencer"></p>
+                        <p style="color: #92400e; font-size: 12px; margin-top: 6px; opacity: 0.8;" id="modal-dias-texto"></p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear Póliza -->
+    <div id="modalCrear" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; backdrop-filter: blur(8px); background: rgba(0, 0, 0, 0.4); animation: fadeIn 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+            <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 700px; width: 100%; max-height: 90vh; padding: 0; overflow: hidden; animation: slideUp 0.3s ease-out; display: flex; flex-direction: column;">
+                
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 28px; position: relative;">
+                    <button onclick="cerrarModalCrear()" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.2); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; color: white; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h2 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">
+                        <i class="fas fa-plus-circle" style="margin-right: 10px;"></i>
+                        Crear Nueva Póliza
+                    </h2>
+                    <p style="color: rgba(255, 255, 255, 0.9); margin-top: 8px; font-size: 14px;">Complete el formulario para registrar una nueva póliza</p>
+                </div>
+
+                <div style="padding: 24px; overflow-y: auto; max-height: calc(90vh - 180px);">
+                    <form id="formCrearPoliza">
+                        {% csrf_token %}
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                <i class="fas fa-user-graduate" style="color: #667eea; margin-right: 6px;"></i>
+                                Estudiantes *
+                            </label>
+                            <select id="selectorEstudiantes" multiple style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white; cursor: pointer; min-height: 120px;">
+                                {% for est in estudiantes %}
+                                <option value="{{ est.id }}">{{ est.nombres }} {{ est.apellidos }} - {{ est.cedula }}</option>
+                                {% endfor %}
+                            </select>
+                            <div id="listaEstudiantesSeleccionados" style="margin-top: 12px; min-height: 50px;">
+                                <!-- Aquí se mostrarán los estudiantes seleccionados -->
+                            </div>
+                            <input type="hidden" name="estudiantes" id="estudiantesSeleccionados">
+                            <p id="contadorEstudiantes" style="color: #64748b; font-size: 12px; margin-top: 8px;">
+                                Seleccionados: <span id="numEstudiantes">0</span> estudiantes
+                            </p>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                <i class="fas fa-rules" style="color: #667eea; margin-right: 6px;"></i>
+                                Regla de Póliza *
+                            </label>
+                            <select name="regla_poliza" id="reglaPoliza" required style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white; cursor: pointer;">
+                                <option value="">Seleccione una regla de póliza</option>
+                                {% for regla in reglas_polizas %}
+                                <option value="{{ regla.id_regla }}" data-aseguradora="{{ regla.aseguradora.id_aseguradora }}">
+                                    {{ regla.nombre_regla }} - {{ regla.aseguradora.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div id="infoRegla" style="display: none; background: #f0f9ff; border: 2px solid #0ea5e9; padding: 12px; border-radius: 10px; margin-top: 12px;">
+                                <p style="color: #0c4a6e; font-size: 13px; margin: 0 0 8px 0; font-weight: 600;" id="nombreRegla"></p>
+                                <p style="color: #475569; font-size: 12px; margin: 0 0 4px 0;"><strong>Vigencia:</strong> <span id="diasVigencia"></span> días, <span id="horasVigencia"></span>h <span id="minutosVigencia"></span>m</p>
+                                <p style="color: #475569; font-size: 12px; margin: 0 0 4px 0;"><strong>Gracia:</strong> <span id="diasGracia"></span> días, <span id="horasGracia"></span>h <span id="minutosGracia"></span>m</p>
+                                <p style="color: #475569; font-size: 12px; margin: 0;"><strong>Máximo estudiantes:</strong> <span id="maxEstudiantes"></span></p>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                <i class="fas fa-building" style="color: #667eea; margin-right: 6px;"></i>
+                                Aseguradora
+                            </label>
+                            <select name="aseguradora" id="aseguradoraSelect" style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white; cursor: pointer;">
+                                <option value="">Seleccione una aseguradora (opcional)</option>
+                                {% for aseg in aseguradoras %}
+                                <option value="{{ aseg.id_aseguradora }}">{{ aseg.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                <i class="fas fa-hashtag" style="color: #667eea; margin-right: 6px;"></i>
+                                Número de Póliza *
+                            </label>
+                            <input type="text" name="numero_poliza" readonly style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #64748b; background: #f8fafc;">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                            <div>
+                                <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                    <i class="fas fa-info-circle" style="color: #667eea; margin-right: 6px;"></i>
+                                    Estado *
+                                </label>
+                                <select name="estado" required style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white;">
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="activa">Activa</option>
+                                    <option value="vencida">Vencida</option>
+                                    <option value="cancelada">Cancelada</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                    <i class="fas fa-shield-alt" style="color: #667eea; margin-right: 6px;"></i>
+                                    Tipo Cobertura *
+                                </label>
+                                <select name="tipo_cobertura" required style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white;">
+                                    <option value="basica">Cobertura Básica</option>
+                                    <option value="ampliada">Cobertura Ampliada</option>
+                                    <option value="completa">Cobertura Completa</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 20px;">
+                            <div>
+                                <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                    <i class="fas fa-calendar-check" style="color: #667eea; margin-right: 6px;"></i>
+                                    Fecha Inicio *
+                                </label>
+                                <input type="date" name="fecha_inicio" id="fechaInicio" required style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white;">
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                <i class="fas fa-dollar-sign" style="color: #667eea; margin-right: 6px;"></i>
+                                Prima Neta (Valor Mensual) *
+                            </label>
+                            <input type="number" name="prima_neta" id="primaNeta" step="0.01" min="0.01" required placeholder="0.00" style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white;">
+                            <p id="rangoPrima" style="color: #64748b; font-size: 12px; margin-top: 8px; display: none;">
+                                Rango permitido: $<span id="minPrima">0.00</span> - $<span id="maxPrima">∞</span>
+                            </p>
+                        </div>
+
+                        <div id="fechasCalculadas" style="display: none; background: #f0fdf4; border: 2px solid #10b981; padding: 16px; border-radius: 10px; margin-bottom: 20px;">
+                            <p style="color: #065f46; font-size: 13px; font-weight: 600; margin-bottom: 8px;">Fechas calculadas automáticamente:</p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div>
+                                    <p style="color: #475569; font-size: 12px; margin: 0 0 4px 0;">Fecha Fin</p>
+                                    <p style="color: #1e293b; font-weight: 600; font-size: 13px; margin: 0;" id="fechaFinCalculada"></p>
+                                </div>
+                                <div>
+                                    <p style="color: #475569; font-size: 12px; margin: 0 0 4px 0;">Fecha Vencimiento</p>
+                                    <p style="color: #1e293b; font-weight: 600; font-size: 13px; margin: 0;" id="fechaVencimientoCalculada"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="mensajeError" style="display: none; background: #fee2e2; border: 2px solid #ef4444; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+                            <p style="color: #991b1b; font-size: 14px; margin: 0;"></p>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div style="padding: 20px 24px; border-top: 2px solid #f1f5f9; background: #f8fafc; display: flex; gap: 12px; justify-content: flex-end;">
+                    <button onclick="cerrarModalCrear()" style="padding: 12px 24px; background: #e2e8f0; color: #475569; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s;">
+                        <i class="fas fa-times" style="margin-right: 6px;"></i>
+                        Cancelar
+                    </button>
+                    <button onclick="enviarFormulario()" id="btnGuardar" style="padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.2s;">
+                        <i class="fas fa-save" style="margin-right: 6px;"></i>
+                        Guardar Póliza
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+    <!-- Stats Cards -->
+    <div style="background: white; padding: 28px; border-radius: 16px; margin-bottom: 32px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;">
+            
+            <div style="flex: 1; min-width: 150px; text-align: center;">
+                <div style="color: #94a3b8; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Total de Pólizas</div>
+                <div style="color: #667eea; font-size: 42px; font-weight: 700; line-height: 1;">{{ total }}</div>
+            </div>
+
+            <div style="flex: 1; min-width: 150px; text-align: center;">
+                <div style="color: #94a3b8; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Pólizas Activas</div>
+                <div style="color: #4facfe; font-size: 42px; font-weight: 700; line-height: 1;">{{ activas }}</div>
+            </div>
+
+            <div style="flex: 1; min-width: 150px; text-align: center;">
+                <div style="color: #94a3b8; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Pólizas Pendientes</div>
+                <div style="color: #f093fb; font-size: 42px; font-weight: 700; line-height: 1;">{{ pendientes }}</div>
+            </div>
+
+            <div style="flex: 1; min-width: 150px; text-align: center;">
+                <div style="color: #94a3b8; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Pólizas Vencidas</div>
+                <div style="color: #fa709a; font-size: 42px; font-weight: 700; line-height: 1;">{{ vencidas }}</div>
+            </div>
+
+            <button onclick="abrirModalCrear()" style="padding: 14px 28px; background: #667eea; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.2s;">
+                <i class="fas fa-plus-circle" style="margin-right: 8px;"></i>
+                Añadir Nueva Póliza
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div style="background: white; padding: 24px; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end;">
+            
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; color: #64748b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                    <i class="fas fa-filter" style="margin-right: 6px;"></i>
+                    Estado de Póliza
+                </label>
+                <select id="filtroEstado" style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 14px; color: #1e293b; background: #f8fafc; cursor: pointer; transition: all 0.2s;">
+                    <option value="">Todos los estados</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="activa">Activa</option>
+                    <option value="vencida">Vencida</option>
+                    <option value="cancelada">Cancelada</option>
+                </select>
+            </div>
+
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; color: #64748b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                    <i class="fas fa-calendar-alt" style="margin-right: 6px;"></i>
+                    Filtrar por Fecha
+                </label>
+                <select id="tipoFecha" style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 14px; color: #1e293b; background: #f8fafc; cursor: pointer; transition: all 0.2s;">
+                    <option value="">Seleccionar tipo</option>
+                    <option value="fecha_creacion">Fecha de Creación</option>
+                    <option value="fecha_inicio">Fecha de Inicio</option>
+                    <option value="fecha_fin">Fecha de Fin</option>
+                    <option value="fecha_actualizacion">Fecha de Actualización</option>
+                </select>
+            </div>
+
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; color: #64748b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                    <i class="fas fa-calendar-day" style="margin-right: 6px;"></i>
+                    Seleccionar Fecha
+                </label>
+                <input type="date" id="selectorFecha" disabled style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 14px; color: #1e293b; background: #f8fafc;">
+            </div>
+
+            <button onclick="limpiarFiltros()" style="padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.2s;">
+                <i class="fas fa-redo-alt" style="margin-right: 6px;"></i>
+                Limpiar Filtros
+            </button>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+    <!-- Tabla -->
+    <div style="background: white; padding: 24px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto;">
+        <table id="tablaPolizas" class="display" style="width: 100%; border-collapse: separate; border-spacing: 0;">
+            <thead>
+                <tr style="background: #f8fafc;">
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">ID</th>
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Número Póliza</th>
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Estudiantes</th>
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Cobertura</th>
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Fecha Creación</th>
+                    <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Prima Neta</th>
+                    <th style="padding: 16px; text-align: center; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Estado</th>
+                    <th style="padding: 16px; text-align: center; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for poliza in polizas %}
+                <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" 
+                    onmouseover="this.style.background='#f8fafc'" 
+                    onmouseout="this.style.background='white'"
+                    data-estado="{{ poliza.estado }}"
+                    data-fecha-creacion="{{ poliza.fecha_creacion|date:'Y-m-d' }}"
+                    data-fecha-inicio="{{ poliza.fecha_inicio|date:'Y-m-d' }}"
+                    data-fecha-fin="{{ poliza.fecha_fin|date:'Y-m-d H:i' }}"
+                    data-fecha-actualizacion="{{ poliza.fecha_actualizacion|date:'Y-m-d' }}"
+                    data-numero-poliza="{{ poliza.numero_poliza }}"
+                    data-cobertura="{{ poliza.get_tipo_cobertura_display }}"
+                    data-prima="{{ poliza.prima_neta }}"
+                    data-valor-mensual="{{ poliza.calcular_valor_mensual }}"
+                    data-duracion="{{ poliza.duracion_meses }}"
+                    data-valor-total="{{ poliza.valor_total }}"
+                    data-poliza-id="{{ poliza.id }}">
+                    
+                    <td style="padding: 16px;">
+                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px;">
+                            {{ forloop.counter|stringformat:"02d" }}
+                        </div>
+                    </td>
+                    
+                    <td style="padding: 16px; color: #1e293b; font-weight: 600; font-size: 14px; white-space: nowrap;">
+                        {{ poliza.numero_poliza }}
+                    </td>
+                    
+                    <td style="padding: 16px; white-space: nowrap;">
+                        <div style="color: #1e293b; font-weight: 500; font-size: 14px; margin-bottom: 4px;">
+                            {{ poliza.estudiantes.count }} estudiante(s)
+                        </div>
+                        <div style="color: #94a3b8; font-size: 12px;">
+                            {% for estudiante in poliza.estudiantes.all|slice:":2" %}
+                                {{ estudiante.nombres }} {{ estudiante.apellidos }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                            {% if poliza.estudiantes.count > 2 %}...{% endif %}
+                        </div>
+                    </td>
+                    
+                    <td style="padding: 16px; color: #475569; font-size: 14px; white-space: nowrap;">
+                        {{ poliza.get_tipo_cobertura_display }}
+                    </td>
+                    
+                    <td style="padding: 16px; color: #475569; font-size: 14px; white-space: nowrap;">
+                        {{ poliza.fecha_creacion|date:"d/m/Y" }}
+                        <div style="color: #94a3b8; font-size: 12px;">{{ poliza.fecha_creacion|date:"h:i A" }}</div>
+                    </td>
+                    
+                    <td style="padding: 16px; color: #0f172a; font-weight: 600; font-size: 14px; white-space: nowrap;">
+                        ${{ poliza.prima_neta|floatformat:2 }}
+                    </td>
+                    
+                    <td style="padding: 16px; text-align: center; white-space: nowrap;">
+                        {% if poliza.estado == 'pendiente' %}
+                            <span style="display: inline-block; padding: 6px 16px; background: #fef3c7; color: #92400e; border-radius: 20px; font-size: 12px; font-weight: 600;">Pendiente</span>
+                        {% elif poliza.estado == 'activa' %}
+                            <span style="display: inline-block; padding: 6px 16px; background: #d1fae5; color: #065f46; border-radius: 20px; font-size: 12px; font-weight: 600;">Activa</span>
+                        {% elif poliza.estado == 'vencida' %}
+                            <span style="display: inline-block; padding: 6px 16px; background: #fee2e2; color: #991b1b; border-radius: 20px; font-size: 12px; font-weight: 600;">Vencida</span>
+                        {% else %}
+                            <span style="display: inline-block; padding: 6px 16px; background: #e2e8f0; color: #475569; border-radius: 20px; font-size: 12px; font-weight: 600;">Cancelada</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td style="padding: 16px; text-align: center; white-space: nowrap;">
+                        <button class="btn-notify" onclick="verDetalle('{{ poliza.numero_poliza }}')" style="padding: 10px 14px; background: #8b5cf6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 2px 6px rgba(139, 92, 246, 0.25);" title="Ver Detalle">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+
+
+
+
+
+</div>
+
+<!-- jQuery y DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+
+<script>
+let tabla;
+let polizasData = [];
+let diasVencimiento = {{ dias_vencimiento|safe }};
+let estudiantesSeleccionados = [];
+let reglaActual = null;
+
+$(document).ready(function() {
+    tabla = $('#tablaPolizas').DataTable({
+        language: {
+            search: "Buscar:",
+            lengthMenu: "Mostrar _MENU_ registros",
+            info: "Mostrando _START_ a _END_ de _TOTAL_ pólizas",
+            infoEmpty: "No hay registros disponibles",
+            infoFiltered: "(filtrado de _MAX_ registros totales)",
+            paginate: {
+                first: "Primero",
+                last: "Último",
+                next: "Siguiente",
+                previous: "Anterior"
+            }
+        },
+        pageLength: 10,
+        order: [[0, 'asc']],
+        columnDefs: [
+            { orderable: false, targets: 7 }
+        ],
+        drawCallback: function() {
+            $('#tablaPolizas tbody tr').each(function(index) {
+                $(this).css('animation', 'none');
+                setTimeout(() => {
+                    $(this).css('animation', 'slideIn 0.3s ease-out');
+                }, index * 30);
+            });
+        }
+    });
+
+    $('#tablaPolizas tbody tr').each(function() {
+        polizasData.push(this);
+    });
+
+    // Inicializar eventos
+    inicializarEventos();
+});
+
+function inicializarEventos() {
+    $('#filtroEstado').on('change', function() {
+        aplicarFiltros();
+    });
+
+    $('#tipoFecha').on('change', function() {
+        const tipoFecha = $(this).val();
+        if (tipoFecha) {
+            $('#selectorFecha').prop('disabled', false);
+            $('#selectorFecha').css('background', 'white');
+        } else {
+            $('#selectorFecha').prop('disabled', true);
+            $('#selectorFecha').css('background', '#f8fafc');
+            $('#selectorFecha').val('');
+        }
+        aplicarFiltros();
+    });
+
+    $('#selectorFecha').on('change', function() {
+        aplicarFiltros();
+    });
+
+    // Evento para selección múltiple de estudiantes
+    $('#selectorEstudiantes').on('change', function() {
+        estudiantesSeleccionados = Array.from($(this).val() || []);
+        actualizarListaEstudiantes();
+        validarMaxEstudiantes();
+    });
+
+
+
+
+
+    // Evento para regla de póliza
+    $('#reglaPoliza').on('change', function() {
+        const reglaId = $(this).val();
+        console.log("Regla ID:", reglaId);
+        if (reglaId) {
+            cargarDetallesRegla(reglaId);
+            // Auto-seleccionar aseguradora si la regla tiene una
+            const option = $(this).find(':selected');
+            const aseguradoraId = option.data('aseguradora');
+            if (aseguradoraId) {
+                $('#aseguradoraSelect').val(aseguradoraId);
+            }
+        } else {
+            $('#infoRegla').hide();
+            reglaActual = null;
+        }
+        validarMaxEstudiantes();
+    });
+
+
+
+
+
+
+
+    // Evento para fecha de inicio
+    $('#fechaInicio').on('change', function() {
+        calcularFechas();
+    });
+
+    // Evento para prima neta
+    $('#primaNeta').on('input', function() {
+        validarPrimaNeta();
+    });
+
+    $('#modalDetalle').on('click', function(e) {
+        if (e.target.id === 'modalDetalle') {
+            cerrarModal();
+        }
+    });
+    
+    $('#modalCrear').on('click', function(e) {
+        if (e.target.id === 'modalCrear') {
+            cerrarModalCrear();
+        }
+    });
+    
+    $(document).on('keydown', function(e) {
+        if (e.key === 'Escape') {
+            cerrarModal();
+            cerrarModalCrear();
+        }
+    });
+}
+
+function cargarDetallesRegla(reglaId) {
+    $.ajax({
+        url: `/polizas/regla/${reglaId}/`,
+        type: 'GET',
+        success: function(response) {
+            console.log("Response:", response);
+            if (response.success) {
+                reglaActual = response.regla;
+                mostrarInfoRegla();
+                actualizarRangoPrima();
+                calcularFechas();
+            }
+        },
+        error: function() {
+            $('#mensajeError p').text('Error al cargar los detalles de la regla');
+            $('#mensajeError').show();
+        }
+    });
+}
+
+function mostrarInfoRegla() {
+    if (!reglaActual) return;
+    
+    $('#nombreRegla').text(reglaActual.nombre);
+    $('#diasVigencia').text(reglaActual.dias_vigencia);
+    $('#horasVigencia').text(reglaActual.horas_vigencia);
+    $('#minutosVigencia').text(reglaActual.minutos_vigencia);
+    $('#diasGracia').text(reglaActual.dias_gracia);
+    $('#horasGracia').text(reglaActual.horas_gracia);
+    $('#minutosGracia').text(reglaActual.minutos_gracia);
+    $('#maxEstudiantes').text(reglaActual.max_estudiantes || 'Sin límite');
+    
+    $('#infoRegla').show();
+}
+
+function actualizarRangoPrima() {
+    if (!reglaActual) return;
+    
+    $('#minPrima').text(reglaActual.monto_minimo.toFixed(2));
+    $('#maxPrima').text(reglaActual.monto_maximo ? reglaActual.monto_maximo.toFixed(2) : '∞');
+    $('#rangoPrima').show();
+}
+
+function validarPrimaNeta() {
+    if (!reglaActual) return true;
+    
+    const prima = parseFloat($('#primaNeta').val()) || 0;
+    const min = parseFloat(reglaActual.monto_minimo);
+    const max = parseFloat(reglaActual.monto_maximo);
+    
+    if (prima < min) {
+        $('#primaNeta').css('border-color', '#ef4444');
+        return false;
+    }
+    
+    if (reglaActual.monto_maximo && prima > max) {
+        $('#primaNeta').css('border-color', '#ef4444');
+        return false;
+    }
+    
+    $('#primaNeta').css('border-color', '#e2e8f0');
+    return true;
+}
+
+function validarMaxEstudiantes() {
+    if (!reglaActual || !reglaActual.max_estudiantes) return true;
+    
+    const numEstudiantes = estudiantesSeleccionados.length;
+    const maxEstudiantes = reglaActual.max_estudiantes;
+    
+    if (numEstudiantes > maxEstudiantes) {
+        $('#selectorEstudiantes').css('border-color', '#ef4444');
+        $('#contadorEstudiantes').css('color', '#ef4444');
+        return false;
+    }
+    
+    $('#selectorEstudiantes').css('border-color', '#e2e8f0');
+    $('#contadorEstudiantes').css('color', '#64748b');
+    return true;
+}
+
+
+
+
+function calcularFechas() {
+    if (!reglaActual || !$('#fechaInicio').val()) {
+        $('#fechasCalculadas').hide();
+        return;
+    }
+    
+    const fechaInicio = new Date($('#fechaInicio').val() + 'T00:00:00');
+
+    const fechaFin = new Date(fechaInicio);
+    const fechaFinobjnew = new Date(fechaFin);
+
+    fechaFin.setDate(fechaFin.getDate() + reglaActual.dias_vigencia);
+    fechaFin.setHours(fechaFin.getHours() + reglaActual.horas_vigencia);
+    fechaFin.setMinutes(fechaFin.getMinutes() + reglaActual.minutos_vigencia);
+    
+    const fechaVencimiento = new Date(fechaFinobjnew);
+    fechaVencimiento.setDate(fechaVencimiento.getDate() + reglaActual.dias_gracia);
+    fechaVencimiento.setHours(fechaVencimiento.getHours() + reglaActual.horas_gracia);
+    fechaVencimiento.setMinutes(fechaVencimiento.getMinutes() + reglaActual.minutos_gracia);
+
+    
+    const options = { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    
+    $('#fechaFinCalculada').text(fechaFin.toLocaleDateString('es-ES', options));
+    $('#fechaVencimientoCalculada').text(fechaVencimiento.toLocaleDateString('es-ES', options));
+    $('#fechasCalculadas').show();
+}
+
+
+
+
+
+
+
+
+
+function actualizarListaEstudiantes() {
+    const lista = $('#listaEstudiantesSeleccionados');
+    const contador = $('#numEstudiantes');
+    const inputHidden = $('#estudiantesSeleccionados');
+    
+    lista.empty();
+    let estudiantesHTML = '';
+    
+    $('#selectorEstudiantes option:selected').each(function() {
+        const id = $(this).val();
+        const nombre = $(this).text();
+        
+        estudiantesHTML += `
+            <div class="estudiante-seleccionado">
+                ${nombre}
+                <button type="button" onclick="removerEstudiante(${id})">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+    });
+    
+    lista.html(estudiantesHTML);
+    contador.text(estudiantesSeleccionados.length);
+    inputHidden.val(estudiantesSeleccionados.join(','));
+}
+
+function removerEstudiante(id) {
+    estudiantesSeleccionados = estudiantesSeleccionados.filter(estId => estId != id);
+    $('#selectorEstudiantes option[value="' + id + '"]').prop('selected', false);
+    actualizarListaEstudiantes();
+    validarMaxEstudiantes();
+}
+
+function aplicarFiltros() {
+    const estadoSeleccionado = $('#filtroEstado').val();
+    const tipoFecha = $('#tipoFecha').val();
+    const fechaSeleccionada = $('#selectorFecha').val();
+
+    $('#tablaPolizas tbody tr').addClass('fade-out');
+
+    setTimeout(() => {
+        tabla.clear();
+
+        polizasData.forEach(function(fila) {
+            let mostrar = true;
+
+            if (estadoSeleccionado && $(fila).data('estado') !== estadoSeleccionado) {
+                mostrar = false;
+            }
+
+            if (tipoFecha && fechaSeleccionada) {
+                const fechaFila = $(fila).data(tipoFecha.replace(/_/g, '-'));
+                if (fechaFila !== fechaSeleccionada) {
+                    mostrar = false;
+                }
+            }
+
+            if (mostrar) {
+                $(fila).removeClass('fade-out');
+                tabla.row.add(fila);
+            }
+        });
+
+        tabla.draw();
+    }, 200);
+}
+
+function limpiarFiltros() {
+    $('#filtroEstado').val('');
+    $('#tipoFecha').val('');
+    $('#selectorFecha').val('').prop('disabled', true).css('background', '#f8fafc');
+    
+    $('#tablaPolizas tbody tr').addClass('fade-out');
+    
+    setTimeout(() => {
+        tabla.clear();
+        polizasData.forEach(function(fila) {
+            $(fila).removeClass('fade-out');
+            tabla.row.add(fila);
+        });
+        tabla.draw();
+    }, 200);
+}
+
+
+
+
+
+
+
+
+async function verDetalle(numeroPoliza) {
+    try {
+        
+        const response = await fetch(`/polizas/detalle/${numeroPoliza}/`);
+        console.log("Response status:", response.status, "URL:", response.url)
+        console.log("response", response);
+        const data = await response.json();
+        
+        if (!data.success) {
+            alert(data.message);
+            return;
+        }
+        
+        const poliza = data.poliza;
+        
+        // Llenar información básica
+        $('#modal-numero').text(`Póliza N° ${poliza.numero_poliza}`);
+        $('#modal-cobertura').text(poliza.tipo_cobertura);
+        $('#modal-prima').text(`${poliza.prima_neta.toFixed(2)}`);
+        $('#modal-total').text(`${poliza.prima_neta.toFixed(2)}`);
+        $('#modal-inicio').text(formatearFecha(poliza.fecha_inicio));
+        $('#modal-fin').text(formatearFechaHora(poliza.fecha_fin));
+        $('#modal-vencimiento').text(poliza.fecha_vencimiento ? formatearFechaHora(poliza.fecha_vencimiento) : 'No definida');
+        
+        // Llenar estudiantes
+        const estudiantesHTML = poliza.estudiantes.map(est => `
+            <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; last:border-bottom: none;">
+                <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin-bottom: 2px;">${est.nombre}</p>
+                <p style="color: #64748b; font-size: 13px; margin: 0;">${est.email} | Cédula: ${est.cedula}</p>
+            </div>
+        `).join('');
+        
+        $('#modal-estudiantes-lista').html(estudiantesHTML || '<p style="color: #64748b; font-size: 14px;">No hay estudiantes asignados</p>');
+        
+        // Estado
+        let badgeEstado = '';
+        switch(poliza.estado) {
+            case 'pendiente':
+                badgeEstado = '<span style="display: inline-block; padding: 6px 16px; background: #fef3c7; color: #92400e; border-radius: 20px; font-size: 12px; font-weight: 600;">Pendiente</span>';
+                break;
+            case 'activa':
+                badgeEstado = '<span style="display: inline-block; padding: 6px 16px; background: #d1fae5; color: #065f46; border-radius: 20px; font-size: 12px; font-weight: 600;">Activa</span>';
+                break;
+            case 'vencida':
+                badgeEstado = '<span style="display: inline-block; padding: 6px 16px; background: #fee2e2; color: #991b1b; border-radius: 20px; font-size: 12px; font-weight: 600;">Vencida</span>';
+                break;
+            default:
+                badgeEstado = '<span style="display: inline-block; padding: 6px 16px; background: #e2e8f0; color: #475569; border-radius: 20px; font-size: 12px; font-weight: 600;">Cancelada</span>';
+        }
+        $('#modal-estado').html(badgeEstado);
+        
+        // Calcular días para vencimiento
+        let diasRestantes = diasVencimiento[numeroPoliza] || 0;
+        console.log("diasRestantes", diasRestantes);
+        let textoDias = '';
+        
+        
+        $('#modal-dias-vencer').text(diasRestantes);
+        $('#modal-dias-texto').text("esto es una Aproximacion");
+        $('#modalDetalle').fadeIn(300);
+        
+    } catch (error) {
+        console.error('Error al cargar detalle:', error);
+        alert('Error al cargar los detalles de la póliza');
+    }
+}
+
+
+
+
+
+
+
+
+function cerrarModal() {
+    $('#modalDetalle').fadeOut(300);
+}
+
+function abrirModalCrear() {
+    estudiantesSeleccionados = [];
+    reglaActual = null;
+    $('#formCrearPoliza')[0].reset();
+    $('#listaEstudiantesSeleccionados').empty();
+    $('#numEstudiantes').text('0');
+    $('#estudiantesSeleccionados').val('');
+    $('#infoRegla').hide();
+    $('#rangoPrima').hide();
+    $('#fechasCalculadas').hide();
+    $('#mensajeError').hide();
+    
+    // Generar número de póliza
+    fetch("{% url 'admin_generar_numero_poliza' %}")
+        .then(res => res.json())
+        .then(data => {
+            $('input[name="numero_poliza"]').val(data.numero_poliza);
+        });
+    
+    $('#modalCrear').fadeIn(300);
+}
+
+function cerrarModalCrear() {
+    $('#modalCrear').fadeOut(300);
+}
+
+
+
+
+
+
+
+function enviarFormulario() {
+    const form = $('#formCrearPoliza')[0];
+    
+    // Validaciones
+    if (estudiantesSeleccionados.length === 0) {
+        mostrarError('Debe seleccionar al menos un estudiante');
+        return;
+    }
+    
+    if (!reglaActual) {
+        mostrarError('Debe seleccionar una regla de póliza');
+        return;
+    }
+    
+    if (!validarMaxEstudiantes()) {
+        mostrarError(`Ha excedido el número máximo de estudiantes permitidos (${reglaActual.max_estudiantes})`);
+        return;
+    }
+    
+    if (!validarPrimaNeta()) {
+        if ($('#primaNeta').val() < reglaActual.monto_minimo) {
+            mostrarError(`La prima neta no puede ser menor a $${reglaActual.monto_minimo}`);
+        } else {
+            mostrarError(`La prima neta no puede ser mayor a $${reglaActual.monto_maximo}`);
+        }
+        return;
+    }
+    
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    const btnGuardar = $('#btnGuardar');
+    btnGuardar.prop('disabled', true);
+    btnGuardar.html('<i class="fas fa-spinner fa-spin" style="margin-right: 6px;"></i>Guardando...');
+    
+    const formData = new FormData(form);
+    
+    // Asegurarse de que estudiantesSeleccionados esté en formData
+    formData.delete('estudiantes');
+    estudiantesSeleccionados.forEach(id => {
+        formData.append('estudiantes', id);
+    });
+    
+    $.ajax({
+        url: "{% url 'admin_crear_poliza' %}",
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                cerrarModalCrear();
+                location.reload();
+            } else {
+                mostrarError(response.message);
+            }
+        },
+        error: function(xhr) {
+            const error = xhr.responseJSON;
+            let mensaje = 'Error al crear la póliza';
+            
+            if (error && error.message) {
+                mensaje = error.message;
+            }
+            
+            mostrarError(mensaje);
+        },
+        complete: function() {
+            btnGuardar.prop('disabled', false);
+            btnGuardar.html('<i class="fas fa-save" style="margin-right: 6px;"></i>Guardar Póliza');
+        }
+    });
+}
+
+
+
+
+
+function mostrarError(mensaje) {
+    $('#mensajeError p').text(mensaje);
+    $('#mensajeError').show();
+    $('html, body').animate({
+        scrollTop: $('#mensajeError').offset().top - 100
+    }, 500);
+}
+
+function formatearFecha(fecha) {
+    const partes = fecha.split('-');
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+function formatearFechaHora(fechaHora) {
+    const fecha = new Date(fechaHora);
+    return fecha.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+</script>
+
+{% endblock %}
