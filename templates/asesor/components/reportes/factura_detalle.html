@@ -5,57 +5,226 @@
 {% block content %}
 {% include "master/appBar/appBar.html" %}
 
-<div class="space-y-6">
-    <div class="flex flex-wrap items-start justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-900">Factura {{ factura.numero_factura }}</h1>
-            <p class="mt-2 text-sm text-slate-500">
-                Siniestro #{{ factura.siniestro.id }} | Beneficiario {{ factura.beneficiario.nombre }}
-            </p>
-        </div>
-        <a href="{% url 'reportes_liquidacion' %}" class="text-sm font-semibold text-slate-500 hover:text-slate-700">
-            Volver al reporte
-        </a>
-    </div>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap');
 
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Monto facturado</div>
-            <div class="mt-3 text-2xl font-extrabold text-slate-900">${{ factura.monto|floatformat:2 }}</div>
-        </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Total pagado</div>
-            <div class="mt-3 text-2xl font-extrabold text-slate-900">${{ total_pagado|floatformat:2 }}</div>
-        </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Saldo pendiente</div>
-            <div class="mt-3 text-2xl font-extrabold text-slate-900">${{ restante|floatformat:2 }}</div>
-        </div>
-    </div>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.76);
+        --glass-border: rgba(148, 163, 184, 0.24);
+        --glass-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+        --ink: #0f172a;
+        --muted: #64748b;
+    }
 
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table class="min-w-full text-sm">
-            <thead class="bg-slate-50 text-left text-xs uppercase tracking-[0.2em] text-slate-400">
-                <tr>
-                    <th class="px-6 py-4">Fecha pago</th>
-                    <th class="px-6 py-4">Metodo</th>
-                    <th class="px-6 py-4">Monto</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                {% for pago in pagos %}
-                <tr>
-                    <td class="px-6 py-4 text-slate-600">{{ pago.fecha_pago|date:"d/m/Y" }}</td>
-                    <td class="px-6 py-4 text-slate-600">{{ pago.metodo_pago }}</td>
-                    <td class="px-6 py-4 text-slate-600">${{ pago.monto_pagado|floatformat:2 }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3" class="px-6 py-12 text-center text-slate-400">No hay pagos registrados.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    .ui-shell {
+        background:
+            radial-gradient(860px 420px at 12% 8%, rgba(20, 184, 166, 0.16), transparent 55%),
+            radial-gradient(980px 520px at 88% 18%, rgba(14, 165, 233, 0.18), transparent 60%),
+            linear-gradient(135deg, #f8fafc 0%, #eef2ff 45%, #f1f5f9 100%);
+        position: relative;
+        overflow: hidden;
+        font-family: 'Sora', 'Segoe UI', sans-serif;
+    }
+
+    .ui-shell::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0.06;
+        pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
+    }
+
+    .ui-container {
+        max-width: 1180px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .ui-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 22px;
+        box-shadow: var(--glass-shadow);
+        backdrop-filter: blur(12px);
+    }
+
+    .ui-title {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--ink);
+        letter-spacing: -0.02em;
+    }
+
+    .ui-subtitle {
+        font-size: 14px;
+        color: var(--muted);
+    }
+
+    .ui-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        background: rgba(15, 23, 42, 0.08);
+        color: #0f172a;
+    }
+
+    .ui-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .ui-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #475569;
+    }
+
+    .ui-link svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .ui-stat-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: #94a3b8;
+    }
+
+    .ui-stat-value {
+        margin-top: 0.75rem;
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--ink);
+    }
+
+    .ui-table {
+        width: 100%;
+        font-size: 14px;
+        border-collapse: collapse;
+    }
+
+    .ui-table thead {
+        background: rgba(148, 163, 184, 0.1);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 11px;
+        color: #94a3b8;
+    }
+
+    .ui-table th,
+    .ui-table td {
+        padding: 16px 22px;
+        text-align: left;
+    }
+
+    .ui-table tbody tr {
+        border-top: 1px solid rgba(226, 232, 240, 0.8);
+    }
+</style>
+
+<div class="ui-shell p-6 md:p-10">
+    <div class="ui-container space-y-6">
+        <div class="ui-card p-6">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="ui-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 3h7l4 4v14H7z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 3v4h4"></path>
+                        </svg>
+                    </span>
+                    <div>
+                        <h1 class="ui-title">Factura {{ factura.numero_factura }}</h1>
+                        <p class="ui-subtitle">
+                            Siniestro #{{ factura.siniestro.id }} | Beneficiario {{ factura.beneficiario.nombre }}
+                        </p>
+                    </div>
+                </div>
+                <a href="{% url 'reportes_liquidacion' %}" class="ui-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7 7-7"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18"></path>
+                    </svg>
+                    Volver al reporte
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div class="ui-card p-6">
+                <div class="ui-stat-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 12h10"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 17h7"></path>
+                    </svg>
+                    Monto facturado
+                </div>
+                <div class="ui-stat-value">${{ factura.monto|floatformat:2 }}</div>
+            </div>
+            <div class="ui-card p-6">
+                <div class="ui-stat-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 12h16"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 8h8"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 16h12"></path>
+                    </svg>
+                    Total pagado
+                </div>
+                <div class="ui-stat-value">${{ total_pagado|floatformat:2 }}</div>
+            </div>
+            <div class="ui-card p-6">
+                <div class="ui-stat-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v8"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h8"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"></path>
+                    </svg>
+                    Saldo pendiente
+                </div>
+                <div class="ui-stat-value">${{ restante|floatformat:2 }}</div>
+            </div>
+        </div>
+
+        <div class="ui-card overflow-hidden">
+            <table class="ui-table">
+                <thead>
+                    <tr>
+                        <th>Fecha pago</th>
+                        <th>Metodo</th>
+                        <th>Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pago in pagos %}
+                    <tr>
+                        <td class="text-slate-600">{{ pago.fecha_pago|date:"d/m/Y" }}</td>
+                        <td class="text-slate-600">{{ pago.metodo_pago }}</td>
+                        <td class="text-slate-600">${{ pago.monto_pagado|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="py-12 text-center text-slate-400">No hay pagos registrados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}

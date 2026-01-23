@@ -3,6 +3,7 @@
 
     {% block content %}
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap');
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
@@ -12,10 +13,48 @@
     margin: 0;
     padding: 0;
     background-color: #0f172a; /* Evita el destello blanco mientras carga */
+    font-family: 'Sora','Segoe UI',sans-serif;
 }
 
     .form-section {
         animation: fadeIn 0.6s ease-out;
+    }
+
+    .card-volume {
+        box-shadow:
+            0 24px 70px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .section-icon {
+        width: 22px;
+        height: 22px;
+        margin-right: 10px;
+        color: #34d399;
+        flex-shrink: 0;
+    }
+
+    .helper-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #e2e8f0;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+    }
+
+    .contact-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .contact-row svg {
+        width: 16px;
+        height: 16px;
+        color: #34d399;
+        flex-shrink: 0;
     }
 
     .input-field {
@@ -181,7 +220,7 @@
         <div style="max-width: 990px; margin: 0 auto;">
             
             <!-- Header Card -->
-            <div style="background: rgba(15, 118, 110, 0.2); backdrop-filter: blur(20px); border-radius: 20px; padding: 40px; margin-bottom: 40px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+            <div class="card-volume" style="background: rgba(15, 118, 110, 0.2); backdrop-filter: blur(20px); border-radius: 20px; padding: 40px; margin-bottom: 40px;">
                 <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 16px;">
                     <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #10b981 0%, #34d399 100%); border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);">
                         <svg style="width: 32px; height: 32px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,16 +229,16 @@
                     </div>
                     <div>
                         <p style="color: #34d399; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">VITALINK UTPL</p>
-                        <h1 style="font-size: 32px; font-weight: 900; color: #f9fafb; line-height: 1.2; margin: 0;">Reportar Evento</h1>
+                        <h1 style="font-size: 32px; font-weight: 900; color: #f9fafb; line-height: 1.2; margin: 0;">Reporte de evento</h1>
                     </div>
                 </div>
                 <p style="color: rgba(255, 255, 255, 0.7); font-size: 15px; line-height: 1.6; margin: 0;">
-                    Complete el formulario para reportar un evento o siniestro de un estudiante UTPL.
+                    Complete el formulario para registrar un evento y activar la cobertura correspondiente.
                 </p>
             </div>
 
             <!-- Main Form Card -->
-            <div style="background: rgba(15, 118, 110, 0.15); backdrop-filter: blur(20px); border-radius: 20px; padding: 50px 40px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+            <div class="card-volume" style="background: rgba(15, 118, 110, 0.15); backdrop-filter: blur(20px); border-radius: 20px; padding: 50px 40px;">
                 <form method="POST" enctype="multipart/form-data" id="activacionForm" url="reportar_evento">
                     {% csrf_token %}
 
@@ -207,6 +246,9 @@
                     <div style="margin-bottom: 50px;" class="form-section">
                         <h2 style="font-size: 22px; font-weight: 700; color: #f9fafb; margin-bottom: 25px; display: flex; align-items: center;">
                             <span class="section-badge">1</span>
+                            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 18a6 6 0 100-12 6 6 0 000 12z"></path>
+                            </svg>
                             Detalles del Evento
                         </h2>
 
@@ -226,6 +268,9 @@
                     <div style="margin-bottom: 50px;" class="form-section">
                         <h2 style="font-size: 22px; font-weight: 700; color: #f9fafb; margin-bottom: 25px; display: flex; align-items: center;">
                             <span class="section-badge">2</span>
+                            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2m8-10a4 4 0 100-8 4 4 0 000 8z"></path>
+                            </svg>
                             Información del Beneficiario
                         </h2>
                         
@@ -258,6 +303,9 @@
                     <div style="margin-bottom: 50px;" class="form-section">
                         <h2 style="font-size: 22px; font-weight: 700; color: #f9fafb; margin-bottom: 25px; display: flex; align-items: center;">
                             <span class="section-badge">3</span>
+                            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.5a2 2 0 011.7.95l1.2 2a2 2 0 01-.45 2.55l-1.2 1a11 11 0 005 5l1-1.2a2 2 0 012.55-.45l2 1.2a2 2 0 01.95 1.7V19a2 2 0 01-2 2h-1C9.4 21 3 14.6 3 6V5z"></path>
+                            </svg>
                             Información de Contacto
                         </h2>
                         
@@ -290,13 +338,16 @@
                     <div style="margin-bottom: 50px;" class="form-section">
                         <h2 style="font-size: 22px; font-weight: 700; color: #f9fafb; margin-bottom: 25px; display: flex; align-items: center;">
                             <span class="section-badge">4</span>
+                            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V7l-5-5H7a2 2 0 00-2 2v15a2 2 0 002 2z"></path>
+                            </svg>
                             Documentación de Soporte
                         </h2>
                         
                         <div class="info-box">
                             <p style="color: rgba(255, 255, 255, 0.85); font-size: 14px; line-height: 1.6; margin-bottom: 12px;">
-                                <strong style="color: #34d399;">¿Para qué sirve?</strong><br>
-                                Los archivos que cargues serán utilizados para validar el siniestro y como información adicional del evento reportado.
+                                <strong style="color: #34d399;">Finalidad de los archivos</strong><br>
+                                Los archivos se utilizan para validar el siniestro y complementar la informacion del evento reportado.
                             </p>
                             <hr style="border: none; border-top: 1px solid rgba(16, 185, 129, 0.2); margin: 12px 0;">
                             <p style="color: rgba(255, 255, 255, 0.7); font-size: 13px; line-height: 1.5; margin: 0;">
@@ -333,6 +384,9 @@
                     <div style="margin-bottom: 40px;" class="form-section">
                         <h2 style="font-size: 22px; font-weight: 700; color: #f9fafb; margin-bottom: 25px; display: flex; align-items: center;">
                             <span class="section-badge">5</span>
+                            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c1.66 0 3 1.34 3 3v2H9v-2c0-1.66 1.34-3 3-3zm6-3h-1V6a5 5 0 00-10 0v2H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2z"></path>
+                            </svg>
                             Verificación de Seguridad
                         </h2>
 
@@ -366,19 +420,36 @@
             </div>
 
             <!-- Help Box -->
-            <div class="help-box">
-                <h3 style="color: #34d399; font-size: 16px; font-weight: 700; margin-bottom: 12px;">💬 ¿Necesitas ayuda?</h3>
-                <p style="color: rgba(255, 255, 255, 0.8); font-size: 14px; margin-bottom: 16px;">Si tienes dudas sobre cómo completar este formulario, contáctanos:</p>
+            <div class="help-box card-volume">
+                <div class="helper-title">Soporte y contacto</div>
+                <p style="color: rgba(255, 255, 255, 0.8); font-size: 14px; margin-bottom: 16px;">Si tienes dudas sobre como completar este formulario, contacta a nuestro equipo:</p>
                 <div style="color: rgba(255, 255, 255, 0.7); font-size: 14px; line-height: 1.8;">
-                    <p style="margin: 0;">📞 <strong>Teléfono:</strong> +593 99 123 4567</p>
-                    <p style="margin: 0;">📧 <strong>Email:</strong> siniestros@vitalink.utpl.edu.ec</p>
-                    <p style="margin: 0;">🕐 <strong>Horario:</strong> Lunes a Viernes 8:00 AM - 5:00 PM</p>
+                    <p style="margin: 0;" class="contact-row">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.5a2 2 0 011.7.95l1.2 2a2 2 0 01-.45 2.55l-1.2 1a11 11 0 005 5l1-1.2a2 2 0 012.55-.45l2 1.2a2 2 0 01.95 1.7V19a2 2 0 01-2 2h-1C9.4 21 3 14.6 3 6V5z"></path>
+                        </svg>
+                        <span><strong>Telefono:</strong> +593 99 123 4567</span>
+                    </p>
+                    <p style="margin: 0;" class="contact-row">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M22 8l-10 6L2 8"></path>
+                        </svg>
+                        <span><strong>Email:</strong> siniestros@vitalink.utpl.edu.ec</span>
+                    </p>
+                    <p style="margin: 0;" class="contact-row">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 22a10 10 0 100-20 10 10 0 000 20z"></path>
+                        </svg>
+                        <span><strong>Horario:</strong> Lunes a Viernes 8:00 AM - 5:00 PM</span>
+                    </p>
                 </div>
             </div>
 
             <!-- Info Box -->
-            <div style="margin-top: 30px; background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 16px; padding: 24px;">
-                <h3 style="color: #34d399; font-size: 16px; font-weight: 700; margin-bottom: 16px;">ℹ️ Información Importante</h3>
+            <div class="card-volume" style="margin-top: 30px; background: rgba(52, 211, 153, 0.1); border-radius: 16px; padding: 24px;">
+                <div class="helper-title">Informacion importante</div>
                 <ul style="color: rgba(255, 255, 255, 0.8); font-size: 14px; line-height: 2; margin: 0; padding-left: 20px;">
                     <li>El equipo de UTPL se encargará de contactarse directamente con los beneficiarios del asegurado.</li>
                     <li>Si se requiere información adicional, el equipo se pondrá en contacto usando los datos proporcionados.</li>

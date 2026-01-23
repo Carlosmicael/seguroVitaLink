@@ -9,333 +9,758 @@
     @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 
     :root {
-        --glass-bg: rgba(255, 255, 255, 0.75);
-        --glass-border: rgba(148, 163, 184, 0.22);
-        --glass-shadow: 0 22px 44px rgba(15, 23, 42, 0.16);
-        --ink: #0f172a;
-        --muted: #64748b;
+        --primary: #14b8a6;
+        --primary-dark: #0d9488;
+        --primary-light: #5eead4;
+        
+        /* Glass variations para cards principales */
+        --glass-teal: rgba(20, 184, 166, 0.12);
+        --glass-emerald: rgba(16, 185, 129, 0.12);
+        --glass-cyan: rgba(6, 182, 212, 0.12);
+        --glass-blue: rgba(59, 130, 246, 0.12);
+        
+        --border-teal: rgba(94, 234, 212, 0.25);
+        --border-emerald: rgba(110, 231, 183, 0.25);
+        --border-cyan: rgba(103, 232, 249, 0.25);
+        --border-blue: rgba(147, 197, 253, 0.25);
+        
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #64748b;
     }
 
     .ui-shell {
-        background:
-            radial-gradient(900px 420px at 12% 8%, rgba(16, 185, 129, 0.16), transparent 55%),
-            radial-gradient(980px 520px at 88% 18%, rgba(34, 197, 94, 0.14), transparent 60%),
-            radial-gradient(860px 420px at 70% 90%, rgba(20, 184, 166, 0.12), transparent 60%),
-            linear-gradient(135deg, #f8fafc 0%, #eef2ff 35%, #f0fdf4 100%);
+        background: linear-gradient(135deg, #e0f2fe 0%, #ecfdf5 25%, #f0fdfa 50%, #f0fdf4 75%, #ecfccb 100%);
         position: relative;
         overflow: hidden;
+        min-height: 100vh;
         font-family: 'Manrope', 'Segoe UI', sans-serif;
+    }
+
+    .ui-shell::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0.4;
+        background-image: 
+            radial-gradient(circle at 20% 30%, rgba(94, 234, 212, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(167, 243, 208, 0.12) 0%, transparent 50%),
+            radial-gradient(circle at 50% 50%, rgba(20, 184, 166, 0.1) 0%, transparent 50%);
     }
 
     .ui-shell::after {
         content: "";
         position: absolute;
         inset: 0;
-        opacity: 0.06;
+        opacity: 0.03;
         pointer-events: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
     }
 
     .ui-container {
-        max-width: 1180px;
+        max-width: 1280px;
         margin: 0 auto;
+        position: relative;
+        z-index: 1;
     }
 
-    .ui-card {
-        background: linear-gradient(180deg, var(--glass-bg) 0%, rgba(255, 255, 255, 0.62) 100%);
-        border: 1px solid var(--glass-border);
-        border-radius: 24px;
-        box-shadow: var(--glass-shadow);
+    /* Glass cards con textura de gotas de agua */
+    .glass-card-teal {
+        background: var(--glass-teal);
+        border: 1px solid var(--border-teal);
+        border-radius: 20px;
+        box-shadow: 
+            0 8px 32px rgba(20, 184, 166, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4),
+            inset 0 -1px 0 rgba(20, 184, 166, 0.1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .glass-card-teal::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 15%),
+            radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 12%),
+            radial-gradient(circle at 40% 70%, rgba(255, 255, 255, 0.25) 0%, transparent 10%),
+            radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.2) 0%, transparent 14%);
+        pointer-events: none;
+    }
+
+    .glass-card-teal:hover {
+        background: rgba(20, 184, 166, 0.18);
+        border-color: rgba(94, 234, 212, 0.4);
+        box-shadow: 
+            0 12px 40px rgba(20, 184, 166, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5),
+            inset 0 -1px 0 rgba(20, 184, 166, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .glass-card-emerald {
+        background: var(--glass-emerald);
+        border: 1px solid var(--border-emerald);
+        border-radius: 20px;
+        box-shadow: 
+            0 8px 32px rgba(16, 185, 129, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4),
+            inset 0 -1px 0 rgba(16, 185, 129, 0.1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .glass-card-emerald::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: 
+            radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.3) 0%, transparent 15%),
+            radial-gradient(circle at 75% 30%, rgba(255, 255, 255, 0.2) 0%, transparent 12%),
+            radial-gradient(circle at 45% 75%, rgba(255, 255, 255, 0.25) 0%, transparent 10%),
+            radial-gradient(circle at 65% 85%, rgba(255, 255, 255, 0.2) 0%, transparent 14%);
+        pointer-events: none;
+    }
+
+    .glass-card-emerald:hover {
+        background: rgba(16, 185, 129, 0.18);
+        border-color: rgba(110, 231, 183, 0.4);
+        box-shadow: 
+            0 12px 40px rgba(16, 185, 129, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5),
+            inset 0 -1px 0 rgba(16, 185, 129, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .glass-card-cyan {
+        background: var(--glass-cyan);
+        border: 1px solid var(--border-cyan);
+        border-radius: 20px;
+        box-shadow: 
+            0 8px 32px rgba(6, 182, 212, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4),
+            inset 0 -1px 0 rgba(6, 182, 212, 0.1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .glass-card-cyan::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: 
+            radial-gradient(circle at 30% 35%, rgba(255, 255, 255, 0.3) 0%, transparent 15%),
+            radial-gradient(circle at 70% 25%, rgba(255, 255, 255, 0.2) 0%, transparent 12%),
+            radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.25) 0%, transparent 10%),
+            radial-gradient(circle at 80% 75%, rgba(255, 255, 255, 0.2) 0%, transparent 14%);
+        pointer-events: none;
+    }
+
+    .glass-card-cyan:hover {
+        background: rgba(6, 182, 212, 0.18);
+        border-color: rgba(103, 232, 249, 0.4);
+        box-shadow: 
+            0 12px 40px rgba(6, 182, 212, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5),
+            inset 0 -1px 0 rgba(6, 182, 212, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .glass-card-blue {
+        background: var(--glass-blue);
+        border: 1px solid var(--border-blue);
+        border-radius: 20px;
+        box-shadow: 
+            0 8px 32px rgba(59, 130, 246, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4),
+            inset 0 -1px 0 rgba(59, 130, 246, 0.1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .glass-card-blue::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: 
+            radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 15%),
+            radial-gradient(circle at 85% 35%, rgba(255, 255, 255, 0.2) 0%, transparent 12%),
+            radial-gradient(circle at 55% 85%, rgba(255, 255, 255, 0.25) 0%, transparent 10%),
+            radial-gradient(circle at 75% 70%, rgba(255, 255, 255, 0.2) 0%, transparent 14%);
+        pointer-events: none;
+    }
+
+    .glass-card-blue:hover {
+        background: rgba(59, 130, 246, 0.18);
+        border-color: rgba(147, 197, 253, 0.4);
+        box-shadow: 
+            0 12px 40px rgba(59, 130, 246, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5),
+            inset 0 -1px 0 rgba(59, 130, 246, 0.15);
+        transform: translateY(-2px);
+    }
+
+    /* Header card con glass */
+    .header-card {
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 20px;
+        box-shadow: 
+            0 4px 16px rgba(15, 23, 42, 0.06),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
         backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .header-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: 
+            radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.4) 0%, transparent 12%),
+            radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 10%);
+        pointer-events: none;
+    }
+
+    /* Cards regulares sin glass - más limpias */
+    .simple-card {
+        background: white;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        transition: all 0.2s ease;
+    }
+
+    .simple-card:hover {
+        border-color: rgba(148, 163, 184, 0.3);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    /* Sección con borde de color */
+    .section-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+        overflow: hidden;
+    }
+
+    .section-header {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        background: linear-gradient(to right, rgba(241, 245, 249, 0.5), rgba(248, 250, 252, 0.5));
+    }
+
+    .section-content {
+        padding: 1.5rem;
     }
 
     .ui-title {
-        font-size: 28px;
+        font-size: 32px;
         font-weight: 800;
-        color: var(--ink);
-        letter-spacing: -0.03em;
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
     }
 
     .ui-subtitle {
         font-size: 14px;
-        color: var(--muted);
+        color: var(--text-muted);
+        font-weight: 500;
     }
 
     .ui-icon {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        background: rgba(15, 23, 42, 0.08);
-        color: var(--ink);
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
     }
 
     .ui-icon svg {
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
     }
 
     .ui-badge {
         display: inline-flex;
         align-items: center;
-        padding: 4px 12px;
+        padding: 6px 16px;
         border-radius: 999px;
         font-size: 10px;
-        letter-spacing: 0.16em;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
         font-weight: 700;
-        border: 1px solid transparent;
-    }
-
-    .ui-badge-muted {
-        background: rgba(148, 163, 184, 0.12);
-        color: #64748b;
-        border-color: rgba(148, 163, 184, 0.3);
+        background: rgba(148, 163, 184, 0.1);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        color: #475569;
     }
 
     .ui-badge-info {
-        background: rgba(34, 197, 94, 0.15);
-        color: #166534;
-        border-color: rgba(34, 197, 94, 0.35);
-    }
-
-    .ui-badge-success {
-        background: rgba(16, 185, 129, 0.16);
-        color: #065f46;
-        border-color: rgba(16, 185, 129, 0.35);
+        background: rgba(20, 184, 166, 0.1);
+        border-color: rgba(20, 184, 166, 0.2);
+        color: #0d9488;
     }
 
     .ui-kpi-label {
         font-size: 11px;
-        letter-spacing: 0.2em;
+        letter-spacing: 0.15em;
         text-transform: uppercase;
-        color: #94a3b8;
+        color: var(--text-muted);
+        font-weight: 600;
     }
 
     .ui-kpi-value {
-        font-size: 30px;
+        font-size: 36px;
         font-weight: 800;
-        color: var(--ink);
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    /* Stats simples */
+    .stat-item {
+        padding: 1rem;
+        border-radius: 10px;
+        background: rgba(241, 245, 249, 0.5);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        transition: all 0.2s ease;
+    }
+
+    .stat-item:hover {
+        background: rgba(241, 245, 249, 0.8);
+        border-color: rgba(203, 213, 225, 0.8);
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .text-success {
+        color: #059669;
+    }
+
+    /* Ítem de lista */
+    .list-item {
+        padding: 0.875rem;
+        border-radius: 8px;
+        background: rgba(248, 250, 252, 0.8);
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        transition: all 0.2s ease;
+    }
+
+    .list-item:hover {
+        background: white;
+        border-color: rgba(203, 213, 225, 0.8);
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+    }
+
+    /* Color indicators */
+    .indicator-teal {
+        border-left: 3px solid #14b8a6;
+    }
+
+    .indicator-emerald {
+        border-left: 3px solid #10b981;
+    }
+
+    .indicator-cyan {
+        border-left: 3px solid #06b6d4;
+    }
+
+    .indicator-blue {
+        border-left: 3px solid #3b82f6;
+    }
+
+    /* Iconos decorativos */
+    .kpi-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(8px);
+        margin-bottom: 0.75rem;
+    }
+
+    .kpi-icon svg {
+        width: 24px;
+        height: 24px;
+        stroke: rgba(15, 23, 42, 0.7);
+        stroke-width: 2;
+    }
+
+    .section-icon {
+        width: 20px;
+        height: 20px;
+        stroke: currentColor;
+        stroke-width: 2;
     }
 </style>
 
 <div class="ui-shell p-6 md:p-10">
     <div class="ui-container space-y-6">
-        <div class="ui-card p-6">
+        <!-- Header Card -->
+        <div class="header-card p-6">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <div class="flex items-center gap-3">
                         <span class="ui-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M4 7h16M4 12h10M4 17h7" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                         </span>
-                        <h1 class="ui-title">Panel de administracion</h1>
+                        <h1 class="ui-title">Panel de Administración</h1>
                     </div>
-                    <p class="ui-subtitle mt-2">Estado global del sistema, operaciones y finanzas.</p>
+                    <p class="ui-subtitle mt-2">Estado global del sistema, operaciones y finanzas</p>
                 </div>
-                <div class="ui-badge ui-badge-muted">Vista general</div>
+                <div class="ui-badge">Vista General</div>
             </div>
         </div>
 
+        <!-- KPI Cards principales con Glass -->
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div class="ui-card p-6">
-                <div class="ui-kpi-label">Polizas activas</div>
+            <div class="glass-card-teal p-6">
+                <div class="kpi-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="ui-kpi-label">Pólizas Activas</div>
                 <div class="mt-3 ui-kpi-value">{{ polizas_activas }}</div>
-                <div class="mt-2 text-xs text-slate-400">Total polizas: {{ total_polizas }}</div>
+                <div class="mt-2 text-xs text-slate-500">Total: {{ total_polizas }}</div>
             </div>
-            <div class="ui-card p-6">
-                <div class="ui-kpi-label">Siniestros pendientes</div>
+            <div class="glass-card-emerald p-6">
+                <div class="kpi-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="ui-kpi-label">Siniestros Pendientes</div>
                 <div class="mt-3 ui-kpi-value">{{ siniestros_pendientes }}</div>
-                <div class="mt-2 text-xs text-slate-400">Total siniestros: {{ total_siniestros }}</div>
+                <div class="mt-2 text-xs text-slate-500">Total: {{ total_siniestros }}</div>
             </div>
-            <div class="ui-card p-6">
-                <div class="ui-kpi-label">Solicitudes pendientes</div>
+            <div class="glass-card-cyan p-6">
+                <div class="kpi-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="ui-kpi-label">Solicitudes Pendientes</div>
                 <div class="mt-3 ui-kpi-value">{{ solicitudes_pendientes }}</div>
-                <div class="mt-2 text-xs text-slate-400">Total solicitudes: {{ total_solicitudes }}</div>
+                <div class="mt-2 text-xs text-slate-500">Total: {{ total_solicitudes }}</div>
             </div>
-            <div class="ui-card p-6">
-                <div class="ui-kpi-label">Notificaciones sin leer</div>
+            <div class="glass-card-blue p-6">
+                <div class="kpi-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="ui-kpi-label">Notificaciones</div>
                 <div class="mt-3 ui-kpi-value">{{ notificaciones_pendientes }}</div>
-                <div class="mt-2 text-xs text-slate-400">Alertas operativas</div>
+                <div class="mt-2 text-xs text-slate-500">Sin leer</div>
             </div>
         </div>
 
+        <!-- Finanzas (importante - con glass) y Aseguradoras -->
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <div class="ui-card p-6 lg:col-span-2">
+            <div class="glass-card-emerald p-6 lg:col-span-2">
+                <div class="flex items-center gap-2 mb-5">
+                    <svg class="section-icon text-slate-700" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h2 class="section-title">Finanzas y Liquidaciones</h2>
+                    <span class="ui-badge ui-badge-info ml-auto">Facturas y Pagos</span>
+                </div>
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-3 mb-4">
+                    <div>
+                        <div class="ui-kpi-label">Total Facturado</div>
+                        <div class="mt-2 text-3xl font-bold text-slate-900">${{ total_facturado|floatformat:2 }}</div>
+                    </div>
+                    <div>
+                        <div class="ui-kpi-label">Total Pagado</div>
+                        <div class="mt-2 text-3xl font-bold text-slate-900">${{ total_pagado|floatformat:2 }}</div>
+                    </div>
+                    <div>
+                        <div class="ui-kpi-label">Saldo Pendiente</div>
+                        <div class="mt-2 text-3xl font-bold text-slate-900">${{ saldo_pendiente|floatformat:2 }}</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="stat-item">
+                        <div class="stat-label">Facturas</div>
+                        <div class="stat-value">{{ facturas_total }}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Pagos</div>
+                        <div class="stat-value">{{ pagos_total }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="flex items-center gap-2">
+                        <svg class="section-icon text-slate-700" viewBox="0 0 24 24" fill="none">
+                            <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h2 class="section-title">Aseguradoras</h2>
+                    </div>
+                </div>
+                <div class="section-content space-y-3">
+                    <div class="stat-item flex items-center justify-between">
+                        <span class="stat-label">Total</span>
+                        <span class="stat-value">{{ aseguradoras_total }}</span>
+                    </div>
+                    <div class="stat-item flex items-center justify-between">
+                        <span class="stat-label">Activas</span>
+                        <span class="stat-value text-success">{{ aseguradoras_activas }}</span>
+                    </div>
+                    <div class="stat-item flex items-center justify-between">
+                        <span class="stat-label">Inactivas</span>
+                        <span class="stat-value">{{ aseguradoras_inactivas }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pólizas, Siniestros, Solicitudes -->
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div class="section-card">
+                <div class="section-header indicator-teal">
+                    <div class="flex items-center gap-2">
+                        <svg class="section-icon text-teal-600" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h2 class="section-title">Pólizas</h2>
+                    </div>
+                </div>
+                <div class="section-content space-y-3">
+                    <div class="stat-item flex items-center justify-between">
+                        <span class="stat-label">Pendientes</span>
+                        <span class="stat-value">{{ polizas_pendientes }}</span>
+                    </div>
+                    <div class="stat-item flex items-center justify-between">
+                        <span class="stat-label">Vencidas</span>
+                        <span class="stat-value">{{ polizas_vencidas }}</span>
+                    </div>
+                    <div class="stat-item flex items-center justify-between">
+                        <span class="stat-label">Estudiantes activos</span>
+                        <span class="stat-value">{{ estudiantes_activos }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-header indicator-blue">
+                    <div class="flex items-center gap-2">
+                        <svg class="section-icon text-blue-600" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h2 class="section-title">Siniestros</h2>
+                    </div>
+                </div>
+                <div class="section-content space-y-3">
+                    <div class="stat-item flex items-center justify-between">
+                        <span class="stat-label">Aprobados</span>
+                        <span class="stat-value text-success">{{ siniestros_aprobados }}</span>
+                    </div>
+                    <div class="stat-item flex items-center justify-between">
+                        <span class="stat-label">Rechazados</span>
+                        <span class="stat-value">{{ siniestros_rechazados }}</span>
+                    </div>
+                    <div class="stat-item flex items-center justify-between">
+                        <span class="stat-label">Pagados</span>
+                        <span class="stat-value">{{ siniestros_pagados }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-header indicator-emerald">
+                    <div class="flex items-center gap-2">
+                        <svg class="section-icon text-emerald-600" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h2 class="section-title">Solicitudes</h2>
+                    </div>
+                </div>
+                <div class="section-content space-y-3">
+                    <div class="stat-item flex items-center justify-between">
+                        <span class="stat-label">En proceso</span>
+                        <span class="stat-value">{{ solicitudes_en_proceso }}</span>
+                    </div>
+                    <div class="stat-item flex items-center justify-between">
+                        <span class="stat-label">Aprobadas</span>
+                        <span class="stat-value text-success">{{ solicitudes_aprobadas }}</span>
+                    </div>
+                    <div class="stat-item flex items-center justify-between">
+                        <span class="stat-label">Rechazadas</span>
+                        <span class="stat-value">{{ solicitudes_rechazadas }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documentos -->
+        <div class="section-card">
+            <div class="section-header">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-slate-900">Finanzas y liquidaciones</h2>
-                    <span class="ui-badge ui-badge-info">Facturas y pagos</span>
-                </div>
-                <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <div class="rounded-xl border border-slate-100 bg-white/70 px-4 py-3">
-                        <div class="ui-kpi-label">Total facturado</div>
-                        <div class="mt-2 text-2xl font-bold text-slate-900">${{ total_facturado|floatformat:2 }}</div>
+                    <div class="flex items-center gap-2">
+                        <svg class="section-icon text-slate-700" viewBox="0 0 24 24" fill="none">
+                            <path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h2 class="section-title">Documentos y Requisitos</h2>
                     </div>
-                    <div class="rounded-xl border border-slate-100 bg-white/70 px-4 py-3">
-                        <div class="ui-kpi-label">Total pagado</div>
-                        <div class="mt-2 text-2xl font-bold text-slate-900">${{ total_pagado|floatformat:2 }}</div>
-                    </div>
-                    <div class="rounded-xl border border-slate-100 bg-white/70 px-4 py-3">
-                        <div class="ui-kpi-label">Saldo pendiente</div>
-                        <div class="mt-2 text-2xl font-bold text-slate-900">${{ saldo_pendiente|floatformat:2 }}</div>
-                    </div>
-                </div>
-                <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div class="rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        Facturas registradas: <span class="font-semibold text-slate-900">{{ facturas_total }}</span>
-                    </div>
-                    <div class="rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        Pagos registrados: <span class="font-semibold text-slate-900">{{ pagos_total }}</span>
-                    </div>
+                    <span class="ui-badge">Control Documental</span>
                 </div>
             </div>
-
-            <div class="ui-card p-6">
-                <h2 class="text-lg font-semibold text-slate-900">Aseguradoras</h2>
-                <div class="mt-4 space-y-3">
-                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        Total aseguradoras
-                        <span class="font-semibold text-slate-900">{{ aseguradoras_total }}</span>
+            <div class="section-content">
+                <div class="grid grid-cols-2 gap-3 md:grid-cols-5">
+                    <div class="stat-item text-center">
+                        <div class="stat-value">{{ documentos_requeridos }}</div>
+                        <div class="stat-label mt-1">Requeridos</div>
                     </div>
-                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        Activas
-                        <span class="font-semibold text-emerald-700">{{ aseguradoras_activas }}</span>
+                    <div class="stat-item text-center">
+                        <div class="stat-value">{{ documentos_activos }}</div>
+                        <div class="stat-label mt-1">Activos</div>
                     </div>
-                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        Inactivas
-                        <span class="font-semibold text-slate-900">{{ aseguradoras_inactivas }}</span>
+                    <div class="stat-item text-center">
+                        <div class="stat-value">{{ documentos_pendientes }}</div>
+                        <div class="stat-label mt-1">Pendientes</div>
+                    </div>
+                    <div class="stat-item text-center">
+                        <div class="stat-value text-success">{{ documentos_aprobados }}</div>
+                        <div class="stat-label mt-1">Aprobados</div>
+                    </div>
+                    <div class="stat-item text-center">
+                        <div class="stat-value">{{ documentos_rechazados }}</div>
+                        <div class="stat-label mt-1">Rechazados</div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Actividad Reciente -->
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <div class="ui-card p-6">
-                <h2 class="text-lg font-semibold text-slate-900">Polizas</h2>
-                <div class="mt-4 space-y-3">
-                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        Pendientes
-                        <span class="font-semibold text-slate-900">{{ polizas_pendientes }}</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        Vencidas
-                        <span class="font-semibold text-slate-900">{{ polizas_vencidas }}</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        Estudiantes activos
-                        <span class="font-semibold text-slate-900">{{ estudiantes_activos }}</span>
+            <div class="simple-card">
+                <div class="p-5 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <svg class="section-icon text-cyan-600" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h2 class="section-title">Últimas Pólizas</h2>
                     </div>
                 </div>
-            </div>
-
-            <div class="ui-card p-6">
-                <h2 class="text-lg font-semibold text-slate-900">Siniestros</h2>
-                <div class="mt-4 space-y-3">
-                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        Aprobados
-                        <span class="font-semibold text-emerald-700">{{ siniestros_aprobados }}</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        Rechazados
-                        <span class="font-semibold text-slate-900">{{ siniestros_rechazados }}</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        Pagados
-                        <span class="font-semibold text-slate-900">{{ siniestros_pagados }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="ui-card p-6">
-                <h2 class="text-lg font-semibold text-slate-900">Solicitudes</h2>
-                <div class="mt-4 space-y-3">
-                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        En proceso
-                        <span class="font-semibold text-slate-900">{{ solicitudes_en_proceso }}</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        Aprobadas
-                        <span class="font-semibold text-emerald-700">{{ solicitudes_aprobadas }}</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        Rechazadas
-                        <span class="font-semibold text-slate-900">{{ solicitudes_rechazadas }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="ui-card p-6">
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-slate-900">Documentos y requisitos</h2>
-                <span class="ui-badge ui-badge-muted">Control documental</span>
-            </div>
-            <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-5">
-                <div class="rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                    Requeridos <span class="font-semibold text-slate-900">{{ documentos_requeridos }}</span>
-                </div>
-                <div class="rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                    Activos <span class="font-semibold text-slate-900">{{ documentos_activos }}</span>
-                </div>
-                <div class="rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                    Pendientes <span class="font-semibold text-slate-900">{{ documentos_pendientes }}</span>
-                </div>
-                <div class="rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                    Aprobados <span class="font-semibold text-slate-900">{{ documentos_aprobados }}</span>
-                </div>
-                <div class="rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                    Rechazados <span class="font-semibold text-slate-900">{{ documentos_rechazados }}</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <div class="ui-card p-6">
-                <h2 class="text-lg font-semibold text-slate-900">Ultimas polizas</h2>
-                <div class="mt-4 space-y-3">
+                <div class="p-4 space-y-2">
                     {% for poliza in recent_polizas %}
-                    <div class="rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        <div class="font-semibold text-slate-900">{{ poliza.numero_poliza }}</div>
-                        <div class="text-xs text-slate-400">{{ poliza.get_estado_display }} | {{ poliza.aseguradora.nombre|default:"Sin aseguradora" }}</div>
+                    <div class="list-item">
+                        <div class="flex items-start gap-2">
+                            <svg class="w-4 h-4 mt-0.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            <div class="flex-1">
+                                <div class="font-semibold text-slate-900 text-sm">{{ poliza.numero_poliza }}</div>
+                                <div class="text-xs text-slate-500 mt-1">{{ poliza.get_estado_display }} · {{ poliza.aseguradora.nombre|default:"Sin aseguradora" }}</div>
+                            </div>
+                        </div>
                     </div>
                     {% empty %}
-                    <div class="rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-500">
-                        No hay polizas registradas.
+                    <div class="list-item text-sm text-slate-500">
+                        No hay pólizas registradas
                     </div>
                     {% endfor %}
                 </div>
             </div>
 
-            <div class="ui-card p-6">
-                <h2 class="text-lg font-semibold text-slate-900">Ultimos siniestros</h2>
-                <div class="mt-4 space-y-3">
+            <div class="simple-card">
+                <div class="p-5 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <svg class="section-icon text-teal-600" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h2 class="section-title">Últimos Siniestros</h2>
+                    </div>
+                </div>
+                <div class="p-4 space-y-2">
                     {% for siniestro in recent_siniestros %}
-                    <div class="rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        <div class="font-semibold text-slate-900">#{{ siniestro.id }} - {{ siniestro.get_tipo_display }}</div>
-                        <div class="text-xs text-slate-400">Estado: {{ siniestro.get_estado_display }}</div>
+                    <div class="list-item">
+                        <div class="flex items-start gap-2">
+                            <svg class="w-4 h-4 mt-0.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                            <div class="flex-1">
+                                <div class="font-semibold text-slate-900 text-sm">#{{ siniestro.id }} - {{ siniestro.get_tipo_display }}</div>
+                                <div class="text-xs text-slate-500 mt-1">{{ siniestro.get_estado_display }}</div>
+                            </div>
+                        </div>
                     </div>
                     {% empty %}
-                    <div class="rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-500">
-                        No hay siniestros registrados.
+                    <div class="list-item text-sm text-slate-500">
+                        No hay siniestros registrados
                     </div>
                     {% endfor %}
                 </div>
             </div>
 
-            <div class="ui-card p-6">
-                <h2 class="text-lg font-semibold text-slate-900">Ultimas solicitudes</h2>
-                <div class="mt-4 space-y-3">
+            <div class="simple-card">
+                <div class="p-5 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <svg class="section-icon text-emerald-600" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h2 class="section-title">Últimas Solicitudes</h2>
+                    </div>
+                </div>
+                <div class="p-4 space-y-2">
                     {% for solicitud in recent_solicitudes %}
-                    <div class="rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-600">
-                        <div class="font-semibold text-slate-900">Solicitud #{{ solicitud.id }}</div>
-                        <div class="text-xs text-slate-400">{{ solicitud.estudiante.nombres }} {{ solicitud.estudiante.apellidos }} | {{ solicitud.get_estado_display }}</div>
+                    <div class="list-item">
+                        <div class="flex items-start gap-2">
+                            <svg class="w-4 h-4 mt-0.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            <div class="flex-1">
+                                <div class="font-semibold text-slate-900 text-sm">Solicitud #{{ solicitud.id }}</div>
+                                <div class="text-xs text-slate-500 mt-1">{{ solicitud.estudiante.nombres }} {{ solicitud.estudiante.apellidos }} · {{ solicitud.get_estado_display }}</div>
+                            </div>
+                        </div>
                     </div>
                     {% empty %}
-                    <div class="rounded-xl border border-slate-100 bg-white/70 px-4 py-3 text-sm text-slate-500">
-                        No hay solicitudes registradas.
+                    <div class="list-item text-sm text-slate-500">
+                        No hay solicitudes registradas
                     </div>
                     {% endfor %}
                 </div>
