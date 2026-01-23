@@ -2,36 +2,226 @@
 
 {% block content %}
 <style>
-.table-container {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap');
+
+:root{
+    --emerald: #10b981;
+    --emerald-dark: #0f766e;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --card: rgba(255,255,255,0.72);
+    --card-border: rgba(148,163,184,0.2);
+    --card-radius: 20px;
 }
 
-.btn-action {
-    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+*{
+    box-sizing: border-box;
+}
+
+.ui-shell{
+    min-height: 100vh;
+    padding: 40px 28px;
+    font-family: 'Sora','Segoe UI',sans-serif;
+    background:
+        radial-gradient(1000px 500px at 10% 0%, rgba(16, 185, 129, 0.12), transparent 55%),
+        radial-gradient(900px 500px at 90% 20%, rgba(14, 165, 233, 0.12), transparent 55%),
+        linear-gradient(135deg, #f8fafc 0%, #eef2ff 45%, #f1f5f9 100%);
+}
+
+.ui-container{
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.ui-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    padding: 24px 28px;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(12px);
+}
+
+.ui-title-wrap{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.ui-icon{
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 100%);
     color: white;
-    font-weight: 600;
-    padding: 8px 20px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.25);
+}
+
+.ui-title{
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.ui-subtitle{
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 6px;
+}
+
+.table-container{
+    margin-top: 24px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    padding: 16px;
+    overflow-x: auto;
+    backdrop-filter: blur(12px);
+}
+
+.ui-table{
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.ui-table thead th{
+    padding: 16px;
+    text-align: left;
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+    background: linear-gradient(to right, rgba(241,245,249,.7), rgba(248,250,252,.7));
+    white-space: nowrap;
+}
+
+.ui-table tbody td{
+    padding: 16px;
+    color: #334155;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+    vertical-align: middle;
+}
+
+.table-row{
+    transition: background .2s ease;
+}
+
+.table-row:hover{
+    background: rgba(248, 250, 252, 0.75);
+}
+
+.cell-center{
+    text-align: center;
+}
+
+.id-badge{
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #115e59 0%, #0f766e 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
     font-size: 14px;
 }
 
-.btn-action:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
+.cell-title{
+    color: #0f172a;
+    font-weight: 600;
 }
 
-.modal-overlay {
+.cell-desc{
+    color: #475569;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cell-meta{
+    color: #94a3b8;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.status{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.status-pending{ background: #fef3c7; color: #92400e; }
+.status-approved{ background: #d1fae5; color: #065f46; }
+.status-rejected{ background: #fee2e2; color: #991b1b; }
+.status-paid{ background: #e0e7ff; color: #3730a3; }
+.status-neutral{ background: #dbeafe; color: #1e40af; }
+
+.btn-action{
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    color: white;
+    font-weight: 700;
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 8px 18px rgba(16, 185, 129, 0.25);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-action:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 14px 26px rgba(16, 185, 129, 0.32);
+}
+
+.empty-state{
+    text-align: center;
+    padding: 56px 24px;
+    color: #94a3b8;
+}
+
+.empty-icon{
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    border-radius: 18px;
+    background: rgba(148, 163, 184, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+}
+
+.modal-overlay{
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(6px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -39,183 +229,226 @@
     padding: 20px;
 }
 
-.modal-overlay.hidden {
-    display: none;
-}
+.modal-overlay.hidden{ display: none; }
 
-.modal-content {
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+.modal-content{
+    background: rgba(255,255,255,0.94);
+    border-radius: 24px;
+    border: 1px solid rgba(148,163,184,0.2);
+    box-shadow: 0 28px 70px rgba(15, 23, 42, 0.35);
     position: relative;
     max-height: 90vh;
     overflow-y: auto;
     animation: modalSlideIn 0.3s ease-out;
 }
 
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-50px) scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+@keyframes modalSlideIn{
+    from { opacity: 0; transform: translateY(-40px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.modal-header {
+.modal-header{
     background: linear-gradient(135deg, #115e59 0%, #0f766e 100%);
     color: white;
     padding: 24px 30px;
-    border-radius: 20px 20px 0 0;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    border-radius: 24px 24px 0 0;
 }
 
-.modal-body {
-    padding: 30px;
+.modal-title{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0;
 }
 
-.close-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
+.modal-subtitle{
+    margin-top: 8px;
+    opacity: 0.9;
+    font-size: 13px;
+}
+
+.modal-body{ padding: 30px; }
+
+.modal-icon{
     width: 36px;
     height: 36px;
-    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-btn{
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.2);
     border: none;
     border-radius: 50%;
     color: white;
     font-size: 24px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 11;
 }
 
-.close-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+.close-btn:hover{
+    background: rgba(255,255,255,0.3);
     transform: rotate(90deg);
 }
 
-.doc-card {
-    background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
-    border: 1px solid rgba(16, 185, 129, 0.2);
-    border-radius: 12px;
+.doc-card{
+    background: linear-gradient(135deg, rgba(240,253,250,0.9) 0%, rgba(204,251,241,0.9) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.18);
+    border-radius: 16px;
     padding: 20px;
     margin-bottom: 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.doc-card:hover {
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
-    transform: translateX(4px);
+.doc-card:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 16px 28px rgba(15, 23, 42, 0.12);
 }
 
-.doc-info p {
+.doc-info p{
     margin: 6px 0;
-    color: #374151;
+    color: #334155;
     font-size: 14px;
 }
 
-.doc-info strong {
-    color: #115e59;
+.doc-info strong{
+    color: #0f172a;
     font-weight: 600;
 }
 
-.badge-obligatorio {
+.doc-title{
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f766e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.doc-tag{
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .18em;
+    font-weight: 700;
+    color: #0f766e;
+    background: rgba(16, 185, 129, 0.15);
+    padding: 4px 8px;
+    border-radius: 999px;
+}
+
+.badge-obligatorio{
     display: inline-block;
     background: #fef3c7;
     color: #92400e;
     padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
 }
 
-.upload-area {
-    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-    border: 2px dashed #d1d5db;
-    border-radius: 12px;
-    padding: 40px 30px;
+.badge-opcional{
+    display: inline-block;
+    background: #e5e7eb;
+    color: #64748b;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.upload-area{
+    background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
+    border: 2px dashed rgba(148, 163, 184, 0.6);
+    border-radius: 14px;
+    padding: 36px 30px;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.upload-area:hover {
-    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+.upload-area:hover{
+    background: linear-gradient(135deg, #eef2f7 0%, #e2e8f0 100%);
     border-color: #10b981;
 }
 
-.upload-area i {
-    font-size: 48px;
+.upload-area i{
+    font-size: 46px;
     color: #10b981;
     margin-bottom: 12px;
 }
 
-.btn-select-file {
+.btn-select-file{
     background: white;
-    border: 1px solid #d1d5db;
+    border: 1px solid rgba(148, 163, 184, 0.6);
     padding: 10px 24px;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 600;
     color: #374151;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.btn-select-file:hover {
-    background: #f9fafb;
+.btn-select-file:hover{
+    background: #f8fafc;
     border-color: #10b981;
-    color: #10b981;
+    color: #0f766e;
 }
 
-.btn-submit {
+.btn-submit{
     background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
     color: white;
     font-weight: 700;
     padding: 12px 32px;
-    border-radius: 10px;
+    border-radius: 12px;
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 8px 18px rgba(16, 185, 129, 0.3);
 }
 
-.btn-submit:hover {
+.btn-submit:hover{
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 12px 24px rgba(16, 185, 129, 0.35);
 }
 
-.btn-cancel {
-    background: #e5e7eb;
-    color: #374151;
+.btn-cancel{
+    background: #e2e8f0;
+    color: #475569;
     font-weight: 600;
     padding: 12px 32px;
-    border-radius: 10px;
+    border-radius: 12px;
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.btn-cancel:hover {
-    background: #d1d5db;
+.btn-cancel:hover{
+    background: #cbd5f5;
 }
 
-.file-selected {
+.file-selected{
     background: #ecfdf5;
     border: 1px solid #10b981;
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 12px 16px;
     margin-top: 12px;
     display: flex;
@@ -224,158 +457,153 @@
     color: #065f46;
 }
 
-.file-selected i {
-    color: #10b981;
-}
+.file-selected i{ color: #10b981; }
 
 /* DataTables custom styling */
-.dataTables_wrapper .dataTables_paginate .paginate_button {
+.dataTables_wrapper .dataTables_paginate .paginate_button{
     padding: 6px 12px;
     margin: 0 4px;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.5);
     background: white;
-    color: #374151;
+    color: #475569;
     transition: all 0.2s ease;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover{
     background: #10b981;
     color: white;
     border-color: #10b981;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+.dataTables_wrapper .dataTables_paginate .paginate_button.current{
     background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
     color: white;
     border-color: #10b981;
 }
 
-.dataTables_wrapper .dataTables_filter input {
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
+.dataTables_wrapper .dataTables_filter input{
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    border-radius: 12px;
     padding: 8px 16px;
     margin-left: 8px;
 }
 
-.dataTables_wrapper .dataTables_filter input:focus {
+.dataTables_wrapper .dataTables_filter input:focus{
     outline: none;
     border-color: #10b981;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
 }
 </style>
 
-<div style="padding: 40px; background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); min-height: 100vh;">
-    <div style="max-width: 1400px; margin: 0 auto;">
-        <!-- Header -->
-        <div style="margin-bottom: 32px;">
-            <h1 style="font-size: 32px; font-weight: 800; color: #115e59; margin-bottom: 8px;">
-                📋 Mis Siniestros
-            </h1>
-            <p style="color: #6b7280; font-size: 16px;">
-                Gestiona y revisa el estado de tus siniestros reportados
-            </p>
+<div class="ui-shell">
+    <div class="ui-container">
+        <div class="ui-header">
+            <div class="ui-title-wrap">
+                <span class="ui-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </span>
+                <div>
+                    <h1 class="ui-title">Mis siniestros</h1>
+                    <p class="ui-subtitle">Gestiona y revisa el estado de tus siniestros reportados.</p>
+                </div>
+            </div>
         </div>
 
-        <!-- Table Container -->
-        <div style="background: white; padding: 24px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto;">
-            <table id="tablaSiniestros" class="display" style="width: 100%; border-collapse: separate; border-spacing: 0;">
+        <div class="table-container">
+            <table id="tablaSiniestros" class="display ui-table">
                 <thead>
-                    <tr style="background: #f8fafc;">
-                        <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">ID</th>
-                        <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Beneficiario</th>
-                        <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Tipo</th>
-                        <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Descripción</th>
-                        <th style="padding: 16px; text-align: center; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Estado</th>
-                        <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Fecha Evento</th>
-                        <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Fecha Reporte</th>
-                        <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Póliza</th>
-                        <th style="padding: 16px; text-align: center; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Acción</th>
+
+                    <tr>
+                        <th>ID</th>
+                        <th>Beneficiario</th>
+                        <th>Tipo</th>
+                        <th>Descripcion</th>
+                        <th class="cell-center">Estado</th>
+                        <th>Fecha evento</th>
+                        <th>Fecha reporte</th>
+                        <th>Poliza</th>
+                        <th class="cell-center">Accion</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for sin in siniestros %}
-                    <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" 
-                        onmouseover="this.style.background='#f8fafc'" 
-                        onmouseout="this.style.background='white'">
-                        
-                        <td style="padding: 16px;">
-                            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #115e59 0%, #0f766e 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px;">
-                                {{ sin.id }}
-                            </div>
+                    <tr class="table-row">
+                        <td>
+                            <div class="id-badge">{{ sin.id }}</div>
                         </td>
                         
-                        <td style="padding: 16px;">
-                            <div style="color: #1e293b; font-weight: 600; font-size: 14px;">{{ sin.beneficiario_nombre }}</div>
+                        <td>
+                            <div class="cell-title">{{ sin.beneficiario_nombre }}</div>
                         </td>
                         
-                        <td style="padding: 16px; white-space: nowrap;">
-                            <div style="color: #1e293b; font-weight: 500; font-size: 14px;">{{ sin.tipo }}</div>
+                        <td>
+                            <div class="cell-title">{{ sin.tipo }}</div>
                         </td>
                         
-                        <td style="padding: 16px;">
-                            <div style="color: #475569; font-size: 14px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ sin.descripcion }}">
+                        <td>
+                            <div class="cell-desc" title="{{ sin.descripcion }}">
                                 {{ sin.descripcion }}
                             </div>
                         </td>
                         
-                        <td style="padding: 16px; text-align: center; white-space: nowrap;">
-                            {% if sin.estado == 'pendiente' or sin.estado == 'Pendiente de revisión' %}
-                                <span style="display: inline-block; padding: 6px 16px; background: #fef3c7; color: #92400e; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                        <td class="cell-center">
+                            {% if sin.estado == 'pendiente' or sin.estado == 'Pendiente de revision' %}
+                                <span class="status status-pending">
                                     <i class="fas fa-clock"></i> Pendiente
                                 </span>
                             {% elif sin.estado == 'aprobado' or sin.estado == 'Aprobado' %}
-                                <span style="display: inline-block; padding: 6px 16px; background: #d1fae5; color: #065f46; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                <span class="status status-approved">
                                     <i class="fas fa-check-circle"></i> Aprobado
                                 </span>
                             {% elif sin.estado == 'rechazado' or sin.estado == 'Rechazado' %}
-                                <span style="display: inline-block; padding: 6px 16px; background: #fee2e2; color: #991b1b; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                <span class="status status-rejected">
                                     <i class="fas fa-times-circle"></i> Rechazado
                                 </span>
                             {% elif sin.estado == 'pagado' or sin.estado == 'Pagado' %}
-                                <span style="display: inline-block; padding: 6px 16px; background: #e0e7ff; color: #3730a3; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                <span class="status status-paid">
                                     <i class="fas fa-dollar-sign"></i> Pagado
                                 </span>
                             {% else %}
-                                <span style="display: inline-block; padding: 6px 16px; background: #dbeafe; color: #1e40af; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                <span class="status status-neutral">
                                     {{ sin.estado }}
                                 </span>
                             {% endif %}
                         </td>
                         
-                        <td style="padding: 16px; color: #475569; font-size: 14px; white-space: nowrap;">
+                        <td>
                             {{ sin.fecha_evento|date:"d/m/Y" }}
                         </td>
                         
-                        <td style="padding: 16px; color: #475569; font-size: 14px; white-space: nowrap;">
+                        <td>
                             {{ sin.fecha_reporte|date:"d/m/Y" }}
-                            <div style="color: #94a3b8; font-size: 12px;">{{ sin.fecha_reporte|date:"h:i A" }}</div>
+                            <div class="cell-meta">{{ sin.fecha_reporte|date:"h:i A" }}</div>
                         </td>
                         
-                        <td style="padding: 16px;">
-                            <div style="color: #1e293b; font-weight: 600; font-size: 14px;">{{ sin.poliza_numero }}</div>
+                        <td>
+                            <div class="cell-title">{{ sin.poliza_numero }}</div>
                         </td>
                         
-                        <td style="padding: 16px; text-align: center; white-space: nowrap;">
-                            <button class="abrirModal"
+                        <td class="cell-center">
+                            <button class="abrirModal btn-action"
                                     data-poliza="{{ sin.poliza_numero }}"
                                     data-beneficiario="{{ sin.beneficiario_id }}"
-                                    style="padding: 10px 14px; background: linear-gradient(135deg, #115e59 0%, #0f766e 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 2px 6px rgba(17, 94, 89, 0.25); transition: all 0.2s;" 
-                                    title="Ver Documentos"
-                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(17, 94, 89, 0.35)'"
-                                    onmouseout="this.style.transform=''; this.style.boxShadow='0 2px 6px rgba(17, 94, 89, 0.25)'">
-                                <i class="fas fa-folder-open"></i> Ver Documentos
+                                    title="Ver documentos">
+                                <i class="fas fa-folder-open"></i>
+                                Ver documentos
                             </button>
                         </td>
                     </tr>
-                    {% empty %}
+{% empty %}
                     <tr>
-                        <td colspan="9" style="text-align: center; padding: 60px 20px; color: #94a3b8;">
-                            <div style="font-size: 48px; margin-bottom: 16px;">
+                        <td colspan="9" class="empty-state">
+                            <div class="empty-icon">
                                 <i class="fas fa-folder-open"></i>
                             </div>
-                            <div style="font-size: 18px; font-weight: 600;">No tienes siniestros registrados</div>
-                            <div style="font-size: 14px; margin-top: 8px;">Los siniestros aprobados aparecerán aquí</div>
+                            <div style="font-size: 16px; font-weight: 700;">No tienes siniestros registrados</div>
+                            <div style="font-size: 13px; margin-top: 6px;">Los siniestros aprobados apareceran aqui.</div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -389,14 +617,20 @@
 <div id="modalSiniestro" class="modal-overlay hidden">
     <div class="modal-content" style="width: 90%; max-width: 1000px;">
         <div class="modal-header">
-            <button class="close-btn" id="cerrarModal">×</button>
-            <h2 style="font-size: 24px; font-weight: 700; margin: 0;">
-                📂 Documentos Requeridos
+            <button class="close-btn" id="cerrarModal">&times;</button>
+            <h2 class="modal-title">
+                <span class="modal-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V7l-5-5H7a2 2 0 00-2 2v15a2 2 0 002 2z"></path>
+                    </svg>
+                </span>
+                Documentos requeridos
             </h2>
-            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">
-                Revisa y carga los documentos necesarios para tu siniestro
+            <p class="modal-subtitle">
+                Revisa y carga los documentos necesarios para tu siniestro.
             </p>
         </div>
+
         <div class="modal-body">
             <div id="documentosContainer">
                 <div style="text-align: center; padding: 40px; color: #6b7280;">
@@ -412,11 +646,17 @@
 <div id="modalDocumento" class="modal-overlay hidden">
     <div class="modal-content" style="width: 90%; max-width: 600px;">
         <div class="modal-header">
-            <button class="close-btn" onclick="cerrarModal('modalDocumento')">×</button>
-            <h3 style="font-size: 22px; font-weight: 700; margin: 0;">
-                📤 Subir Documento
+            <button class="close-btn" onclick="cerrarModal('modalDocumento')">&times;</button>
+            <h3 class="modal-title">
+                <span class="modal-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v10M8 11l4 4 4-4M5 19h14"></path>
+                    </svg>
+                </span>
+                Subir documento
             </h3>
         </div>
+
         <div class="modal-body">
             <form id="formSubirDocumento" enctype="multipart/form-data">
                 {% csrf_token %}
@@ -540,18 +780,15 @@ $(document).ready(function() {
                     return;
                 }
                 data.forEach(doc => {
-                    const obligatorioHTML = doc.obligatorio 
-                        ? '<span class="badge-obligatorio">✓ Obligatorio</span>' 
-                        : '<span style="display: inline-block; background: #e5e7eb; color: #6b7280; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">Opcional</span>';
-                    
+                    const obligatorioHTML = doc.obligatorio
+                        ? '<span class="badge-obligatorio"><i class="fas fa-asterisk"></i> Obligatorio</span>'
+                        : '<span class="badge-opcional">Opcional</span>';
 
 
                     const html = `
                         <div class="doc-card">
                             <div class="doc-info" style="flex: 1;">
-                                <p style="font-size: 16px; font-weight: 700; color: #115e59; margin-bottom: 8px;">
-                                    📄 ${doc.nombre_documento}
-                                </p>
+                                <p class="doc-title"><span class="doc-tag">DOC</span>${doc.nombre_documento}</p>
                                 <p><strong>Tipo Siniestro:</strong> ${doc.siniestro_tipo}</p>
                                 <p><strong>Descripción:</strong> ${doc.descripcion || 'N/A'}</p>
                                 <p><strong>Estado:</strong> ${obligatorioHTML}</p>
@@ -560,7 +797,7 @@ $(document).ready(function() {
                             <button class="abrirModalSubir btn-action" 
                                     data-descripcion="${doc.nombre_documento}" 
                                     data-beneficiario="${beneficiarioId}">
-                                📤 Subir
+                                 Subir
                             </button>
                         </div>
                     `;

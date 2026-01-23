@@ -6,7 +6,7 @@
 {% include "master/appBar/appBar.html" %}
 
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap');
 
     :root {
         --glass-bg: rgba(255, 255, 255, 0.76);
@@ -23,7 +23,7 @@
             linear-gradient(135deg, #f8fafc 0%, #eef2ff 45%, #f1f5f9 100%);
         position: relative;
         overflow: hidden;
-        font-family: 'Manrope', 'Segoe UI', sans-serif;
+        font-family: 'Sora', 'Segoe UI', sans-serif;
     }
 
     .ui-shell::after {
@@ -79,6 +79,7 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        gap: 0.45rem;
         padding: 0.55rem 1.1rem;
         border-radius: 12px;
         font-size: 11px;
@@ -86,6 +87,10 @@
         letter-spacing: 0.18em;
         text-transform: uppercase;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .ui-btn svg {
+        width: 14px;
+        height: 14px;
     }
     .ui-btn-primary {
         background: #0f172a;
@@ -165,10 +170,20 @@
             </div>
             <div class="md:col-span-4 flex flex-wrap items-center justify-between gap-3">
                 <button type="submit" class="ui-btn ui-btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h18"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 12h12"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19h4"></path>
+                    </svg>
                     Aplicar filtros
                 </button>
                 <div class="flex gap-3">
                     <a href="?{{ request.GET.urlencode }}&export=xlsx" class="ui-btn ui-btn-ghost">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v10"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 11l4 4 4-4"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 19h14"></path>
+                        </svg>
                         Exportar Excel
                     </a>
                 </div>

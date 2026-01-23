@@ -7,22 +7,18 @@
 
 <style>
   /* Tipografía premium */
-  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap');
 
   :root{
-    --bg0:#070A0F;
-    --bg1:#0A1220;
-    --bg2:#0B1E1C;
+    --card: rgba(255,255,255,.68);
+    --card2: rgba(255,255,255,.6);
+    --stroke: rgba(148,163,184,.18);
 
-    --card: rgba(255,255,255,.72);
-    --card2: rgba(255,255,255,.62);
-    --stroke: rgba(148,163,184,.22);
-
-    --text:#0B1220;
+    --text:#0f172a;
     --muted:#64748b;
 
-    --shadow: 0 18px 45px rgba(2,6,23,.18);
-    --shadow2: 0 28px 70px rgba(2,6,23,.22);
+    --shadow: 0 22px 55px rgba(15,23,42,.16);
+    --shadow2: 0 34px 80px rgba(15,23,42,.22);
 
     --r-xl: 26px;
     --r-lg: 20px;
@@ -35,15 +31,14 @@
     --rose:#fb7185;
   }
 
-  *{ font-family: 'Manrope', 'Segoe UI', sans-serif; }
+  .ui-shell *{ font-family: 'Sora', 'Segoe UI', sans-serif; }
 
   /* Fondo premium: gradiente + viñeta + blobs + noise */
   .ui-shell{
     min-height: 100vh;
     background:
-      radial-gradient(1200px 600px at 15% 10%, rgba(20,184,166,.22), transparent 60%),
-      radial-gradient(900px 520px at 82% 20%, rgba(14,165,233,.24), transparent 55%),
-      radial-gradient(900px 520px at 60% 95%, rgba(99,102,241,.18), transparent 60%),
+      radial-gradient(1100px 600px at 12% 8%, rgba(20,184,166,.14), transparent 60%),
+      radial-gradient(900px 520px at 88% 18%, rgba(14,165,233,.14), transparent 55%),
       linear-gradient(135deg, #f8fafc 0%, #eef2ff 35%, #f1f5f9 100%);
     position: relative;
     overflow: hidden;
@@ -51,20 +46,18 @@
 
   .ui-shell::before{
     content:"";
-    position:absolute; inset:-2px;
+    position:absolute; inset:0;
     background:
-      radial-gradient(circle at 30% 20%, rgba(0,0,0,.05), transparent 35%),
-      radial-gradient(circle at 70% 75%, rgba(0,0,0,.06), transparent 40%);
+      radial-gradient(circle at 30% 20%, rgba(0,0,0,.04), transparent 40%),
+      radial-gradient(circle at 70% 75%, rgba(0,0,0,.04), transparent 45%);
     pointer-events:none;
-    mix-blend-mode:multiply;
   }
 
-  /* Noise overlay */
   .ui-shell::after{
     content:"";
     position:absolute; inset:0;
     pointer-events:none;
-    opacity:.06;
+    opacity:.04;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
   }
 
@@ -76,12 +69,12 @@
 
   /* Cards premium */
   .ui-card{
-    background: linear-gradient(180deg, var(--card) 0%, var(--card2) 100%);
+    background: rgba(255,255,255,.7);
     border: 1px solid var(--stroke);
     border-radius: var(--r-xl);
     box-shadow: var(--shadow);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     position: relative;
     overflow: hidden;
     transition: box-shadow .18s ease, border-color .18s ease;
@@ -89,15 +82,25 @@
 
   .ui-card::before{
     content:"";
-    position:absolute; inset:-1px;
-    background: radial-gradient(600px 220px at 25% 0%, rgba(255,255,255,.65), transparent 55%);
-    opacity:.55;
+    position:absolute; inset:0;
+    background:
+      radial-gradient(220px 140px at 18% 8%, rgba(255,255,255,.38), transparent 60%),
+      radial-gradient(320px 200px at 88% 92%, rgba(255,255,255,.22), transparent 62%);
+    opacity:.6;
     pointer-events:none;
   }
 
   .ui-card:hover{
     box-shadow: var(--shadow2);
     border-color: rgba(148,163,184,.35);
+  }
+
+  .ui-card--soft{
+    box-shadow: 0 10px 24px rgba(15,23,42,.12);
+  }
+
+  .ui-card--soft::before{
+    opacity: .25;
   }
 
   /* Header */
@@ -163,7 +166,7 @@
     width: 220px; height: 220px;
     border-radius: 50%;
     filter: blur(18px);
-    opacity: .22;
+    opacity: .12;
     pointer-events:none;
   }
   .glow-cyan{ background: radial-gradient(circle, rgba(6,182,212,.9), transparent 65%); }
@@ -206,13 +209,133 @@
     from{ opacity:0; transform: translateY(10px); }
     to{ opacity:1; transform: translateY(0); }
   }
+  /* ========= DROP VOLUME (solo cards) ========= */
+/* aplica a todas tus .ui-card excepto el título si le pones .no-drop */
+.ui-card:not(.no-drop){
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(148,163,184,.22);
+  box-shadow:
+    0 14px 34px rgba(15,23,42,.12),
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -1px 0 rgba(15,23,42,.05);
+  transition:
+    transform .22s cubic-bezier(.4,0,.2,1),
+    box-shadow .22s cubic-bezier(.4,0,.2,1),
+    border-color .22s cubic-bezier(.4,0,.2,1);
+}
+
+/* “gota” (micro-burbujas) */
+.ui-card:not(.no-drop)::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.95;
+  background:
+    radial-gradient(circle at 14% 18%, rgba(255,255,255,.30) 0%, transparent 14%),
+    radial-gradient(circle at 86% 14%, rgba(255,255,255,.22) 0%, transparent 12%),
+    radial-gradient(circle at 36% 76%, rgba(255,255,255,.24) 0%, transparent 10%),
+    radial-gradient(circle at 78% 84%, rgba(255,255,255,.18) 0%, transparent 14%),
+    radial-gradient(circle at 58% 52%, rgba(255,255,255,.12) 0%, transparent 18%);
+}
+
+/* borde “edge shine” (volumen) */
+.ui-card:not(.no-drop)::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,.30), transparent 45%);
+  mix-blend-mode: normal; /* evita artefactos raros */
+  opacity:.55;
+}
+
+/* hover sutil (sin glow duro) */
+.ui-card:not(.no-drop):hover{
+  transform: translateY(-2px);
+  border-color: rgba(148,163,184,.34);
+  box-shadow:
+    0 22px 50px rgba(15,23,42,.16),
+    inset 0 1px 0 rgba(255,255,255,.60),
+    inset 0 -1px 0 rgba(15,23,42,.06);
+}
+
+/* asegúrate que el contenido quede sobre los brillos */
+.ui-card > *{
+  position: relative;
+  z-index: 1;
+}
+
+/* ====== DROP CARD (gota + volumen) ====== */
+.drop-card{
+  position: relative !important;
+  overflow: hidden !important;
+  border-color: rgba(148,163,184,.30) !important;
+
+  /* volumen real */
+  box-shadow:
+    0 18px 46px rgba(15,23,42,.16),
+    inset 0 1px 0 rgba(255,255,255,.65),
+    inset 0 -2px 0 rgba(15,23,42,.06) !important;
+
+  transition: transform .22s cubic-bezier(.4,0,.2,1),
+              box-shadow .22s cubic-bezier(.4,0,.2,1),
+              border-color .22s cubic-bezier(.4,0,.2,1) !important;
+}
+
+/* brillo de borde (edge shine) */
+.drop-card::before{
+  content:"" !important;
+  position:absolute !important;
+  inset:0 !important;
+  pointer-events:none !important;
+  border-radius: inherit !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.40), transparent 52%) !important;
+  opacity:.75 !important;
+}
+
+/* “gotas/burbujas” MÁS visibles */
+.drop-card::after{
+  content:"" !important;
+  position:absolute !important;
+  inset:-2px !important;
+  pointer-events:none !important;
+  border-radius: inherit !important;
+  opacity:.95 !important;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(255,255,255,.40) 0%, transparent 16%),
+    radial-gradient(circle at 86% 14%, rgba(255,255,255,.28) 0%, transparent 14%),
+    radial-gradient(circle at 40% 78%, rgba(255,255,255,.30) 0%, transparent 12%),
+    radial-gradient(circle at 78% 86%, rgba(255,255,255,.24) 0%, transparent 16%),
+    radial-gradient(circle at 60% 52%, rgba(255,255,255,.18) 0%, transparent 22%) !important;
+}
+
+/* hover: volumen + lift */
+.drop-card:hover{
+  transform: translateY(-3px) !important;
+  border-color: rgba(148,163,184,.42) !important;
+  box-shadow:
+    0 28px 70px rgba(15,23,42,.22),
+    inset 0 1px 0 rgba(255,255,255,.70),
+    inset 0 -2px 0 rgba(15,23,42,.08) !important;
+}
+
+/* contenido siempre encima */
+.drop-card > *{
+  position: relative !important;
+  z-index: 1 !important;
+}
+
 </style>
 
 
 <div class="ui-shell p-6 md:p-10">
   <div class="ui-container">
     <div class="ui-header mb-8">
-        <div class="fade-in ui-card flex-1 p-6">
+        <div class="fade-in ui-card drop-card group relative overflow-hidden p-6">
             <div class="flex items-center gap-3">
                 <span class="ui-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
@@ -223,7 +346,7 @@
             </div>
             <p class="ui-subtitle mt-2">Lectura rapida de salud operativa y tendencias de cartera.</p>
         </div>
-        <div class="fade-in ui-card p-4">
+        <div class="fade-in ui-card drop-card group relative overflow-hidden p-4">
             <div class="live-pill">
                 <span class="relative flex h-2 w-2">
                     <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span>
@@ -236,7 +359,7 @@
     </div>
   </div>
     <div class="mb-8 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-        <div class="fade-in ui-card group relative overflow-hidden p-5">
+        <div class="fade-in ui-card drop-card group relative overflow-hidden p-5">
             <div class="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-500">
                 <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
                     <path d="M5 7h14M5 12h10M5 17h7" stroke-linecap="round" stroke-linejoin="round" />
@@ -248,7 +371,7 @@
             <div class="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100" style="background:linear-gradient(120deg, transparent, rgba(14,165,233,0.08), transparent);"></div>
             <span class="kpi-glow glow-cyan"></span>
         </div>
-        <div class="fade-in ui-card group relative overflow-hidden p-5">
+        <div class="fade-in ui-card drop-card group relative overflow-hidden p-5">
             <div class="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-500">
                 <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
                     <path d="M4 12h16M7 7h10M6 17h12" stroke-linecap="round" stroke-linejoin="round" />
@@ -260,7 +383,7 @@
             <div class="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100" style="background:linear-gradient(120deg, transparent, rgba(249,115,22,0.12), transparent);"></div>
             <span class="kpi-glow glow-amber"></span>
         </div>
-        <div class="fade-in ui-card group relative overflow-hidden p-5">
+        <div class="fade-in ui-card drop-card group relative overflow-hidden p-5">
             <div class="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-500">
                 <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
                     <path d="M6 7h12M6 12h8M6 17h10" stroke-linecap="round" stroke-linejoin="round" />
@@ -272,7 +395,7 @@
             <div class="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100" style="background:linear-gradient(120deg, transparent, rgba(244,63,94,0.12), transparent);"></div>
             <span class="kpi-glow glow-rose"></span>
         </div>
-        <div class="fade-in ui-card group relative overflow-hidden p-5">
+        <div class="fade-in ui-card drop-card group relative overflow-hidden p-5">
             <div class="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-500">
                 <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
                     <path d="M4 12h16M8 8h8M6 16h12" stroke-linecap="round" stroke-linejoin="round" />
