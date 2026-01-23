@@ -2,12 +2,12 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main, develop, kriss, carlos, desarollo-ronal, gabriela ]
+    branches: [ main, master, develop ]
   pull_request:
-    branches: [ main, develop, kriss, carlos, desarollo-ronal, gabriela ]
+    branches: [ main, master, develop ]
 
 env:
-  PYTHON_VERSION: '3.12'
+  PYTHON_VERSION: '3.11'
   NODE_VERSION: '18'
 
 jobs:

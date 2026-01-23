@@ -1,0 +1,662 @@
+{% load static %} {% block content %}
+<style>
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+</style>
+
+<div
+  style="
+    background: linear-gradient(135deg, #134e4a 0%, #14b8a6 100%);
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: &quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif;
+  "
+>
+  <div
+    style="
+      width: 100%;
+      max-width: 1200px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      animation: fadeUp 0.6s ease-out;
+      position: relative;
+    "
+  >
+    <div style="position: absolute; top: 20px; right: 20px; z-index: 20">
+      <a
+        href="{% url 'login' %}"
+        style="
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: linear-gradient(135deg, #115e59 0%, #0f766e 100%);
+          color: white;
+          font-weight: 600;
+          padding: 10px 20px;
+          border-radius: 12px;
+          text-decoration: none;
+          font-size: 15px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+          transition: all 0.3s ease;
+        "
+      >
+        <svg
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+          ></path>
+        </svg>
+        Iniciar Sesión como Beneficiario
+      </a>
+    </div>
+
+    <!-- Header Section -->
+    <div
+      style="
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(
+          135deg,
+          #115e59 0%,
+          #0f766e 50%,
+          #14b8a6 100%
+        );
+        color: white;
+        padding: 80px 40px;
+        text-align: center;
+      "
+    >
+      <div
+        style="
+          position: absolute;
+          top: -100px;
+          right: -100px;
+          width: 300px;
+          height: 300px;
+          background: rgba(52, 211, 153, 0.15);
+          border-radius: 50%;
+        "
+      ></div>
+      <div
+        style="
+          position: absolute;
+          bottom: -80px;
+          left: -80px;
+          width: 250px;
+          height: 250px;
+          background: rgba(52, 211, 153, 0.15);
+          border-radius: 50%;
+        "
+      ></div>
+
+      <div style="position: relative; z-index: 10">
+        <p
+          style="
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #34d399;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+          "
+        >
+          Universidad Técnica Particular de Loja
+        </p>
+
+        <!-- Insurance Icon SVG -->
+        {% comment %}
+        <div
+          style="
+            margin: 0 auto 30px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            animation: float 3s ease-in-out infinite;
+          "
+        >
+          <svg
+            width="70"
+            height="70"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#34d399"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <path d="M9 12l2 2 4-4"></path>
+          </svg>
+        </div>
+        {% endcomment %}
+      </div>
+      <img
+        src="{% static '../../img/logo_vitalink_verde.png' %}"
+        alt="Ícono de Seguro"
+        style="
+          width: 200px;
+          height: 100px;
+          margin-bottom: 30px;
+          filter: invert(1) sepia(1) saturate(5) hue-rotate(150deg);
+        "
+      />
+      <div style="position: relative; z-index: 10">
+        <h1
+          style="
+            font-size: 56px;
+            font-weight: 900;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+            line-height: 1;
+          "
+        >
+          VitaLink
+        </h1>
+        <p
+          style="
+            font-size: 20px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.95);
+            letter-spacing: 0.5px;
+          "
+        >
+          Gestión Integral de Pólizas de Vida Estudiantil
+        </p>
+      </div>
+    </div>
+
+    <!-- Intro Section -->
+    <div style="padding: 60px 40px">
+      <div style="margin-bottom: 60px; text-align: center">
+        <h2
+          style="
+            font-size: 36px;
+            font-weight: 700;
+            color: #115e59;
+            margin-bottom: 30px;
+          "
+        >
+          Bienvenido a tu Centro de Siniestros
+        </h2>
+        <div
+          style="
+            max-width: 800px;
+            margin: 0 auto;
+            color: #4b5563;
+            font-size: 17px;
+            line-height: 1.8;
+          "
+        >
+          <p style="margin-bottom: 20px">
+            En VitaLink entendemos la importancia de tu tranquilidad y la de tu
+            familia. Como estudiante de la Universidad Técnica Particular de
+            Loja, tienes acceso a una póliza de vida que te protege en todo
+            momento.
+          </p>
+          <p>
+            Este portal te permite activar tu póliza de forma fácil, segura y
+            transparente desde cualquier lugar. Solo necesitas reportar un
+            evento o necesidad, y tu solicitud será procesada para activar la
+            cobertura de vida que te corresponde.
+          </p>
+        </div>
+      </div>
+
+      <!-- Benefits Section -->
+      <div
+        style="
+          background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+          padding: 40px;
+          border-radius: 15px;
+          border-left: 6px solid #10b981;
+          margin-bottom: 60px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        "
+      >
+        <h3
+          style="
+            font-size: 26px;
+            font-weight: 700;
+            color: #115e59;
+            margin-bottom: 30px;
+          "
+        >
+          ¿Por qué confiar en VitaLink?
+        </h3>
+        <ul style="list-style: none; padding: 0; margin: 0">
+          <li
+            style="
+              display: flex;
+              align-items: center;
+              color: #4b5563;
+              font-size: 17px;
+              font-weight: 500;
+              margin-bottom: 20px;
+            "
+          >
+            <span
+              style="
+                color: #10b981;
+                font-size: 24px;
+                font-weight: 700;
+                margin-right: 15px;
+                min-width: 30px;
+              "
+              >✓</span
+            >
+            <span
+              >Cobertura completa diseñada especialmente para estudiantes
+              UTPL</span
+            >
+          </li>
+          <li
+            style="
+              display: flex;
+              align-items: center;
+              color: #4b5563;
+              font-size: 17px;
+              font-weight: 500;
+              margin-bottom: 20px;
+            "
+          >
+            <span
+              style="
+                color: #10b981;
+                font-size: 24px;
+                font-weight: 700;
+                margin-right: 15px;
+                min-width: 30px;
+              "
+              >✓</span
+            >
+            <span>Gestión 100% digital sin trámites complicados</span>
+          </li>
+          <li
+            style="
+              display: flex;
+              align-items: center;
+              color: #4b5563;
+              font-size: 17px;
+              font-weight: 500;
+              margin-bottom: 20px;
+            "
+          >
+            <span
+              style="
+                color: #10b981;
+                font-size: 24px;
+                font-weight: 700;
+                margin-right: 15px;
+                min-width: 30px;
+              "
+              >✓</span
+            >
+            <span
+              >Procesamiento rápido de solicitudes en menos de 3 días
+              hábiles</span
+            >
+          </li>
+          <li
+            style="
+              display: flex;
+              align-items: center;
+              color: #4b5563;
+              font-size: 17px;
+              font-weight: 500;
+              margin-bottom: 20px;
+            "
+          >
+            <span
+              style="
+                color: #10b981;
+                font-size: 24px;
+                font-weight: 700;
+                margin-right: 15px;
+                min-width: 30px;
+              "
+              >✓</span
+            >
+            <span>Asistencia dedicada en español</span>
+          </li>
+          <li
+            style="
+              display: flex;
+              align-items: center;
+              color: #4b5563;
+              font-size: 17px;
+              font-weight: 500;
+            "
+          >
+            <span
+              style="
+                color: #10b981;
+                font-size: 24px;
+                font-weight: 700;
+                margin-right: 15px;
+                min-width: 30px;
+              "
+              >✓</span
+            >
+            <span>Total confidencialidad y seguridad de datos</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Process Section -->
+      <div style="margin-bottom: 60px">
+        <h3
+          style="
+            font-size: 30px;
+            font-weight: 700;
+            color: #115e59;
+            margin-bottom: 50px;
+            text-align: center;
+          "
+        >
+          Proceso para Activar tu Póliza
+        </h3>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+          "
+        >
+          <!-- Step 1 -->
+          <div
+            style="
+              background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+              padding: 35px;
+              border-radius: 15px;
+              border-top: 4px solid #10b981;
+              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+              transition: all 0.3s ease;
+            "
+          >
+            <div
+              style="
+                display: flex;
+                justify-content: center;
+                margin-bottom: 25px;
+              "
+            >
+              <div
+                style="
+                  width: 60px;
+                  height: 60px;
+                  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-weight: 700;
+                  font-size: 26px;
+                  color: white;
+                  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
+                "
+              >
+                1
+              </div>
+            </div>
+            <h4
+              style="
+                font-size: 20px;
+                font-weight: 700;
+                color: #115e59;
+                text-align: center;
+                margin-bottom: 15px;
+              "
+            >
+              Reporta tu Evento
+            </h4>
+            <p
+              style="
+                color: #4b5563;
+                text-align: center;
+                line-height: 1.6;
+                font-size: 15px;
+              "
+            >
+              Presiona el botón principal y completa el formulario con toda la
+              información del evento que requiere la activación de tu póliza.
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div
+            style="
+              background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+              padding: 35px;
+              border-radius: 15px;
+              border-top: 4px solid #10b981;
+              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+              transition: all 0.3s ease;
+            "
+          >
+            <div
+              style="
+                display: flex;
+                justify-content: center;
+                margin-bottom: 25px;
+              "
+            >
+              <div
+                style="
+                  width: 60px;
+                  height: 60px;
+                  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-weight: 700;
+                  font-size: 26px;
+                  color: white;
+                  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
+                "
+              >
+                2
+              </div>
+            </div>
+            <h4
+              style="
+                font-size: 20px;
+                font-weight: 700;
+                color: #115e59;
+                text-align: center;
+                margin-bottom: 15px;
+              "
+            >
+              Verificación Segura
+            </h4>
+            <p
+              style="
+                color: #4b5563;
+                text-align: center;
+                line-height: 1.6;
+                font-size: 15px;
+              "
+            >
+              Nuestro equipo especializado revisará tu solicitud y documentación
+              de forma segura y confidencial.
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div
+            style="
+              background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+              padding: 35px;
+              border-radius: 15px;
+              border-top: 4px solid #10b981;
+              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+              transition: all 0.3s ease;
+            "
+          >
+            <div
+              style="
+                display: flex;
+                justify-content: center;
+                margin-bottom: 25px;
+              "
+            >
+              <div
+                style="
+                  width: 60px;
+                  height: 60px;
+                  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-weight: 700;
+                  font-size: 26px;
+                  color: white;
+                  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
+                "
+              >
+                3
+              </div>
+            </div>
+            <h4
+              style="
+                font-size: 20px;
+                font-weight: 700;
+                color: #115e59;
+                text-align: center;
+                margin-bottom: 15px;
+              "
+            >
+              Activación Inmediata
+            </h4>
+            <p
+              style="
+                color: #4b5563;
+                text-align: center;
+                line-height: 1.6;
+                font-size: 15px;
+              "
+            >
+              Nuestro equipo se contactará con los beneficiarios para confirmar
+              la activación de la póliza y los detalles de la cobertura.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA Section -->
+      <div
+        style="
+          background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+          padding: 50px 40px;
+          border-radius: 15px;
+          border: 2px solid #10b981;
+          text-align: center;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        "
+      >
+        <h2
+          style="
+            font-size: 32px;
+            font-weight: 700;
+            color: #115e59;
+            margin-bottom: 25px;
+          "
+        >
+          ¿Necesitas Activar tu Póliza?
+        </h2>
+        <p
+          style="
+            color: #4b5563;
+            font-size: 17px;
+            margin-bottom: 35px;
+            line-height: 1.7;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+          "
+        >
+          Presiona el botón de abajo para reportar un evento y activar tu
+          cobertura de vida. El proceso es sencillo: solo completa un formulario
+          con tu información básica y el evento que lo motiva.
+        </p>
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+          "
+        >
+          <a
+            href="{% url 'reportar_evento' %}"
+            style="
+              display: inline-block;
+              background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+              color: white;
+              font-weight: 700;
+              padding: 18px 45px;
+              border-radius: 10px;
+              font-size: 17px;
+              letter-spacing: 1px;
+              text-transform: uppercase;
+              text-decoration: none;
+              box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
+              transition: all 0.3s ease;
+            "
+          >
+            📋 Reportar Evento y Activar Póliza
+          </a>
+          <!-- Opcional: botón secundario de login aquí también -->
+          <a
+            href="{% url 'login' %}"
+            style="
+              color: #115e59;
+              font-weight: 600;
+              text-decoration: underline;
+              font-size: 15px;
+            "
+          >
+            ¿Ya tienes cuenta? Inicia sesión aquí
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
