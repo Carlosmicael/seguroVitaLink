@@ -26,6 +26,10 @@ urlpatterns = [
     path('beneficiario/documentos/', beneficiario_views.mis_siniestros_view, name='beneficiario_documentos'),
     path('api/documentos_aseguradora/<str:poliza_numero>/', beneficiario_views.documentos_aseguradora_api, name='documentos_aseguradora_api'),
     path('api/subir-documento/', beneficiario_views.subir_documento, name='subir_documento_api'),
+    path('pusher/auth/beneficiario/', beneficiario_views.pusher_auth, name='pusher_auth_beneficiario'),
+    path('obtener-notificaciones-usuario/beneficiario/<int:user_id>/', beneficiario_views.obtener_notificaciones_usuario, name='obtener_notificaciones_usuario'),
+    path('marcar-notificaciones-leidas/beneficiario/<int:user_id>/', beneficiario_views.marcar_notificaciones_leidas, name='marcar_notificaciones_leidas'),
+
 
 
 
@@ -149,6 +153,19 @@ urlpatterns = [
     path('aseguradoras/terminos/', administrador_views.politicas_publicas, name='politicas_publicas'),
     path('aseguradoras/<int:aseguradora_id>/terminos/', administrador_views.politica_publica_detalle, name='politica_publica_detalle'),
 
+
+
+
+
+
+
+
+
+
+     # URLs para el sistema de chat
+    path('enviar-mensaje-beneficiario/', beneficiario_views.enviar_mensaje_beneficiario, name='enviar_mensaje_beneficiario'),
+    path('get-beneficiarios-para-chat/', asesor_views.get_beneficiarios_para_chat, name='get_beneficiarios_para_chat'),
+    path('enviar-mensaje-asesor/', asesor_views.enviar_mensaje_asesor, name='enviar_mensaje_asesor'),
 ]
 
 

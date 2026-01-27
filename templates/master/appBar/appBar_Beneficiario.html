@@ -22,7 +22,7 @@
                             <div class="w-2 h-6 bg-emerald-400 rounded-sm transform -skew-x-12"></div>
                             <div class="w-2 h-6 bg-emerald-500 rounded-sm transform -skew-x-12"></div>
                         </div>
-                        <h3 class="text-xl font-bold tracking-wide text-white">VitaLink Asesor</h3>
+                        <h3 class="text-xl font-bold tracking-wide text-white">VitaLink Beneficiario</h3>
                     </div>
                 </div>
 
@@ -224,6 +224,8 @@
     </nav>
 
     <audio id="notification-sound" src="{% static 'sounds/notification-sound-effect-372475.mp3' %}"></audio>
+    <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+
     
     </div>
 
@@ -273,8 +275,10 @@
 
     //notificaciones y el resto//
     const userId = {{ user.id }};
-    const pusher = new Pusher('3e0fb7f926cfffecfe16', {cluster: 'us2', encrypted: true, authEndpoint: '/pusher/auth/asesor'});
+    const pusher = new Pusher('3e0fb7f926cfffecfe16', {cluster: 'us2', encrypted: true, authEndpoint: '/pusher/auth/beneficiario/'});
     const channel = pusher.subscribe(`private-user-${userId}`);
+    console.log("ididididididididi")
+    console.log("canal",channel)
     console.log(userId)
 
 
@@ -328,8 +332,7 @@
 
     //funcion para verificar los mensajes nuevos
     async function fetchMensajes() {
-        
-        fetch(`/obtener-notificaciones-usuario/asesor/${userId}/`)
+        fetch(`/obtener-notificaciones-usuario/beneficiario/${userId}/`)
             .then(response => response.json())
             .then(data => {
                 mensajes = data;
@@ -352,7 +355,7 @@
     //marcar todos los mensajes como leidos
     function marcarNotificacionesLeidas() {
       cantidad = 0;
-      fetch(`/marcar-notificaciones-leidas/asesor/${userId}`)
+      fetch(`/marcar-notificaciones-leidas/beneficiario/${userId}`)
       .then(data => {console.log(data);})
       .catch(error => {
         console.error('Error al marcar notificaciones como leidas:', error);
@@ -376,7 +379,7 @@
   notificationContent.innerHTML = '';
   marcarNotificacionesLeidas();
   
-  fetch(`/obtener-notificaciones-usuario/asesor/${userId}/`)
+  fetch(`/obtener-notificaciones-usuario/beneficiario/${userId}/`)
     .then(response => response.json())
     .then(data => {
       mensajes = data;

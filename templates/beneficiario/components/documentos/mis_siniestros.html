@@ -1,6 +1,8 @@
 {% extends "master/sideBar/sidebar_beneficiario.html" %}
 
 {% block content %}
+{% include "master/appBar/appBar_Beneficiario.html" %}
+{% include "master/footer/chatFooterBeneficiario.html" %}
 <style>
 .table-container {
     background: white;
@@ -556,6 +558,10 @@ $(document).ready(function() {
                                 <p><strong>Descripción:</strong> ${doc.descripcion || 'N/A'}</p>
                                 <p><strong>Estado:</strong> ${obligatorioHTML}</p>
                                 <p style="color: #6b7280; font-size: 13px;"><strong>Versión:</strong> ${doc.fecha_version}</p>
+                                 <p style="font-size: 16px; font-weight: 700; color: #115e59; margin-bottom: 8px;">
+                                    📄 ${doc.fecha_vencimiento}
+                                </p>
+
                             </div>
                             <button class="abrirModalSubir btn-action" 
                                     data-descripcion="${doc.nombre_documento}" 

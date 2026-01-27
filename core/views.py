@@ -65,29 +65,40 @@ logger = logging.getLogger(__name__)
 
 
 def login_view(request):
-
     if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username', '')
+        password = request.POST.get('password', '')
         user = authenticate(request, username=username, password=password)
 
-        if user:
-            login(request, user)
-
-            rol = user.profile.rol
-            if rol == 'administrador':
-                return redirect('administrador_dashboard')
-
-            if rol == 'asesor':
-                return redirect('asesor_dashboard')
-
-            elif rol == 'solicitante':
-                return redirect('solicitante_dashboard')
-
-            elif rol == 'beneficiario':
-                return redirect('beneficiario_dashboard')
-
-        return render(request, 'login.html', {'error': 'Credenciales inválidas'})
+        if user is not None:
+            try:
+                login(request, user)
+                
+                if hasattr(user, 'profile'):
+                    rol = user.profile.rol
+                    
+                    if rol == 'administrador':
+                        return redirect('administrador_dashboard')
+                    elif rol == 'asesor':
+                        return redirect('asesor_dashboard')
+                    elif rol == 'solicitante':
+                        return redirect('solicitante_dashboard')
+                    elif rol == 'beneficiario':
+                        return redirect('beneficiario_dashboard')
+                    else:
+                        logout(request)
+                        return render(request, 'auth/login/login.html', {
+                            'error': 'Rol de usuario no válido'
+                        })
+                else:
+                    logout(request)
+                    return render(request, 'auth/login/login.html', {'error': 'Usuario no tiene perfil configurado'})
+                    
+            except Exception as e:
+                logout(request)
+                return render(request, 'auth/login/login.html', {'error': 'Error al procesar el inicio de sesión'})
+        
+        return render(request, 'auth/login/login.html', {'error': 'Credenciales inválidas'})
 
     return render(request, 'auth/login/login.html')
 
@@ -723,8 +734,7 @@ def view_documento(request, doc_id):
     file_path = documento.doc_file.path
 
     if file_url.endswith(".pdf") or file_url.endswith(".doc") or file_url.endswith(".docx"):
-        result = upload_file_to_drive(file_path, os.path.basename(file_path), convert_to_google_doc=True)
-        return JsonResponse({'doc_file_url': result['edit_url'],'doc_file': file_url_local})
+        return JsonResponse({'doc_file_url': file_url, 'doc_file': file_url})
     
     print("Archivo no es PDF, DOC o DOCX")
     print("File URL:", file_url)

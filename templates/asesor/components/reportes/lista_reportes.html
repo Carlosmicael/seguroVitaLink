@@ -4,6 +4,8 @@
 
 {% block content %}
 {% include "master/appBar/appBar.html" %}
+{% include "master/footer/chatFooter.html" %}
+
 <!-- En el head o antes de usar -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
@@ -906,7 +908,6 @@
     fetch(`/reportes/${id}/`)
         .then(response => response.json())
         .then(data => {
-            // Llenar información básica
             document.getElementById('modalReporteId').textContent = `#${data.id}`;
             document.getElementById('modalBeneficiario').textContent = data.beneficiario;
             document.getElementById('modalRelacion').textContent = data.relacion;
@@ -931,13 +932,11 @@
             
             document.getElementById('modalEstado').innerHTML = estadoBadge;
 
-            // Mostrar archivo adjunto - USANDO EL MISMO ENFOQUE QUE EN EL PREVIEW
             const archivoViewer = document.getElementById('archivoViewer');
             
             if (data.archivo_url) {
                 let contenidoArchivo = '';
                 
-                // Usar archivo_tipo que viene del servidor
                 if (data.archivo_tipo === 'pdf') {
                     contenidoArchivo = `
                         <div style="margin-bottom: 10px; font-size: 14px; color: #64748b;">

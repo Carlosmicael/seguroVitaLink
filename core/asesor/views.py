@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from core.decorators import role_required
-from core.models import Poliza, Estudiante, Profile, Notificaciones, ReporteEvento, Siniestro, ConfiguracionSiniestro,Factura,Pago,Beneficiario
+from core.models import Poliza, Estudiante, Profile, Notificaciones, ReporteEvento, Siniestro, ConfiguracionSiniestro,Factura,Pago,Beneficiario,DocumentosAseguradora
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
@@ -26,7 +26,7 @@ from django.db.models import Count, Sum, F, Q
 from django.db import transaction
 from django.contrib import messages
 from decimal import Decimal
-
+from datetime import timedelta, date
 
 
 logger = logging.getLogger(__name__)
@@ -602,6 +602,24 @@ def beneficiarios_module_crear(request):
                 """
                 
                 fecha_actual = datetime.now().strftime('%d/%m/%Y')
+
+
+                tipo_siniestro = siniestro.tipo 
+                aseguradora_siniestro = siniestro.poliza.aseguradora if siniestro.poliza else None
+                documentos_req = DocumentosAseguradora.objects.filter(siniestro_tipo=tipo_siniestro,activo=True,aseguradora=aseguradora_siniestro).order_by('dias_max_entrega')
+
+                lista_fechas_limite = []
+                fecha_hoy = date.today()
+
+                for doc in documentos_req:
+                    fecha_vencimiento = fecha_hoy + timedelta(days=doc.dias_max_entrega)
+                    lista_fechas_limite.append(fecha_vencimiento.strftime('%Y-%m-%d'))
+
+                beneficiario.fechas_limite = lista_fechas_limite
+                beneficiario.save()
+
+
+                print("aqui envia el mensaje al correo electronico")
                 
                 try:
                     enviar_recordatorio(user, mensaje, fecha_actual)
@@ -670,7 +688,7 @@ pusher_client = pusher.Pusher(app_id=settings.PUSHER_APP_ID,key=settings.PUSHER_
 @role_required(['asesor'])
 @csrf_exempt
 def pusher_auth(request):
-    print("Llegó a pusher_auth!")
+    print("Llegó a pusher_auth asesorrrr!")
     if not request.user.is_authenticated:
         return HttpResponseForbidden()
 
@@ -683,6 +701,8 @@ def pusher_auth(request):
     
     auth = pusher_client.authenticate(channel=channel_name,socket_id=socket_id)
     return JsonResponse(auth)
+
+
 
 
 
@@ -747,12 +767,12 @@ from django.contrib.auth.decorators import login_required
 @login_required(login_url='login')
 @role_required(['asesor'])
 def lista_siniestros(request):
-    # Traer todos los siniestros sin filtros
     siniestros = Siniestro.objects.all().select_related('poliza').order_by('-fecha_reporte')
-    context = {
-        'siniestros': siniestros
-    }
+    context = {'siniestros': siniestros}
     return render(request, 'asesor/components/documentos/siniestros_lista.html', context)
+
+
+
 
 @login_required(login_url='login')
 @role_required(['asesor'])
@@ -1070,6 +1090,11 @@ def factura_detalle(request, factura_id):
     )
 
 
+
+
+
+
+
 @login_required(login_url='/login')
 @role_required(['asesor'])
 def reportes_liquidacion(request):
@@ -1079,8 +1104,8 @@ def reportes_liquidacion(request):
     estado_filtro = request.GET.get('estado') or ''
     export = request.GET.get('export')
 
-    # Cambiamos 'siniestro__poliza__estudiante' por prefetch_related
     facturas_qs = Factura.objects.select_related('beneficiario', 'siniestro', 'siniestro__poliza').prefetch_related('pagos', 'siniestro__poliza__estudiantes').order_by('-fecha')
+    
     if beneficiario_id:
         facturas_qs = facturas_qs.filter(beneficiario_id=beneficiario_id)
 
@@ -1104,12 +1129,18 @@ def reportes_liquidacion(request):
             continue
 
         saldo_pendiente = factura.monto - total_pagado_total
+        
+        estudiante = None
+        if factura.siniestro and factura.siniestro.poliza:
+            estudiantes = factura.siniestro.poliza.estudiantes.all()
+            estudiante = estudiantes.first() if estudiantes.exists() else None
+        
         facturas_filtradas.append(
             {
                 'factura': factura,
                 'beneficiario': factura.beneficiario,
                 'siniestro': factura.siniestro,
-                'estudiante': factura.siniestro.poliza.estudiante if factura.siniestro and factura.siniestro.poliza else None,
+                'estudiante': estudiante,  
                 'total_pagado': total_pagado_filtrado,
                 'saldo_pendiente': saldo_pendiente,
                 'estado': estado,
@@ -1138,6 +1169,7 @@ def reportes_liquidacion(request):
             "Saldo pendiente",
             "Estado",
         ])
+        
         for item in facturas_filtradas:
             estudiante = item['estudiante']
             estudiante_nombre = f"{estudiante.nombres} {estudiante.apellidos}" if estudiante else "-"
@@ -1188,3 +1220,163 @@ def reportes_liquidacion(request):
             },
         },
     )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from core.decorators import role_required
+from core.models import Beneficiario 
+import json
+import pusher
+from django.conf import settings
+from django.utils import timezone
+
+# Cliente Pusher
+pusher_client = pusher.Pusher(
+    app_id=settings.PUSHER_APP_ID,
+    key=settings.PUSHER_KEY,
+    secret=settings.PUSHER_SECRET,
+    cluster=settings.PUSHER_CLUSTER,
+    ssl=True
+)
+
+
+@login_required(login_url='/login')
+@role_required(['asesor'])
+@csrf_exempt
+def enviar_mensaje_asesor(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            message = data.get('message', '').strip()
+            beneficiario_id = data.get('beneficiario_id')
+            print("Message:", message)
+            print("Beneficiario ID:", beneficiario_id)
+            
+            if len(message) == 0:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'El mensaje no puede estar vacío'
+                }, status=400)
+            
+            if len(message) > 200:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'El mensaje no puede superar los 200 caracteres'
+                }, status=400)
+            
+            if not beneficiario_id:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'ID de beneficiario requerido'
+                }, status=400)
+
+            try:
+                beneficiario = Beneficiario.objects.get(id_beneficiario=beneficiario_id)
+            except Beneficiario.DoesNotExist:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Beneficiario no encontrado'
+                }, status=404)
+
+            if not beneficiario.profile:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'El beneficiario no tiene perfil asociado'
+                }, status=400)
+
+            beneficiario_user = beneficiario.profile.user
+            beneficiario_user_id = beneficiario_user.id
+
+
+            print("Beneficiario User ID:", beneficiario_user_id)
+            channel_name = f"private-user-{beneficiario_user_id}"
+
+            print("Channel Name:", channel_name)
+            
+            pusher_client.trigger(channel_name, 'chat-message', {'message': message,'timestamp': str(timezone.now())})
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Mensaje enviado correctamente'
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Formato de datos inválido'
+            }, status=400)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Error al enviar mensaje: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Método no permitido'
+    }, status=405)
+
+
+
+
+
+    # En core/asesor/views.py
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from core.decorators import role_required
+from core.models import Beneficiario
+
+@login_required
+@role_required(['asesor'])
+def get_beneficiarios_para_chat(request):
+    """Obtener beneficiarios para mostrar en el chat del asesor"""
+    try:
+        # Obtener todos los beneficiarios
+        beneficiarios = Beneficiario.objects.all()
+        
+        beneficiarios_list = []
+        for benef in beneficiarios:
+            beneficiarios_list.append({
+                'id': benef.id_beneficiario,  # ID del beneficiario
+                'nombre': benef.nombre,
+                'email': benef.correo,
+                'telefono': benef.telefono or '',
+                'tiene_perfil': benef.profile is not None
+            })
+        
+        return JsonResponse({
+            'status': 'success',
+            'beneficiarios': beneficiarios_list,
+            'count': len(beneficiarios_list)
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Error al obtener beneficiarios: {str(e)}'
+        }, status=500)
