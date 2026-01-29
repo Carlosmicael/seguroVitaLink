@@ -37,6 +37,3 @@ media/
 # Otros archivos de sistema
 .DS_Store
 Thumbs.db
-
-# Python cache
-__pycache__/

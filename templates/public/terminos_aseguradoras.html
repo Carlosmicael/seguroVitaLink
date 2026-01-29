@@ -3,26 +3,166 @@
 {% block title %}Terminos de aseguradoras{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-    <div>
-        <h1 class="text-2xl font-bold text-slate-900">Terminos publicos</h1>
-        <p class="mt-2 text-sm text-slate-500">Consulta las politicas activas de cada aseguradora.</p>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root{
+    --primary:#14b8a6;
+    --primary-dark:#0d9488;
+    --primary-light:#5eead4;
+
+    --glass-teal: rgba(20, 184, 166, 0.12);
+    --glass-emerald: rgba(16, 185, 129, 0.12);
+    --glass-blue: rgba(59, 130, 246, 0.10);
+
+    --border-teal: rgba(94, 234, 212, 0.25);
+    --border-emerald: rgba(110, 231, 183, 0.25);
+    --border-blue: rgba(147, 197, 253, 0.25);
+
+    --text-primary:#0f172a;
+    --text-secondary:#475569;
+    --text-muted:#64748b;
+
+    --card-radius: 20px;
+  }
+
+  *{ box-sizing:border-box; }
+  body{ font-family:'Manrope','Segoe UI',sans-serif; }
+
+  .ui-shell{
+    background: linear-gradient(135deg, #e0f2fe 0%, #ecfdf5 25%, #f0fdfa 50%, #f0fdf4 75%, #ecfccb 100%);
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+    font-family: 'Manrope','Segoe UI',sans-serif;
+  }
+  .ui-shell::before{
+    content:"";
+    position:absolute; inset:0;
+    opacity:.42;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(94, 234, 212, 0.15) 0%, transparent 52%),
+      radial-gradient(circle at 80% 70%, rgba(167, 243, 208, 0.12) 0%, transparent 52%),
+      radial-gradient(circle at 50% 50%, rgba(20, 184, 166, 0.10) 0%, transparent 55%);
+  }
+  .ui-shell::after{
+    content:"";
+    position:absolute; inset:0;
+    opacity:.03;
+    pointer-events:none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  }
+  .ui-container{
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-card{
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(148,163,184,.20);
+    border-radius: var(--card-radius);
+    box-shadow: 0 6px 18px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    position: relative;
+    overflow: hidden;
+  }
+  .header-card::before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.40) 0%, transparent 12%),
+      radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.30) 0%, transparent 10%);
+    pointer-events:none;
+  }
+  .ui-title{
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+  .ui-subtitle{
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .ui-icon{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    box-shadow: 0 6px 16px rgba(20,184,166,.25);
+  }
+
+  .glass-card{
+    border-radius: var(--card-radius);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border-blue);
+    background: var(--glass-blue);
+    box-shadow: 0 10px 28px rgba(59,130,246,.12),
+                inset 0 1px 0 rgba(255,255,255,.45);
+  }
+
+  .ui-link{
+    display:inline-flex;
+    align-items:center;
+    gap:.5rem;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .ui-link:hover{ color: var(--text-primary); }
+
+  @media (max-width: 900px){
+    .ui-title{ font-size: 26px; }
+  }
+</style>
+
+<div class="ui-shell p-6 md:p-10">
+  <div class="ui-container space-y-6">
+    <div class="header-card p-6">
+      <div class="flex items-center gap-3">
+        <span class="ui-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 7h16M4 12h10M4 17h7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div>
+          <h1 class="ui-title">Terminos publicos</h1>
+          <p class="ui-subtitle mt-2">Consulta las politicas activas de cada aseguradora.</p>
+        </div>
+      </div>
     </div>
 
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {% for aseguradora in aseguradoras %}
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="text-lg font-semibold text-slate-900">{{ aseguradora.nombre }}</div>
-            <p class="mt-2 text-sm text-slate-500">{{ aseguradora.politicas|default:"Sin resumen de politicas." }}</p>
-            <a href="{% url 'politica_publica_detalle' aseguradora.id_aseguradora %}" class="mt-4 inline-flex text-xs font-semibold uppercase tracking-[0.2em] text-slate-700 hover:text-slate-900">
-                Ver terminos
-            </a>
-        </div>
-        {% empty %}
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
-            No hay aseguradoras activas registradas.
-        </div>
-        {% endfor %}
+      {% for aseguradora in aseguradoras %}
+      <div class="glass-card p-6">
+        <div class="text-lg font-semibold text-slate-900">{{ aseguradora.nombre }}</div>
+        <p class="mt-2 text-sm text-slate-600">{{ aseguradora.politicas|default:"Sin resumen de politicas." }}</p>
+        <a href="{% url 'politica_publica_detalle' aseguradora.id_aseguradora %}" class="ui-link mt-4">
+          Ver terminos
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M7 17L17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+      {% empty %}
+      <div class="glass-card p-6 text-sm text-slate-600">
+        No hay aseguradoras activas registradas.
+      </div>
+      {% endfor %}
     </div>
+  </div>
 </div>
 {% endblock %}

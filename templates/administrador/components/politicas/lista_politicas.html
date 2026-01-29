@@ -1,75 +1,308 @@
-{% extends "master/sideBar/sidebar_admin.html" %}
+{% extends "master/sideBar/sidebar_administrador.html" %}
 
 {% block title %}Politicas{% endblock %}
 
 {% block content %}
-{% include "master/appBar/appBar.html" %}
+{% include "master/appBar/appBar_Admin.html" %}
 
-<div class="space-y-6">
-    <div class="flex flex-wrap items-start justify-between gap-4">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root{
+    --primary:#14b8a6;
+    --primary-dark:#0d9488;
+    --primary-light:#5eead4;
+
+    --glass-teal: rgba(20, 184, 166, 0.12);
+    --glass-emerald: rgba(16, 185, 129, 0.12);
+    --glass-blue: rgba(59, 130, 246, 0.10);
+    --glass-rose: rgba(244, 63, 94, 0.10);
+    --glass-amber: rgba(245, 158, 11, 0.10);
+
+    --border-teal: rgba(94, 234, 212, 0.25);
+    --border-emerald: rgba(110, 231, 183, 0.25);
+    --border-blue: rgba(147, 197, 253, 0.25);
+    --border-rose: rgba(251, 113, 133, 0.25);
+    --border-amber: rgba(253, 230, 138, 0.30);
+
+    --text-primary:#0f172a;
+    --text-secondary:#475569;
+    --text-muted:#64748b;
+
+    --card-radius: 20px;
+  }
+
+  *{ box-sizing:border-box; }
+  body{ font-family:'Manrope','Segoe UI',sans-serif; }
+
+  /* ====== SHELL ====== */
+  .ui-shell{
+    background: linear-gradient(135deg, #e0f2fe 0%, #ecfdf5 25%, #f0fdfa 50%, #f0fdf4 75%, #ecfccb 100%);
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+    font-family: 'Manrope','Segoe UI',sans-serif;
+  }
+  .ui-shell::before{
+    content:"";
+    position:absolute; inset:0;
+    opacity:.42;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(94, 234, 212, 0.15) 0%, transparent 52%),
+      radial-gradient(circle at 80% 70%, rgba(167, 243, 208, 0.12) 0%, transparent 52%),
+      radial-gradient(circle at 50% 50%, rgba(20, 184, 166, 0.10) 0%, transparent 55%);
+  }
+  .ui-shell::after{
+    content:"";
+    position:absolute; inset:0;
+    opacity:.03;
+    pointer-events:none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  }
+  .ui-container{
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ====== HEADER ====== */
+  .header-card{
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(148,163,184,.20);
+    border-radius: var(--card-radius);
+    box-shadow: 0 6px 18px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    position: relative;
+    overflow: hidden;
+  }
+  .header-card::before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.40) 0%, transparent 12%),
+      radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.30) 0%, transparent 10%);
+    pointer-events:none;
+  }
+  .ui-title{
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+  .ui-subtitle{
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .ui-icon{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    box-shadow: 0 6px 16px rgba(20,184,166,.25);
+  }
+
+  /* ====== GLASS CARDS ====== */
+  .glass-card{
+    border-radius: var(--card-radius);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+    transition: transform .22s cubic-bezier(.4,0,.2,1),
+                box-shadow .22s cubic-bezier(.4,0,.2,1),
+                border-color .22s;
+  }
+  .glass-card::before{
+    content:"";
+    position:absolute; inset:0;
+    pointer-events:none;
+    opacity:.9;
+    background:
+      radial-gradient(circle at 18% 24%, rgba(255,255,255,.30) 0%, transparent 14%),
+      radial-gradient(circle at 82% 18%, rgba(255,255,255,.20) 0%, transparent 12%),
+      radial-gradient(circle at 42% 78%, rgba(255,255,255,.24) 0%, transparent 10%),
+      radial-gradient(circle at 74% 86%, rgba(255,255,255,.18) 0%, transparent 14%);
+  }
+  .glass-card:hover{ transform: translateY(-2px); }
+
+  .glass-blue{
+    background: var(--glass-blue);
+    border: 1px solid var(--border-blue);
+    box-shadow: 0 10px 28px rgba(59,130,246,.12),
+                inset 0 1px 0 rgba(255,255,255,.45),
+                inset 0 -1px 0 rgba(59,130,246,.06);
+  }
+
+  /* ====== BUTTONS ====== */
+  .ui-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:.55rem;
+    padding: .70rem 1.05rem;
+    border-radius: 14px;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    border: 1px solid rgba(148,163,184,.25);
+    background: rgba(255,255,255,.78);
+    box-shadow: 0 6px 16px rgba(15,23,42,.06);
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    cursor: pointer;
+  }
+  .ui-btn:hover{
+    transform: translateY(-1px);
+    border-color: rgba(20,184,166,.22);
+    box-shadow: 0 10px 20px rgba(15,23,42,.08);
+  }
+  .ui-btn-primary{
+    border-color: rgba(20,184,166,.25);
+    background: rgba(20,184,166,.12);
+    color: var(--primary-dark);
+  }
+
+  .back-link{
+    display:inline-flex;
+    align-items:center;
+    gap:.5rem;
+    padding: .55rem .85rem;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 800;
+    border: 1px solid rgba(148,163,184,.25);
+    background: rgba(255,255,255,.75);
+    box-shadow: 0 4px 14px rgba(15,23,42,.06);
+    color: var(--text-secondary);
+    transition: transform .15s ease, border-color .15s ease;
+  }
+  .back-link:hover{
+    transform: translateY(-1px);
+    border-color: rgba(20,184,166,.25);
+  }
+  .back-link svg{ width: 16px; height: 16px; }
+
+  .table-card{
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(148,163,184,.18);
+    border-radius: var(--card-radius);
+    box-shadow: 0 10px 28px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    overflow: hidden;
+  }
+  .table-head{
+    background: linear-gradient(to right, rgba(241,245,249,.55), rgba(248,250,252,.55));
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-size: 11px;
+    font-weight: 900;
+  }
+  .table-row:hover{ background: rgba(248,250,252,.75); }
+
+  .message-card{
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(148,163,184,.18);
+    border-radius: 16px;
+    padding: .85rem 1rem;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 8px 20px rgba(15,23,42,.05);
+  }
+
+  @media (max-width: 900px){
+    .ui-title{ font-size: 26px; }
+  }
+</style>
+
+<div class="ui-shell p-6 md:p-10">
+  <div class="ui-container space-y-6">
+    <div class="header-card p-6">
+      <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-slate-900">Politicas de {{ aseguradora.nombre }}</h1>
-            <p class="mt-2 text-sm text-slate-500">Versionado y documentos legales asociados.</p>
+          <div class="flex items-center gap-3">
+            <span class="ui-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 3l7 4v6c0 5-3.5 8-7 8s-7-3-7-8V7l7-4z" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <h1 class="ui-title">Politicas de {{ aseguradora.nombre }}</h1>
+          </div>
+          <p class="ui-subtitle mt-2">Versionado y documentos legales asociados.</p>
         </div>
-        <div class="flex gap-3">
-            <a href="{% url 'aseguradoras_list' %}" class="text-sm font-semibold text-slate-500 hover:text-slate-700">
-                Volver a aseguradoras
-            </a>
-            <a href="{% url 'politica_create' aseguradora.id_aseguradora %}" class="rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white hover:bg-slate-800">
-                Nueva version
-            </a>
+        <div class="flex flex-wrap gap-3">
+          <a href="{% url 'aseguradoras_list' %}" class="back-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Volver a aseguradoras
+          </a>
+          <a href="{% url 'politica_create' aseguradora.id_aseguradora %}" class="ui-btn ui-btn-primary">
+            Nueva version
+          </a>
         </div>
+      </div>
     </div>
 
     {% if messages %}
     <div class="space-y-2">
-        {% for message in messages %}
-        <div class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
-            {{ message }}
-        </div>
-        {% endfor %}
+      {% for message in messages %}
+      <div class="message-card">
+        {{ message }}
+      </div>
+      {% endfor %}
     </div>
     {% endif %}
 
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table class="min-w-full text-sm">
-            <thead class="bg-slate-50 text-left text-xs uppercase tracking-[0.2em] text-slate-400">
-                <tr>
-                    <th class="px-6 py-4">Fecha version</th>
-                    <th class="px-6 py-4">Documento</th>
-                    <th class="px-6 py-4">Resumen</th>
-                    <th class="px-6 py-4 text-right">Acciones</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                {% for politica in politicas %}
-                <tr class="hover:bg-slate-50/70">
-                    <td class="px-6 py-4 text-slate-700">{{ politica.fecha_version|date:"d/m/Y" }}</td>
-                    <td class="px-6 py-4 text-slate-600">
-                        {% if politica.documento %}
-                            <a href="{{ politica.documento.url }}" class="text-slate-700 hover:text-slate-900" target="_blank">Ver PDF</a>
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                    <td class="px-6 py-4 text-slate-500">
-                        {{ politica.terminos|truncatechars:120 }}
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <a href="{% url 'politica_edit' politica.id %}" class="text-xs font-semibold text-slate-600 hover:text-slate-900">
-                            Editar
-                        </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="px-6 py-12 text-center text-slate-400">
-                        No hay versiones registradas.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="table-card">
+      <table class="min-w-full text-sm">
+        <thead class="table-head text-left">
+          <tr>
+            <th class="px-6 py-4">Fecha version</th>
+            <th class="px-6 py-4">Documento</th>
+            <th class="px-6 py-4">Resumen</th>
+            <th class="px-6 py-4 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for politica in politicas %}
+          <tr class="table-row">
+            <td class="px-6 py-4 text-slate-700">{{ politica.fecha_version|date:"d/m/Y" }}</td>
+            <td class="px-6 py-4 text-slate-600">
+              {% if politica.documento %}
+                <a href="{{ politica.documento.url }}" class="text-slate-700 hover:text-slate-900" target="_blank">Ver PDF</a>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 text-slate-500">
+              {{ politica.terminos|truncatechars:120 }}
+            </td>
+            <td class="px-6 py-4 text-right">
+              <a href="{% url 'politica_edit' politica.id %}" class="text-xs font-semibold text-slate-600 hover:text-slate-900">
+                Editar
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="px-6 py-12 text-center text-slate-400">
+              No hay versiones registradas.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
+  </div>
 </div>
 {% endblock %}
