@@ -1,0 +1,174 @@
+{% load static %} {% block content %}
+<style>
+  :root {
+    --primary: #064e3b;
+    --primary-medium: #115e59;
+    --primary-light: #14b8a6;
+    --accent: #34d399;
+    --white: #ffffff;
+    --glass-bg: rgba(255, 255, 255, 0.92);
+    --glass-border: rgba(255, 255, 255, 0.3);
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(1deg); }
+  }
+
+  @keyframes orbRotate {
+    0% { transform: translate(0, 0); }
+    50% { transform: translate(30px, -50px); }
+    100% { transform: translate(0, 0); }
+  }
+
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  }
+
+  .hover-scale {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .hover-scale:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-gradient {
+    background: linear-gradient(135deg, var(--primary-medium) 0%, var(--primary-light) 100%);
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(20, 184, 166, 0.3);
+  }
+
+  .btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(20, 184, 166, 0.4);
+    filter: brightness(1.1);
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #1f2937;
+  }
+</style>
+
+<!-- Contenedor Principal con Degradado de arriba-abajo y derecha-izquierda (225deg) -->
+<div style="background: linear-gradient(225deg, #064e3b 0%, #115e59 40%, #14b8a6 100%); min-height: 100vh; position: relative; overflow-x: hidden; padding-bottom: 60px;">
+  
+  <!-- Elementos Decorativos Animados -->
+  <div style="position: absolute; top: 10%; right: 5%; width: 300px; height: 300px; background: var(--accent); opacity: 0.15; filter: blur(80px); border-radius: 50%; animation: orbRotate 10s infinite ease-in-out;"></div>
+  <div style="position: absolute; bottom: 10%; left: 5%; width: 250px; height: 250px; background: white; opacity: 0.1; filter: blur(60px); border-radius: 50%; animation: orbRotate 12s infinite reverse ease-in-out;"></div>
+  
+  <!-- Patrón de Puntos Sutil -->
+  <div style="position: absolute; inset: 0; opacity: 0.05; background-image: radial-gradient(white 1px, transparent 1px); background-size: 40px 40px;"></div>
+
+  <div style="max-width: 1200px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 1;">
+    
+    <!-- BARRA SUPERIOR / NAV -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 50px; animation: fadeInUp 0.6s ease-out;">
+      <div style="display: flex; align-items: center; gap: 18px;">
+         <div style="b">
+            <img src="{% static '../../img/logo_vitalink_verde.png' %}" alt="Logo" style="height: 80px; width: auto;">
+         </div>
+         <div style="height: 35px; width: 1.5px; background: rgba(255,255,255,0.3);"></div>
+         <span style="font-weight: 700; color: white; letter-spacing: 2px; font-size: 13px; text-transform: uppercase; opacity: 0.9;">UTPL</span>
+      </div>
+      <a href="{% url 'login' %}" class="btn-gradient" style="color: white; text-decoration: none; padding: 12px 28px; border-radius: 14px; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.1);">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+        Acceso Beneficiario
+      </a>
+    </div>
+
+    <!-- SECCIÓN HERO -->
+    <div class="glass-card" style="border-radius: 35px; overflow: hidden; display: grid; grid-template-columns: 1.1fr 0.9fr; min-height: 520px; animation: fadeInUp 0.8s ease-out;">
+      
+      <!-- Contenido de Texto -->
+      <div style="padding: 70px; display: flex; flex-direction: column; justify-content: center;">
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(20, 184, 166, 0.1); padding: 6px 16px; border-radius: 100px; width: fit-content; margin-bottom: 25px;">
+           <span style="width: 8px; height: 8px; background: var(--primary-light); border-radius: 50%;"></span>
+           <span style="color: var(--primary-medium); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; font-size: 12px;">Seguro de Vida Estudiantil</span>
+        </div>
+        
+        <h1 style="color: var(--primary); font-size: 52px; font-weight: 800; line-height: 1.1; margin: 0 0 25px 0;">Tu tranquilidad es nuestra <span style="color: var(--primary-light);">prioridad.</span></h1>
+        <p style="color: #4b5563; font-size: 18px; line-height: 1.7; margin-bottom: 40px; max-width: 480px;">
+          Gestión inteligente y humana de siniestros. Protegemos el futuro de la comunidad universitaria <b>UTPL</b> con procesos ágiles y digitales.
+        </p>
+        
+        <div style="display: flex; gap: 20px;">
+          <a href="{% url 'reportar_evento' %}" class="btn-gradient" style="color: white; text-decoration: none; padding: 20px 40px; border-radius: 15px; font-weight: 700; font-size: 16px; text-align: center;">
+            Reportar un Siniestro
+          </a>
+        </div>
+      </div>
+
+      <!-- Área Visual del Hero -->
+      <div style="background: linear-gradient(135deg, #064e3b 0%, #115e59 100%); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; border-left: 1px solid rgba(255,255,255,0.1);">
+        <!-- Círculos de fondo para la imagen -->
+        <div style="position: absolute; width: 350px; height: 350px; border: 1px solid rgba(255,255,255,0.1); border-radius: 50%;"></div>
+        <div style="position: absolute; width: 450px; height: 450px; border: 1px solid rgba(255,255,255,0.05); border-radius: 50%;"></div>
+        
+        <div style="text-align: center; z-index: 1; animation: float 6s infinite ease-in-out;">
+          <img src="{% static '../../img/logo_vitalink_verde.png' %}" alt="Vitalink" style="width: 240px; height: auto; ">
+          <div style="margin-top: 25px;">
+            <p style="color: white; font-weight: 300; font-size: 22px; opacity: 0.8; margin: 0; letter-spacing: 1px;">Gestión Integral de Pólizas</p>
+            <div style="margin-top: 15px; width: 50px; height: 3px; background: var(--accent); margin-left: auto; margin-right: auto; border-radius: 10px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN DE PASOS -->
+    <div style="margin-top: 100px;">
+      <div style="text-align: center; margin-bottom: 60px;">
+        <h2 style="color: white; font-size: 36px; font-weight: 800; margin-bottom: 10px;">Proceso de Atención</h2>
+        <p style="color: rgba(255,255,255,0.8); font-size: 18px;">Rápido, transparente y sin complicaciones.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 35px;">
+        <!-- Paso 1 -->
+        <div class="glass-card hover-scale" style="padding: 45px; border-radius: 30px; text-align: center;">
+          <div style="width: 65px; height: 65px; background: var(--primary-light); color: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px; font-size: 26px; font-weight: 800; box-shadow: 0 10px 20px rgba(20, 184, 166, 0.3);">1</div>
+          <h3 style="color: var(--primary); font-size: 22px; font-weight: 700; margin-bottom: 15px;">Reporte Digital</h3>
+          <p style="color: #6b7280; font-size: 15px; line-height: 1.6;">Inicia tu solicitud completando los datos básicos del evento en nuestro formulario.</p>
+        </div>
+
+        <!-- Paso 2 -->
+        <div class="glass-card hover-scale" style="padding: 45px; border-radius: 30px; text-align: center;">
+          <div style="width: 65px; height: 65px; background: var(--primary-light); color: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px; font-size: 26px; font-weight: 800; box-shadow: 0 10px 20px rgba(20, 184, 166, 0.3);">2</div>
+          <h3 style="color: var(--primary); font-size: 22px; font-weight: 700; margin-bottom: 15px;">Validación UTPL</h3>
+          <p style="color: #6b7280; font-size: 15px; line-height: 1.6;">Verificamos la cobertura con el departamento de bienestar estudiantil de manera interna.</p>
+        </div>
+
+        <!-- Paso 3 -->
+        <div class="glass-card hover-scale" style="padding: 45px; border-radius: 30px; text-align: center;">
+          <div style="width: 65px; height: 65px; background: var(--primary-light); color: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px; font-size: 26px; font-weight: 800; box-shadow: 0 10px 20px rgba(20, 184, 166, 0.3);">3</div>
+          <h3 style="color: var(--primary); font-size: 22px; font-weight: 700; margin-bottom: 15px;">Resolución</h3>
+          <p style="color: #6b7280; font-size: 15px; line-height: 1.6;">Confirmamos la activación de la póliza y procedemos con la gestión de beneficios.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div style="margin-top: 100px; padding: 40px; border-top: 1px solid rgba(255,255,255,0.15); display: flex; justify-content: space-between; align-items: center;">
+      <p style="color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 500;">© 2024 VitaLink & UTPL. Innovación en protección estudiantil.</p>
+      <div style="display: flex; gap: 40px;">
+        <div style="text-align: right;">
+          <p style="color: rgba(255,255,255,0.5); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Atención 24/7</p>
+          <span style="color: white; font-weight: 700; font-size: 15px;">1800-VITALINK</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

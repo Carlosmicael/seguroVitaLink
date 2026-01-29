@@ -2,303 +2,326 @@
 
 {% block title %}Dashboard{% endblock %}
 
-
-
-
-
 {% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap');
 
-<div class="p-6 bg-gray-50">
-    <!-- Header -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
-        <p class="text-gray-600 mt-2">Bienvenido al sistema de backlog</p>
-    </div>
+  :root{
+    --emerald: #10b981;
+    --emerald-dark: #0f766e;
+    --sky: #38bdf8;
+    --amber: #f59e0b;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --card: rgba(255,255,255,0.72);
+    --card-border: rgba(148,163,184,0.2);
+    --card-radius: 20px;
+  }
 
-    <!-- Top Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <!-- Visits Card -->
-        <div class="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl p-6 text-white shadow-lg">
-            <div class="flex justify-between items-start mb-4">
-                <div>
-                    <p class="text-cyan-100 text-sm mb-2">Visitas de hoy</p>
-                    <h2 class="text-5xl font-bold">824</h2>
-                </div>
-                <div class="bg-white bg-opacity-20 rounded-full p-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="space-y-3 mt-6">
-                <div class="flex items-center justify-between bg-white bg-opacity-10 rounded-lg p-3">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-white bg-opacity-20 rounded-lg p-2">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                            </svg>
-                        </div>
-                        <span class="text-sm">Popularidad</span>
-                    </div>
-                    <span class="text-xl font-bold">93</span>
-                </div>
-                <div class="flex items-center justify-between bg-white bg-opacity-10 rounded-lg p-3">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-white bg-opacity-20 rounded-lg p-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                            </svg>
-                        </div>
-                        <span class="text-sm">Tasa general</span>
-                    </div>
-                    <span class="text-xl font-bold">4.7</span>
-                </div>
-            </div>
-            <button class="mt-6 w-full bg-cyan-700 hover:bg-cyan-800 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
-                VER ESTADÍSTICAS COMPLETAS
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-            </button>
+  *{ box-sizing: border-box; }
+
+  .benef-shell{
+    min-height: 100vh;
+    padding: 32px 28px 48px;
+    font-family: 'Sora','Segoe UI',sans-serif;
+    background:
+      radial-gradient(900px 420px at 15% 0%, rgba(16, 185, 129, 0.12), transparent 55%),
+      radial-gradient(900px 520px at 85% 15%, rgba(56, 189, 248, 0.16), transparent 60%),
+      linear-gradient(135deg, #f8fafc 0%, #eef2ff 45%, #f1f5f9 100%);
+  }
+
+  .benef-container{
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    gap: 24px;
+  }
+
+  .hero-card{
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    padding: 28px 30px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    backdrop-filter: blur(12px);
+  }
+
+  .hero-left{
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .hero-icon{
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 100%);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 12px 22px rgba(16, 185, 129, 0.25);
+  }
+
+  .hero-title{
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .hero-sub{
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .hero-pill{
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--emerald-dark);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .stats-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 18px;
+  }
+
+  .stat-card{
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 20px 22px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    display: grid;
+    gap: 12px;
+  }
+
+  .stat-label{
+    font-size: 11px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .stat-value{
+    font-size: 34px;
+    font-weight: 800;
+    color: var(--ink);
+  }
+
+  .stat-hint{
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .stat-icon{
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+
+  .stat-icon.emerald{ background: linear-gradient(135deg, #10b981, #34d399); }
+  .stat-icon.sky{ background: linear-gradient(135deg, #0ea5e9, #38bdf8); }
+  .stat-icon.amber{ background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+  .stat-icon.ink{ background: linear-gradient(135deg, #334155, #64748b); }
+
+  .grid-split{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+  }
+
+  .panel-card{
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  }
+
+  .panel-title{
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0 0 14px 0;
+  }
+
+  .action-grid{
+    display: grid;
+    gap: 12px;
+  }
+
+  .action-btn{
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: rgba(255,255,255,0.9);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .action-btn svg{
+    width: 18px;
+    height: 18px;
+    color: var(--emerald-dark);
+  }
+
+  .timeline{
+    display: grid;
+    gap: 14px;
+  }
+
+  .timeline-item{
+    display: grid;
+    gap: 4px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: rgba(148, 163, 184, 0.08);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  .timeline-title{
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .timeline-meta{
+    font-size: 12px;
+    color: var(--muted);
+  }
+</style>
+
+<div class="benef-shell">
+  <div class="benef-container">
+    <section class="hero-card">
+      <div class="hero-left">
+        <span class="hero-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 4v6c0 5-3.5 8-7 8s-7-3-7-8V7l7-4z"></path>
+          </svg>
+        </span>
+        <div>
+          <h1 class="hero-title">Panel del beneficiario</h1>
+          <p class="hero-sub">Estado general de tus siniestros y documentos pendientes.</p>
         </div>
+      </div>
+      <div class="hero-pill">Actualizado hoy</div>
+    </section>
 
-        <!-- Popularity Rate Card -->
-        <div class="bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl p-6 shadow-lg">
-            <div class="flex justify-between items-start mb-4">
-                <div>
-                    <p class="text-gray-700 text-sm mb-2">Tasa de popularidad</p>
-                    <div class="flex items-baseline gap-2">
-                        <h2 class="text-5xl font-bold text-gray-800">87</h2>
-                        <span class="text-orange-500 text-sm font-semibold">+2</span>
-                    </div>
-                </div>
-                <div class="relative w-24 h-24">
-                    <svg class="transform -rotate-90 w-24 h-24">
-                        <circle cx="48" cy="48" r="40" stroke="#fef3c7" stroke-width="8" fill="none"/>
-                        <circle cx="48" cy="48" r="40" stroke="#fb923c" stroke-width="8" fill="none"
-                                stroke-dasharray="251.2" stroke-dashoffset="50" stroke-linecap="round"/>
-                    </svg>
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="text-xs text-gray-600">87%</span>
-                    </div>
-                </div>
-            </div>
-            <p class="text-gray-600 text-sm mt-4 leading-relaxed">
-                Tu tasa ha aumentado debido a tu actividad reciente. 
-                <span class="font-semibold text-gray-800">Sigue avanzando</span> y consigue más puntos!
-            </p>
-            <div class="mt-6 bg-white rounded-xl p-4 flex items-center justify-between shadow-sm">
-                <div class="flex items-center gap-3">
-                    <div class="bg-orange-100 rounded-lg p-2">
-                        <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                        </svg>
-                    </div>
-                    <span class="text-sm text-gray-700">Aprende a gestionar tu startup</span>
-                </div>
-                <button class="bg-orange-400 hover:bg-orange-500 text-white rounded-full p-2 transition-colors">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
-                    </svg>
-                </button>
-            </div>
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon emerald">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M7 5h5l5 5v9a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2z"></path>
+          </svg>
         </div>
+        <div class="stat-label">Siniestros</div>
+        <div class="stat-value">{{ siniestros_total|default:"0" }}</div>
+        <div class="stat-hint">Total registrados</div>
+      </div>
 
-        <!-- Targeting by Region -->
-        <div class="bg-white rounded-2xl p-6 shadow-lg">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Segmentación por región</h3>
-            <div class="relative h-48 bg-gray-100 rounded-xl overflow-hidden">
-                <svg viewBox="0 0 800 400" class="w-full h-full">
-                    <!-- Simplified world map -->
-                    <path d="M100,150 L150,120 L200,130 L250,110 L300,140 L250,180 L200,170 L150,190 Z" 
-                          class="fill-gray-300 stroke-gray-400" stroke-width="1"/>
-                    <path d="M400,100 L500,90 L550,110 L580,140 L550,180 L480,190 L420,170 Z" 
-                          class="fill-gray-300 stroke-gray-400" stroke-width="1"/>
-                    <path d="M150,250 L200,240 L280,260 L250,310 L180,300 Z" 
-                          class="fill-gray-300 stroke-gray-400" stroke-width="1"/>
-                    
-                    <!-- Location markers -->
-                    <circle cx="520" cy="130" r="25" class="fill-cyan-400 opacity-30"/>
-                    <circle cx="520" cy="130" r="12" class="fill-cyan-500"/>
-                    <circle cx="220" cy="280" r="30" class="fill-cyan-400 opacity-20"/>
-                    <circle cx="220" cy="280" r="15" class="fill-cyan-500"/>
-                </svg>
-            </div>
-            <div class="mt-4 space-y-3">
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg"></div>
-                        <div>
-                            <p class="font-semibold text-gray-800">Polonia</p>
-                            <p class="text-xs text-gray-500">238k usuarios</p>
-                        </div>
-                    </div>
-                    <span class="text-sm font-bold text-gray-700">+6.7</span>
-                </div>
-            </div>
+      <div class="stat-card">
+        <div class="stat-icon sky">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h10M4 18h7"></path>
+          </svg>
         </div>
-    </div>
+        <div class="stat-label">Documentos</div>
+        <div class="stat-value">{{ documentos_pendientes|default:"0" }}</div>
+        <div class="stat-hint">Pendientes de entrega</div>
+      </div>
 
-    <!-- Bottom Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Finance Performance -->
-        <div class="bg-white rounded-2xl p-6 shadow-lg">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-bold text-gray-800">Rendimiento Financiero</h3>
-                <button class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="flex items-center gap-3 mb-6">
-                <div class="bg-cyan-500 rounded-lg p-3">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-2xl font-bold text-gray-800">12 841</p>
-                    <p class="text-sm text-gray-500">Ingreso mensual</p>
-                </div>
-            </div>
-            <div class="h-48">
-                <canvas id="financeChart"></canvas>
-            </div>
+      <div class="stat-card">
+        <div class="stat-icon amber">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+          </svg>
         </div>
+        <div class="stat-label">Pagos</div>
+        <div class="stat-value">{{ pagos_en_proceso|default:"0" }}</div>
+        <div class="stat-hint">En proceso</div>
+      </div>
 
-        <!-- TOP Performers -->
-        <div class="bg-white rounded-2xl p-6 shadow-lg">
-            <h3 class="text-lg font-bold text-gray-800 mb-6">TOP performers</h3>
-            <div class="space-y-4">
-                <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                    <div class="flex items-center gap-3">
-                        <img src="https://i.pravatar.cc/150?img=1" alt="Bessie Cooper" class="w-12 h-12 rounded-full">
-                        <div>
-                            <p class="font-semibold text-gray-800">Bessie Cooper</p>
-                            <p class="text-xs text-gray-500">Activo • En línea</p>
-                        </div>
-                    </div>
-                    <span class="text-lg font-bold text-orange-400">4.3</span>
-                </div>
-                <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                    <div class="flex items-center gap-3">
-                        <img src="https://i.pravatar.cc/150?img=12" alt="Albert Flores" class="w-12 h-12 rounded-full">
-                        <div>
-                            <p class="font-semibold text-gray-800">Albert Flores</p>
-                            <p class="text-xs text-gray-500">Activo • En línea</p>
-                        </div>
-                    </div>
-                    <span class="text-lg font-bold text-cyan-500">4.7</span>
-                </div>
-                <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                    <div class="flex items-center gap-3">
-                        <img src="https://i.pravatar.cc/150?img=13" alt="Guy Hawkins" class="w-12 h-12 rounded-full">
-                        <div>
-                            <p class="font-semibold text-gray-800">Guy Hawkins</p>
-                            <p class="text-xs text-gray-500">Hace 10m</p>
-                        </div>
-                    </div>
-                    <span class="text-lg font-bold text-orange-400">4.4</span>
-                </div>
-            </div>
+      <div class="stat-card">
+        <div class="stat-icon ink">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
         </div>
+        <div class="stat-label">Estado</div>
+        <div class="stat-value">{{ estado_principal|default:"--" }}</div>
+        <div class="stat-hint">Ultima actualizacion</div>
+      </div>
+    </section>
 
-        <!-- Activity Chart -->
-        <div class="bg-white rounded-2xl p-6 shadow-lg">
-            <h3 class="text-lg font-bold text-gray-800 mb-6">Actividad semanal</h3>
-            <div class="h-64">
-                <canvas id="activityChart"></canvas>
-            </div>
+    <section class="grid-split">
+      <div class="panel-card">
+        <h2 class="panel-title">Acciones rapidas</h2>
+        <div class="action-grid">
+          <a class="action-btn" href="#">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M7 5h5l5 5v9a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2z"></path>
+            </svg>
+            Mis documentos
+          </a>
+          <a class="action-btn" href="#">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h10"></path>
+            </svg>
+            Mis siniestros
+          </a>
+          <a class="action-btn" href="#">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5"></path>
+            </svg>
+            Reportar evento
+          </a>
         </div>
-    </div>
+      </div>
+
+      <div class="panel-card">
+        <h2 class="panel-title">Ultimos movimientos</h2>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-title">Revision de documentos en proceso</div>
+            <div class="timeline-meta">Actualizado hace 2 dias</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-title">Siniestro recibido y validado</div>
+            <div class="timeline-meta">Actualizado hace 4 dias</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-title">Notificacion enviada al beneficiario</div>
+            <div class="timeline-meta">Actualizado hace 7 dias</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Finance Chart
-    const financeCtx = document.getElementById('financeChart').getContext('2d');
-    new Chart(financeCtx, {
-        type: 'bar',
-        data: {
-            labels: ['DIC', 'ENE', 'FEB', 'MAR', 'ABR', 'MAY'],
-            datasets: [{
-                data: [8500, 6200, 7800, 10200, 12500, 14800],
-                backgroundColor: '#06b6d4',
-                borderRadius: 6,
-                barThickness: 20
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { display: false },
-                    ticks: { display: false }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: {
-                        color: '#9ca3af',
-                        font: { size: 11 }
-                    }
-                }
-            }
-        }
-    });
-
-    // Activity Chart
-    const activityCtx = document.getElementById('activityChart').getContext('2d');
-    new Chart(activityCtx, {
-        type: 'line',
-        data: {
-            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-            datasets: [{
-                label: 'Actividad',
-                data: [65, 78, 90, 81, 95, 88, 92],
-                borderColor: '#06b6d4',
-                backgroundColor: 'rgba(6, 182, 212, 0.1)',
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: '#06b6d4',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: '#f3f4f6',
-                        drawBorder: false
-                    },
-                    ticks: {
-                        color: '#9ca3af',
-                        font: { size: 11 }
-                    }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: {
-                        color: '#9ca3af',
-                        font: { size: 11 }
-                    }
-                }
-            }
-        }
-    });
-</script>
 {% endblock %}
