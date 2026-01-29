@@ -3,108 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - UTPL</title>
+    <title>Login - VitaLink</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .wave-shape {
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 80%);
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+                        0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+                        0 2px 10px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+                        0 1px 5px rgba(255, 255, 255, 0.08) inset;
+        }
+
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12) inset,
+                        0 2px 8px rgba(255, 255, 255, 0.12) inset;
+            outline: none;
+        }
+
+        .gradient-button {
+            background: linear-gradient(90deg, #a3e635 0%, #22c55e 100%);
+            border: none;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+        }
+
+        .gradient-button:hover {
+            background: linear-gradient(90deg, #84cc16 0%, #16a34a 100%);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.5);
+        }
+
+        .gradient-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .gradient-button:hover::before {
+            left: 100%;
+        }
+
+        /* Burbujas animadas */
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: rise linear infinite;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        @keyframes rise {
+            to {
+                bottom: 110%;
+                transform: translateX(var(--drift)) scale(1.1);
+            }
+        }
+
+        .bubble:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            left: 10%;
+            animation-duration: 8s;
+            animation-delay: 0s;
+            --drift: 50px;
+        }
+
+        .bubble:nth-child(2) {
+            width: 50px;
+            height: 50px;
+            left: 25%;
+            animation-duration: 6s;
+            animation-delay: 2s;
+            --drift: -30px;
+        }
+
+        .bubble:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            left: 45%;
+            animation-duration: 10s;
+            animation-delay: 1s;
+            --drift: 40px;
+        }
+
+        .bubble:nth-child(4) {
+            width: 60px;
+            height: 60px;
+            left: 65%;
+            animation-duration: 7s;
+            animation-delay: 3s;
+            --drift: -20px;
+        }
+
+        .bubble:nth-child(5) {
+            width: 90px;
+            height: 90px;
+            left: 80%;
+            animation-duration: 9s;
+            animation-delay: 0.5s;
+            --drift: 35px;
+        }
+
+        .bubble:nth-child(6) {
+            width: 70px;
+            height: 70px;
+            left: 15%;
+            animation-duration: 8.5s;
+            animation-delay: 4s;
+            --drift: -25px;
+        }
+
+        .bubble:nth-child(7) {
+            width: 55px;
+            height: 55px;
+            left: 35%;
+            animation-duration: 7.5s;
+            animation-delay: 2.5s;
+            --drift: 45px;
+        }
+
+        .bubble:nth-child(8) {
+            width: 85px;
+            height: 85px;
+            left: 55%;
+            animation-duration: 9.5s;
+            animation-delay: 1.5s;
+            --drift: -35px;
+        }
+
+        .bubble:nth-child(9) {
+            width: 65px;
+            height: 65px;
+            left: 75%;
+            animation-duration: 8s;
+            animation-delay: 3.5s;
+            --drift: 28px;
+        }
+
+        .bubble:nth-child(10) {
+            width: 95px;
+            height: 95px;
+            left: 90%;
+            animation-duration: 10.5s;
+            animation-delay: 0.8s;
+            --drift: -40px;
         }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-900 via-blue-700 to-blue-600 flex items-center justify-center p-4">
-    <div class="w-full max-w-6xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[600px]">
+<body class="min-h-screen flex items-center justify-center p-4 overflow-hidden" style="background-image: url('https://plus.unsplash.com/premium_photo-1720965520995-588162393731?q=80&w=1975&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+    
+    <div class="absolute inset-0 bg-black/50"></div>
+
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <div class="flex items-center justify-center relative z-10 w-full">
         
-        <!-- Left Side - Illustration with wave -->
-        <div style="background-image: url('https://image.slidesharecdn.com/primeraoutpl-170127232741/75/Primer-ano-utpl-1-2048.jpg');background-size: cover;background-position: center;" class="md:w-1/2 bg-gradient-to-br from-gray-50 to-teal-50 relative">
+        <div class="glass-card rounded-3xl p-12 w-full max-w-sm flex-shrink-0">
+            
+            <div class="text-center mb-10">
+                <h2 class="text-5xl font-bold text-white mb-3" style="text-shadow: 0 0 20px rgba(34, 197, 94, 0.4), 0 2px 10px rgba(0, 0, 0, 0.3); filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));">Login</h2>
+                <p class="text-white/90 text-base" style="text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);">Welcome back please login to your account</p>
+            </div>
 
-        </div>
-
-
-
-
-
-        <!-- Right Side - Login Form -->
-        <div class="md:w-1/2 bg-gradient-to-br from-blue-800 via-blue-700 to-blue-900 p-12 flex items-center justify-center">
-            <div class="w-full max-w-sm">
-                <h2 class="text-5xl font-bold text-white mb-12">Login</h2>
+            <form method="POST" action="" class="space-y-6">
+                {% csrf_token %}
                 
-                <form method="POST" action="" class="space-y-6">
-                    {% csrf_token %}
-                    
-                    <!-- Username Field -->
-                    <div>
-                        <label for="username" class="block text-gray-200 text-sm font-medium mb-2">Username</label>
-                        <input 
-                            type="text" 
-                            id="username" 
-                            name="username" 
-                            placeholder="Enter your username" 
-                            required
-                            class="w-full px-5 py-3.5 bg-blue-900/40 border-none rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-                    </div>
-
-                    <!-- Password Field -->
-                    <div>
-                        <label for="password" class="block text-gray-200 text-sm font-medium mb-2">Password</label>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            name="password" 
-                            placeholder="Enter your password" 
-                            required
-                            class="w-full px-5 py-3.5 bg-blue-900/40 border-none rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-                    </div>
-
-                    <!-- Forgot Password Link -->
-                    <div class="text-right">
-                        <a href="#" class="text-blue-300 hover:text-blue-200 text-sm transition">Forgot Password?</a>
-                    </div>
-
-                    <!-- Error Message -->
-                    {% if error %}
-                    <div class="bg-red-500/20 border border-red-400 text-red-100 px-4 py-3 rounded-xl">
-                        {{ error }}
-                    </div>
-                    {% endif %}
-
-                    <!-- Login Button -->
-                    <button 
-                        type="submit" 
-                        class="w-full bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-300 hover:to-blue-400 text-white font-bold py-3.5 px-4 rounded-xl transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-lg">
-                        Login 
-                    </button>
-
-                    <button 
-                        class="w-full bg-gradient-to-r from-red-400 to-red-500 hover:from-red-300 hover:to-red-400 text-white font-bold py-3.5 px-4 rounded-xl transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-lg">
-                        Reportar Siniestro
-                    </button>
-
-                    <!-- Register Link -->
-                    <div class="text-center mt-6">
-                        <p class="text-gray-300 text-sm">
-                            Don't have an account? 
-                            <a href="#" class="text-blue-300 hover:text-blue-200 font-semibold underline transition">Register Now</a>
-                        </p>
-                    </div>
-                </form>
-
-                <!-- Terms Footer -->
-                <div class="mt-12 text-center">
-                    <a href="#" class="text-blue-400 hover:text-blue-300 text-xs transition">Terms and Services</a>
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        placeholder="User Name" 
+                        required
+                        class="glass-input w-full px-5 py-4 pr-12 rounded-2xl text-white placeholder-white/70 transition-all">
+                    <svg class="absolute right-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
                 </div>
-                
-                <!-- Contact Info -->
-                <div class="mt-8 text-right">
-                    <p class="text-xs text-gray-400">Have a problem? Contact us at</p>
-                    <a href="#" class="text-xs text-blue-400 hover:text-blue-300">NOC@maranatha.edu</a>
+
+                <div class="relative">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Password" 
+                        required
+                        class="glass-input w-full px-5 py-4 pr-12 rounded-2xl text-white placeholder-white/70 transition-all">
+                    <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 transform -translate-y-1/2">
+                        <svg class="w-6 h-6 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                    </button>
                 </div>
+
+                <div class="flex items-center">
+                    <input type="checkbox" id="remember" class="w-5 h-5 rounded bg-white/20 border-white/30 text-green-500 focus:ring-0 cursor-pointer">
+                    <label for="remember" class="ml-3 text-white text-sm cursor-pointer">Remember me</label>
+                </div>
+
+                {% if error %}
+                <div class="bg-red-500/30 backdrop-blur-sm border border-red-300/50 text-white px-4 py-3 rounded-xl">
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                <button 
+                    type="submit" 
+                    class="gradient-button w-full text-white font-bold py-4 px-4 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] text-lg" style="text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 15px rgba(255, 255, 255, 0.2);">
+                    Login
+                </button>
+            </form>
+
+            <div class="mt-8 text-center">
+                <p class="text-white text-sm">
+                    Don't have an account? 
+                    <a href="#" class="font-bold underline hover:text-white/80 transition">Signup</a>
+                </p>
+            </div>
+
+            <div class="mt-8 text-center">
+                <p class="text-white/60 text-xs">Created by <span class="italic">anggidwiputra</span></p>
             </div>
         </div>
     </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+        }
+    </script>
 </body>
 </html>
-
-

@@ -258,6 +258,11 @@
 
                 if (btn.title === "Ver") {
                     document.getElementById('loader').style.display = "flex";
+
+
+
+                    
+
                     fetch(`/documentos/${docId}/view/`)
                         .then(response => response.json())
                         .then(data => {

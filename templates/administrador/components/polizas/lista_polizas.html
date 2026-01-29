@@ -297,15 +297,132 @@
                             </div>
                         </div>
 
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
-                                <i class="fas fa-dollar-sign" style="color: #667eea; margin-right: 6px;"></i>
-                                Prima Neta (Valor Mensual) *
-                            </label>
-                            <input type="number" name="prima_neta" id="primaNeta" step="0.01" min="0.01" required placeholder="0.00" style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white;">
-                            <p id="rangoPrima" style="color: #64748b; font-size: 12px; margin-top: 8px; display: none;">
-                                Rango permitido: $<span id="minPrima">0.00</span> - $<span id="maxPrima">∞</span>
+
+
+                        <!-- SECCIÓN DE CÁLCULO DE PRIMA NETA -->
+                        <div style="background: #f0f9ff; padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #0ea5e9;">
+                            <h4 style="color: #0c4a6e; font-size: 15px; font-weight: 700; margin-bottom: 16px;">
+                                <i class="fas fa-calculator" style="margin-right: 8px;"></i>
+                                Cálculo de Prima Neta
+                            </h4>
+                            <p style="color: #475569; font-size: 13px; margin-bottom: 16px;">
+                                Ingrese el valor total que la UTPL paga mensualmente y los porcentajes de impuestos para calcular la prima neta.
                             </p>
+                            
+                            <!-- Valor Total que Paga la UTPL -->
+                            <div style="margin-bottom: 20px; background: white; padding: 16px; border-radius: 10px; border: 2px solid #0ea5e9;">
+                                <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                    <i class="fas fa-money-bill-wave" style="color: #0ea5e9; margin-right: 6px;"></i>
+                                    Valor Total Mensual (que paga la UTPL) *
+                                </label>
+                                <input type="number" 
+                                    name="valor_total_utpl" 
+                                    id="valorTotalUTPL" 
+                                    step="0.01" 
+                                    min="0.01" 
+                                    required 
+                                    placeholder="4000.00" 
+                                    style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; font-weight: 600; color: #1e293b; background: white;">
+                                <p style="color: #64748b; font-size: 12px; margin-top: 6px;">Valor total que la universidad paga mensualmente (incluye impuestos)</p>
+                            </div>
+                            
+                            <!-- Grid de Porcentajes de Impuestos -->
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px;">
+                                
+                                <!-- IVA -->
+                                <div>
+                                    <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                        <i class="fas fa-percentage" style="color: #0ea5e9; margin-right: 6px;"></i>
+                                        IVA (%)
+                                    </label>
+                                    <input type="number" 
+                                        id="porcentajeIVA" 
+                                        step="0.01" 
+                                        min="0" 
+                                        value="12" 
+                                        placeholder="12" 
+                                        style="width: 100%; padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
+                                    <p style="color: #64748b; font-size: 11px; margin-top: 4px;">Valor calculado: <strong id="valorIVA">$0.00</strong></p>
+                                    <input type="hidden" name="iva" id="inputIVA" value="0">
+                                </div>
+                                
+                                <!-- Superintendencia -->
+                                <div>
+                                    <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                        <i class="fas fa-percentage" style="color: #0ea5e9; margin-right: 6px;"></i>
+                                        Superintendencia (%)
+                                    </label>
+                                    <input type="number" 
+                                        id="porcentajeSuperintendencia" 
+                                        step="0.01" 
+                                        min="0" 
+                                        value="3.5" 
+                                        placeholder="3.5" 
+                                        style="width: 100%; padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
+                                    <p style="color: #64748b; font-size: 11px; margin-top: 4px;">Valor calculado: <strong id="valorSuperintendencia">$0.00</strong></p>
+                                    <input type="hidden" name="superintendencia" id="inputSuperintendencia" value="0">
+                                </div>
+                                
+                                <!-- Seguro Social Campesino -->
+                                <div>
+                                    <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                        <i class="fas fa-percentage" style="color: #0ea5e9; margin-right: 6px;"></i>
+                                        SSC (%)
+                                    </label>
+                                    <input type="number" 
+                                        id="porcentajeSSC" 
+                                        step="0.01" 
+                                        min="0" 
+                                        value="0.5" 
+                                        placeholder="0.5" 
+                                        style="width: 100%; padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
+                                    <p style="color: #64748b; font-size: 11px; margin-top: 4px;">Valor calculado: <strong id="valorSSC">$0.00</strong></p>
+                                    <input type="hidden" name="seguro_campesino" id="inputSeguroCampesino" value="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ⭐ RESULTADO: PRIMA NETA CALCULADA -->
+                        <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #10b981;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div>
+                                    <h4 style="color: #065f46; font-size: 15px; font-weight: 700; margin: 0 0 4px 0;">
+                                        <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+                                        Prima Neta (Calculada Automáticamente)
+                                    </h4>
+                                    <p style="color: #047857; font-size: 12px; margin: 0;">
+                                        Valor que recibe la aseguradora (sin impuestos)
+                                    </p>
+                                </div>
+                                <div style="color: #10b981; font-size: 28px; font-weight: 700;" id="desglosePrimaNeta">$0.00</div>
+                            </div>
+                            <input type="hidden" name="prima_neta" id="primaNeta" value="0">
+                        </div>
+
+                        <!-- Desglose detallado -->
+                        <div style="background: #fef3c7; padding: 16px; border-radius: 10px; margin-bottom: 20px;">
+                            <h5 style="color: #92400e; font-size: 13px; font-weight: 700; margin: 0 0 12px 0;">
+                                <i class="fas fa-receipt" style="margin-right: 6px;"></i>
+                                Desglose de Impuestos
+                            </h5>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; color: #78350f; font-size: 13px;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>Valor Total (UTPL):</span>
+                                    <strong id="desgloseTotal">$0.00</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>IVA (<span id="desgloseIVAPorcentaje">12</span>%):</span>
+                                    <strong id="desgloseIVA">$0.00</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>Superintendencia (<span id="desgloseSuperPorcentaje">3.5</span>%):</span>
+                                    <strong id="desgloseSuper">$0.00</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; grid-column: span 2;">
+                                    <span>SSC (<span id="desgloseSSCPorcentaje">0.5</span>%):</span>
+                                    <strong id="desgloseSSC">$0.00</strong>
+                                </div>
+                            </div>
                         </div>
 
                         <div id="fechasCalculadas" style="display: none; background: #f0fdf4; border: 2px solid #10b981; padding: 16px; border-radius: 10px; margin-bottom: 20px;">
@@ -581,6 +698,10 @@ $(document).ready(function() {
         polizasData.push(this);
     });
 
+    $('#inputIVA, #inputSuperintendencia, #inputSeguroCampesino').on('input', function() {
+        calcularPrimaNeta();
+    });
+
     // Inicializar eventos
     inicializarEventos();
 });
@@ -639,16 +760,10 @@ function inicializarEventos() {
 
 
 
-
-
-
-
-    // Evento para fecha de inicio
     $('#fechaInicio').on('change', function() {
         calcularFechas();
     });
 
-    // Evento para prima neta
     $('#primaNeta').on('input', function() {
         validarPrimaNeta();
     });
@@ -1104,6 +1219,78 @@ function formatearFechaHora(fechaHora) {
         minute: '2-digit'
     });
 }
+
+
+
+// Función para calcular prima neta y todos los valores
+function calcularPrimaNeta() {
+    // Obtener valor total que paga la UTPL
+    const valorTotal = parseFloat($('#valorTotalUTPL').val()) || 0;
+    
+    // Obtener porcentajes
+    const porcentajeIVA = parseFloat($('#porcentajeIVA').val()) || 0;
+    const porcentajeSuperintendencia = parseFloat($('#porcentajeSuperintendencia').val()) || 0;
+    const porcentajeSSC = parseFloat($('#porcentajeSSC').val()) || 0;
+    
+    // Calcular porcentaje total de impuestos
+    const porcentajeTotalImpuestos = porcentajeIVA + porcentajeSuperintendencia + porcentajeSSC;
+    
+    // Calcular valores de cada impuesto
+    const valorIVA = (valorTotal * porcentajeIVA) / 100;
+    const valorSuperintendencia = (valorTotal * porcentajeSuperintendencia) / 100;
+    const valorSSC = (valorTotal * porcentajeSSC) / 100;
+    
+    // Calcular total de impuestos
+    const totalImpuestos = valorIVA + valorSuperintendencia + valorSSC;
+    
+    // Prima Neta = Valor Total - Total Impuestos
+    const primaNeta = valorTotal - totalImpuestos;
+    
+    // Actualizar valores calculados de cada impuesto
+    $('#valorIVA').text(`$${valorIVA.toFixed(2)}`);
+    $('#valorSuperintendencia').text(`$${valorSuperintendencia.toFixed(2)}`);
+    $('#valorSSC').text(`$${valorSSC.toFixed(2)}`);
+    
+    // Actualizar inputs hidden
+    $('#inputIVA').val(valorIVA.toFixed(2));
+    $('#inputSuperintendencia').val(valorSuperintendencia.toFixed(2));
+    $('#inputSeguroCampesino').val(valorSSC.toFixed(2));
+    $('#primaNeta').val(primaNeta.toFixed(2));
+    
+    // Actualizar display de prima neta
+    $('#primaNeta Display').text(`$${primaNeta.toFixed(2)}`);
+    
+    // Actualizar desglose
+    $('#desgloseTotal').text(`$${valorTotal.toFixed(2)}`);
+    $('#desglosePrimaNeta').text(`$${primaNeta.toFixed(2)}`);
+    $('#primaNeta Display').text(`$${primaNeta.toFixed(2)}`);
+
+
+    $('#desgloseIVA').text(`$${valorIVA.toFixed(2)}`);
+    $('#desgloseSuper').text(`$${valorSuperintendencia.toFixed(2)}`);
+    $('#desgloseSSC').text(`$${valorSSC.toFixed(2)}`);
+    
+    $('#desgloseIVAPorcentaje').text(porcentajeIVA.toFixed(1));
+    $('#desgloseSuperPorcentaje').text(porcentajeSuperintendencia.toFixed(1));
+    $('#desgloseSSCPorcentaje').text(porcentajeSSC.toFixed(1));
+    
+    // Validar contra regla si existe
+    if (reglaActual && primaNeta > 0) {
+        validarPrimaNeta();
+    }
+}
+
+// ⭐ Eventos en los campos
+$(document).ready(function() {
+
+    $('#valorTotalUTPL, #porcentajeIVA, #porcentajeSuperintendencia, #porcentajeSSC').on('input', function() {
+        calcularPrimaNeta();
+    });
+    
+    calcularPrimaNeta();
+});
+
+
 </script>
 
 {% endblock %}

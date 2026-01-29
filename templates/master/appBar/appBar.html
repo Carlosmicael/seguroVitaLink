@@ -275,6 +275,7 @@
     const userId = {{ user.id }};
     const pusher = new Pusher('3e0fb7f926cfffecfe16', {cluster: 'us2', encrypted: true, authEndpoint: '/pusher/auth/asesor'});
     const channel = pusher.subscribe(`private-user-${userId}`);
+    console.log(userId)
 
 
 

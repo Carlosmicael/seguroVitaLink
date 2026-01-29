@@ -9,6 +9,7 @@ from .administrador import views as administrador_views
 
 
 
+
 urlpatterns = [
     path('login/', views.login_view, name='login'),
 
@@ -25,6 +26,10 @@ urlpatterns = [
     path('beneficiario/documentos/', beneficiario_views.mis_siniestros_view, name='beneficiario_documentos'),
     path('api/documentos_aseguradora/<str:poliza_numero>/', beneficiario_views.documentos_aseguradora_api, name='documentos_aseguradora_api'),
     path('api/subir-documento/', beneficiario_views.subir_documento, name='subir_documento_api'),
+    path('pusher/auth/beneficiario/', beneficiario_views.pusher_auth, name='pusher_auth_beneficiario'),
+    path('obtener-notificaciones-usuario/beneficiario/<int:user_id>/', beneficiario_views.obtener_notificaciones_usuario, name='obtener_notificaciones_usuario'),
+    path('marcar-notificaciones-leidas/beneficiario/<int:user_id>/', beneficiario_views.marcar_notificaciones_leidas, name='marcar_notificaciones_leidas'),
+
 
 
 
@@ -53,13 +58,6 @@ urlpatterns = [
     path('documentos/crear/', administrador_views.crear_documento, name='crear_documento'),
     path('documentos/detalle/<int:id_doc>/', administrador_views.detalle_documento, name='detalle_documento'),
     path('documentos/eliminar/<int:id_doc>/', administrador_views.eliminar_documento, name='eliminar_documento'),
-
-    # === ASEGURADORAS ===
-    path('administrador/aseguradoras/', administrador_views.aseguradoras_list, name='aseguradoras_list'),
-    path('administrador/aseguradoras/crear/', administrador_views.aseguradora_create, name='aseguradora_create'),
-    path('administrador/aseguradoras/<int:aseguradora_id>/editar/', administrador_views.aseguradora_edit, name='aseguradora_edit'),
-    path('administrador/aseguradoras/<int:aseguradora_id>/toggle/', administrador_views.aseguradora_toggle, name='aseguradora_toggle'),
-    path('administrador/aseguradoras/<int:aseguradora_id>/politicas/', administrador_views.politicas_list, name='politicas_list'),
 
     path('trigger-event/<int:user_id>/', administrador_views.trigger_event, name='trigger_event'),
     path('pusher/auth/', administrador_views.pusher_auth, name='pusher_auth'),
@@ -97,7 +95,7 @@ urlpatterns = [
     path('asesor/reportes/liquidaciones/', asesor_views.reportes_liquidacion, name='reportes_liquidacion'),
     path('asesor/reportes/liquidaciones/factura/<int:factura_id>/', asesor_views.factura_detalle, name='factura_detalle'),
     # Ronal - Fin Gestión de Liquidaciones
-
+    path('analisis-siniestralidad/', asesor_views.analisis_siniestralidad, name='analisis_siniestralidad'),
 
     #Documentos
     path("documentos/poliza/", views.obtener_documentos_por_proceso, name="obtener_documentos"),
@@ -131,6 +129,12 @@ urlpatterns = [
     path('beneficiarios/', asesor_views.beneficiarios_module_lista, name='beneficiarios_module_lista'),
     path('beneficiarios/crear/', asesor_views.beneficiarios_module_crear, name='beneficiarios_module_crear'),
     path('beneficiarios/<int:id>/', asesor_views.beneficiarios_module_detalle, name='beneficiarios_module_detalle'),
+    path('beneficiarios/<int:beneficiario_id>/checklist-documentos/', asesor_views.beneficiario_checklist_documentos, name='beneficiario_checklist_documentos'),
+    path('beneficiarios/subir-documentos-faltantes/', asesor_views.subir_documentos_faltantes, name='subir_documentos_faltantes'),
+
+
+
+
     
 
 
@@ -155,6 +159,19 @@ urlpatterns = [
     path('aseguradoras/terminos/', administrador_views.politicas_publicas, name='politicas_publicas'),
     path('aseguradoras/<int:aseguradora_id>/terminos/', administrador_views.politica_publica_detalle, name='politica_publica_detalle'),
 
+
+
+
+
+
+
+
+
+
+     # URLs para el sistema de chat
+    path('enviar-mensaje-beneficiario/', beneficiario_views.enviar_mensaje_beneficiario, name='enviar_mensaje_beneficiario'),
+    path('get-beneficiarios-para-chat/', asesor_views.get_beneficiarios_para_chat, name='get_beneficiarios_para_chat'),
+    path('enviar-mensaje-asesor/', asesor_views.enviar_mensaje_asesor, name='enviar_mensaje_asesor'),
 ]
 
 

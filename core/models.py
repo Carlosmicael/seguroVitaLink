@@ -217,7 +217,46 @@ class Poliza(models.Model):
     fecha_inicio = models.DateField(verbose_name="Fecha de Inicio", help_text="Fecha en que la póliza entra en vigencia")
     fecha_fin = models.DateTimeField(verbose_name="Fecha de Fin", help_text="Fecha en que la póliza expira")
     fecha_vencimiento = models.DateTimeField(null=True, blank=True)
-    prima_neta = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.01)], verbose_name="Prima Neta", help_text="Valor mensual de la prima")
+
+
+
+    iva = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0,
+        verbose_name="IVA (12%)",
+        help_text="Impuesto al Valor Agregado",
+        null=True,
+        blank=True
+    )
+    superintendencia = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0,
+        verbose_name="Superintendencia (3.5%)",
+        help_text="Contribución a la Superintendencia de Compañías",
+        null=True,
+        blank=True
+    )
+
+    seguro_campesino = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0,
+        verbose_name="Seguro Social Campesino (0.5%)",
+        help_text="Contribución al SSC",
+        null=True,
+        blank=True
+    )
+    
+    # Prima neta - ahora se calcula automáticamente
+    prima_neta = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        validators=[MinValueValidator(0.01)], 
+        verbose_name="Prima Neta", 
+        help_text="Valor que se paga a la aseguradora (sin impuestos)"
+    )
     fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
     fecha_actualizacion = models.DateTimeField(auto_now=True, verbose_name="Última Actualización")
     
@@ -232,6 +271,11 @@ class Poliza(models.Model):
     
     def __str__(self):
         return f"Póliza {self.numero_poliza} - {self.tipo_cobertura} - {self.estado}"
+
+    
+    def calcular_prima_total(self):
+        """Prima neta + todos los impuestos = lo que paga la UTPL"""
+        return float(self.prima_neta) + float(self.iva) + float(self.superintendencia) + float(self.seguro_campesino)
     
     def calcular_valor_mensual(self):
         valor_base = float(self.prima_neta)
@@ -362,6 +406,24 @@ class Siniestro(models.Model):
     comentarios = models.TextField(blank=True)
     fecha_limite_reporte = models.DateField(null=True, blank=True, help_text="Fecha límite para enviar a aseguradora")
     enviado = models.BooleanField(default=False, help_text="Indica si el siniestro fue enviado a la aseguradora",blank=True,null=True)
+
+    nombre_estudiante_fallecido = models.CharField(
+        max_length=200, 
+        null=True, 
+        blank=True,
+        verbose_name='Nombre completo del estudiante fallecido'
+    )
+    cedula_estudiante_fallecido = models.CharField(
+        max_length=10, 
+        null=True, 
+        blank=True,
+        verbose_name='Cédula del estudiante fallecido'
+    )
+    motivo_muerte = models.TextField(
+        null=True, 
+        blank=True,
+        verbose_name='Motivo de la muerte'
+    )
     
     class Meta:
         ordering = ['-fecha_reporte']
@@ -451,38 +513,10 @@ class Beneficiario(models.Model):
     telefono = models.CharField(max_length=20, blank=True, null=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="beneficiarios", blank=True, null=True)
-    # Nuevo campo: Array de fechas límite para cada documento
     fechas_limite = models.JSONField(default=list, blank=True, null=True,help_text="Fechas límite para cada documento en formato YYYY-MM-DD")
 
     def __str__(self):
         return self.nombre
-
-
-
-
-class TcasDocumentos(models.Model):
-    CHOICES_ESTADO = (
-        ("pendiente", "Pendiente"),
-        ("aprobado", "Aprobado"),
-        ("rechazado", "Rechazado"),
-    )
-    doc_cod_doc = models.AutoField(primary_key=True)
-    doc_descripcion = models.TextField()
-    doc_file = models.FileField(upload_to="documentos/", null=True, blank=True)
-    doc_size = models.PositiveIntegerField(null=True, blank=True) 
-    fec_creacion = models.DateTimeField(auto_now_add=True,blank=True,null=True)
-    fecha_edit = models.DateTimeField(blank=True,null=True)
-    estado = models.CharField(max_length=10, choices=CHOICES_ESTADO, default="pendiente",blank=True,null=True)
-    beneficiario = models.ForeignKey(Beneficiario, on_delete=models.CASCADE, related_name="documentos",blank=True,null=True)
-
-
-    def save(self, *args, **kwargs):
-        if self.doc_file and not self.doc_file._committed:
-            self.doc_size = self.doc_file.size
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"Documento {self.doc_cod_doc} ({self.doc_size} bytes)"
 
 
 
@@ -503,6 +537,47 @@ class DocumentosAseguradora(models.Model):
 
     def __str__(self):
         return f"{self.nombre_documento} ({'Obligatorio' if self.obligatorio else 'Opcional'})"
+
+
+
+
+class TcasDocumentos(models.Model):
+    CHOICES_ESTADO = (
+        ("pendiente", "Pendiente"),
+        ("aprobado", "Aprobado"),
+        ("rechazado", "Rechazado"),
+    )
+    doc_cod_doc = models.AutoField(primary_key=True)
+    doc_descripcion = models.TextField()
+    doc_file = models.FileField(upload_to="documentos/", null=True, blank=True)
+    doc_size = models.PositiveIntegerField(null=True, blank=True) 
+    fec_creacion = models.DateTimeField(auto_now_add=True,blank=True,null=True)
+    fecha_edit = models.DateTimeField(blank=True,null=True)
+    estado = models.CharField(max_length=10, choices=CHOICES_ESTADO, default="pendiente",blank=True,null=True)
+    beneficiario = models.ForeignKey(Beneficiario, on_delete=models.CASCADE, related_name="documentos",blank=True,null=True)
+    documento_aseguradora = models.ForeignKey(
+        DocumentosAseguradora, 
+        on_delete=models.SET_NULL, 
+        related_name="documentos_subidos",
+        blank=True, 
+        null=True,
+        help_text="Tipo de documento según catálogo de aseguradora"
+    )
+
+
+    def save(self, *args, **kwargs):
+        if self.doc_file and not self.doc_file._committed:
+            self.doc_size = self.doc_file.size
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Documento {self.doc_cod_doc} ({self.doc_size} bytes)"
+
+
+
+
+
+
 
 ## Factura y Pago Models - RONAL --------------------------------------
 
@@ -588,32 +663,50 @@ class ReporteEvento(models.Model):
         ('enviado', 'Enviado'),
         ('descartado', 'Descartado'),
     ]
-
+    
+    # Campos originales
     descripcion = models.TextField()
-
     nombre_beneficiario = models.CharField(max_length=150)
     relacion_beneficiario = models.CharField(max_length=50)
-
     telefono = models.CharField(max_length=20)
     email = models.EmailField()
-
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='nuevo')
-
     fecha_creacion = models.DateTimeField(auto_now_add=True)
-
     evaluado = models.BooleanField(default=False)
-
     archivo_documento = models.FileField(
         upload_to='reportes/',
         null=True,
-        blank=True
+        blank=True,
+        help_text='Certificado de defunción (obligatorio)'
     )
-
-
+    
+    nombre_estudiante_fallecido = models.CharField(
+        max_length=200, 
+        null=True, 
+        blank=True,
+        verbose_name='Nombre completo del estudiante fallecido'
+    )
+    cedula_estudiante_fallecido = models.CharField(
+        max_length=10, 
+        null=True, 
+        blank=True,
+        verbose_name='Cédula del estudiante fallecido'
+    )
+    motivo_muerte = models.TextField(
+        null=True, 
+        blank=True,
+        verbose_name='Motivo de la muerte'
+    )
+    
     def get_archivo_url(self):
         if self.archivo_documento:
             return self.archivo_documento.url
         return None
-
+    
     def __str__(self):
         return f"Reporte #{self.id} - {self.nombre_beneficiario}"
+    
+    class Meta:
+        verbose_name = 'Reporte de Evento'
+        verbose_name_plural = 'Reportes de Eventos'
+        ordering = ['-fecha_creacion']

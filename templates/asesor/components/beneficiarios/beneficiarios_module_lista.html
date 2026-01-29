@@ -4,6 +4,7 @@
 
 {% block content %}
 {% include "master/appBar/appBar.html" %}
+{% include "master/footer/chatFooter.html" %}
 
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -181,6 +182,276 @@ function verDetalle(id) {
 function cerrarModal() {
     $('#modalDetalle').fadeOut(300);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var beneficiarioIdActual = null;
+var documentosFaltantesSeleccionados = [];
+
+
+// Función para abrir modal checklist
+function verChecklistDocumentos(beneficiarioId) {
+    console.log("beneficiarioId", beneficiarioId);
+    window.beneficiarioIdActual = beneficiarioId;
+    window.documentosFaltantesSeleccionados = [];
+
+    console.log("llegara aquiiiii", beneficiarioId);
+
+    
+    $.ajax({
+        url: `/beneficiarios/${beneficiarioId}/checklist-documentos/`,
+        type: 'GET',
+        success: function(data) {
+            $('#checklist-beneficiario-nombre').text(`Beneficiario: ${data.beneficiario_nombre}`);
+            $('#checklist-siniestro-tipo').text(data.siniestro_tipo);
+            $('#checklist-siniestro-id').text(`#${data.siniestro_id}`);
+            
+            renderDocumentosEntregados(data.documentos_entregados);
+            renderDocumentosFaltantes(data.documentos_faltantes);
+            
+            // Mostrar modal
+            $('#modalChecklistDocumentos').fadeIn(300);
+        },
+        error: function() {
+            alert('Error al cargar el checklist de documentos');
+        }
+    });
+}
+
+
+
+
+
+
+
+
+// Renderizar documentos entregados
+function renderDocumentosEntregados(documentos) {
+    const container = $('#documentos-entregados-lista');
+    container.empty();
+    
+    if (documentos.length === 0) {
+        container.html(`
+            <div style="background: #fef3c7; padding: 16px; border-radius: 10px; text-align: center; color: #92400e;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 24px; margin-bottom: 8px;"></i>
+                <p style="margin: 0; font-weight: 600;">No se han entregado documentos aún</p>
+            </div>
+        `);
+        return;
+    }
+    
+    documentos.forEach(doc => {
+        container.append(`
+            <div style="background: #d1fae5; padding: 16px; border-radius: 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid #10b981;">
+                <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                        <i class="fas fa-check-circle" style="color: #10b981; font-size: 20px;"></i>
+                        <h4 style="color: #065f46; font-size: 15px; font-weight: 700; margin: 0;">${doc.nombre_documento}</h4>
+                    </div>
+                    ${doc.descripcion ? `<p style="color: #059669; font-size: 13px; margin: 4px 0 0 30px;">${doc.descripcion}</p>` : ''}
+                    <div style="margin-top: 8px; margin-left: 30px;">
+                        <span style="display: inline-block; padding: 4px 12px; background: #065f46; color: white; border-radius: 12px; font-size: 11px; font-weight: 600;">
+                            ${doc.obligatorio ? 'Obligatorio' : 'Opcional'}
+                        </span>
+                        <span style="color: #047857; font-size: 12px; margin-left: 12px;">
+                            <i class="fas fa-calendar"></i> Subido: ${doc.fecha_subida}
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <button onclick="verDocumento('${doc.url}')" style="padding: 8px 16px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px;">
+                        <i class="fas fa-eye"></i> Ver
+                    </button>
+                </div>
+            </div>
+        `);
+    });
+}
+
+
+
+
+
+//  Renderizar documentos faltantes
+function renderDocumentosFaltantes(documentos) {
+    const container = $('#documentos-faltantes-lista');
+    container.empty();
+    
+    if (documentos.length === 0) {
+        container.html(`
+            <div style="background: #d1fae5; padding: 16px; border-radius: 10px; text-align: center; color: #065f46;">
+                <i class="fas fa-check-circle" style="font-size: 24px; margin-bottom: 8px;"></i>
+                <p style="margin: 0; font-weight: 600;">✓ Todos los documentos han sido entregados</p>
+            </div>
+        `);
+        $('#btnSubirFaltantes').hide();
+        return;
+    }
+    
+    documentos.forEach(doc => {
+        container.append(`
+            <div style="background: #fee2e2; padding: 16px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid #ef4444;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <i class="fas fa-times-circle" style="color: #ef4444; font-size: 20px;"></i>
+                    <h4 style="color: #991b1b; font-size: 15px; font-weight: 700; margin: 0;">${doc.nombre_documento}</h4>
+                </div>
+                ${doc.descripcion ? `<p style="color: #dc2626; font-size: 13px; margin: 4px 0 12px 30px;">${doc.descripcion}</p>` : ''}
+                <div style="margin-top: 12px; margin-left: 30px; display: flex; align-items: center; gap: 12px;">
+                    <span style="display: inline-block; padding: 4px 12px; background: #991b1b; color: white; border-radius: 12px; font-size: 11px; font-weight: 600;">
+                        ${doc.obligatorio ? 'Obligatorio' : 'Opcional'}
+                    </span>
+                    <span style="color: #dc2626; font-size: 12px;">
+                        <i class="fas fa-clock"></i> Máx. ${doc.dias_max_entrega} días
+                    </span>
+                </div>
+                <div style="margin-top: 12px; margin-left: 30px;">
+                    <input type="file" 
+                           id="file-${doc.id_doc_req}" 
+                           data-doc-id="${doc.id_doc_req}"
+                           data-doc-nombre="${doc.nombre_documento}"
+                           accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                           onchange="handleFileSelect(this)"
+                           style="padding: 10px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 13px; width: 100%; cursor: pointer;">
+                </div>
+            </div>
+        `);
+    });
+    
+    $('#btnSubirFaltantes').hide();
+}
+
+
+
+
+//  Manejar selección de archivo
+function handleFileSelect(input) {
+    const docId = input.dataset.docId;
+    const docNombre = input.dataset.docNombre;
+    const file = input.files[0];
+    
+    if (file) {
+        const index = documentosFaltantesSeleccionados.findIndex(d => d.docId === docId);
+        if (index !== -1) {
+            documentosFaltantesSeleccionados[index] = { docId, docNombre, file };
+        } else {
+            documentosFaltantesSeleccionados.push({ docId, docNombre, file });
+        }
+        
+        if (documentosFaltantesSeleccionados.length > 0) {
+            $('#btnSubirFaltantes').show();
+        }
+    }
+}
+
+
+
+// Subir documentos faltantes
+function subirDocumentosFaltantes() {
+    if (documentosFaltantesSeleccionados.length === 0) {
+        alert('Por favor, seleccione al menos un documento para subir');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('beneficiario_id', beneficiarioIdActual);
+    
+    documentosFaltantesSeleccionados.forEach((doc, index) => {
+        formData.append(`documentos[${index}][doc_id]`, doc.docId);
+        formData.append(`documentos[${index}][file]`, doc.file);
+    });
+    
+    const btnSubir = $('#btnSubirFaltantes');
+    btnSubir.prop('disabled', true);
+    btnSubir.html('<i class="fas fa-spinner fa-spin" style="margin-right: 6px;"></i>Subiendo...');
+    
+    $.ajax({
+        url: '/beneficiarios/subir-documentos-faltantes/',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        success: function(response) {
+            if (response.success) {
+                alert('✓ Documentos subidos exitosamente');
+                cerrarModalChecklist();
+                location.reload();
+            }
+        },
+        error: function(xhr) {
+            alert('Error al subir los documentos: ' + (xhr.responseJSON?.message || 'Error desconocido'));
+        },
+        complete: function() {
+            btnSubir.prop('disabled', false);
+            btnSubir.html('<i class="fas fa-upload" style="margin-right: 6px;"></i>Subir Documentos Faltantes');
+        }
+    });
+}
+
+// Ver documento en nueva ventana
+function verDocumento(url) {
+    window.open(url, '_blank');
+}
+
+// Cerrar modal checklist
+function cerrarModalChecklist() {
+    $('#modalChecklistDocumentos').fadeOut(300);
+    beneficiarioIdActual = null;
+    documentosFaltantesSeleccionados = [];
+}
+
+// Función para botón "Enviar"
+function enviarBeneficiario(beneficiarioId) {
+    if (confirm('¿Está seguro que desea enviar este beneficiario?')) {
+        $.ajax({
+            url: `/beneficiarios/${beneficiarioId}/enviar/`,
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    alert('✓ Beneficiario enviado exitosamente');
+                    location.reload();
+                }
+            },
+            error: function() {
+                alert('Error al enviar el beneficiario');
+            }
+        });
+    }
+}
 </script>
 
 <div style="padding: 32px; background: #f8f9fc; min-height: 100vh;" class="fade-in">
@@ -286,6 +557,80 @@ function cerrarModal() {
                         <p style="color: #059669; font-size: 20px; font-weight: 700; margin: 0;" id="modal-fecha-creacion"></p>
                     </div>
 
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+    <!-- Modal Checklist de Documentos -->
+    <div id="modalChecklistDocumentos" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; backdrop-filter: blur(8px); background: rgba(0, 0, 0, 0.4); animation: fadeIn 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+            <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 900px; width: 100%; max-height: 90vh; padding: 0; overflow: hidden; animation: slideUp 0.3s ease-out; display: flex; flex-direction: column;">
+                
+                <!-- Header Modal -->
+                <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 28px; position: relative;">
+                    <button onclick="cerrarModalChecklist()" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.2); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; color: white; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h2 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">
+                        <i class="fas fa-clipboard-check" style="margin-right: 10px;"></i>
+                        Checklist de Documentos
+                    </h2>
+                    <p style="color: rgba(255, 255, 255, 0.9); margin-top: 8px; font-size: 14px;" id="checklist-beneficiario-nombre"></p>
+                </div>
+
+                <!-- Body Modal -->
+                <div style="padding: 30px; overflow-y: auto; max-height: calc(90vh - 240px);">
+                    
+                    <!-- Información del Siniestro -->
+                    <div style="background: #f0f9ff; padding: 20px; border-radius: 12px; margin-bottom: 24px; border-left: 4px solid #3b82f6;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                            <i class="fas fa-info-circle" style="color: #3b82f6; font-size: 20px;"></i>
+                            <h3 style="color: #1e40af; font-size: 16px; font-weight: 600; margin: 0;">Información del Siniestro</h3>
+                        </div>
+                        <p style="color: #1e40af; font-size: 14px; margin: 0;">
+                            <strong>Tipo:</strong> <span id="checklist-siniestro-tipo"></span> | 
+                            <strong>ID:</strong> <span id="checklist-siniestro-id"></span>
+                        </p>
+                    </div>
+
+                    <!-- Documentos Entregados -->
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="color: #1e293b; font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center;">
+                            <i class="fas fa-check-circle" style="color: #10b981; margin-right: 10px;"></i>
+                            Documentos Entregados
+                        </h3>
+                        <div id="documentos-entregados-lista"></div>
+                    </div>
+
+                    <!-- Documentos Faltantes -->
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="color: #1e293b; font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center;">
+                            <i class="fas fa-times-circle" style="color: #ef4444; margin-right: 10px;"></i>
+                            Documentos Faltantes
+                        </h3>
+                        <form id="formDocumentosFaltantes" enctype="multipart/form-data">
+                            <div id="documentos-faltantes-lista"></div>
+                        </form>
+                    </div>
+
+                </div>
+
+                <!-- Footer Modal -->
+                <div style="padding: 20px 24px; border-top: 2px solid #f1f5f9; background: #f8fafc; display: flex; gap: 12px; justify-content: flex-end;">
+                    <button onclick="cerrarModalChecklist()" style="padding: 12px 24px; background: #e2e8f0; color: #475569; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                        <i class="fas fa-times" style="margin-right: 6px;"></i>
+                        Cerrar
+                    </button>
+                    <button onclick="subirDocumentosFaltantes()" id="btnSubirFaltantes" style="display: none; padding: 12px 24px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                        <i class="fas fa-upload" style="margin-right: 6px;"></i>
+                        Subir Documentos Faltantes
+                    </button>
                 </div>
             </div>
         </div>
@@ -485,8 +830,25 @@ function cerrarModal() {
                     </td>
                     
                     <td style="padding: 16px; text-align: center; white-space: nowrap;">
-                        <button onclick="verDetalle({{ beneficiario.id_beneficiario }})" style="padding: 10px 14px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25); transition: all 0.2s;" title="Ver Detalle">
+                        <!-- Botón Ver Detalle (existente) -->
+                        <button onclick="verDetalle({{ beneficiario.id_beneficiario }})" 
+                                style="padding: 10px 14px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25); transition: all 0.2s; margin-right: 8px;" 
+                                title="Ver Detalle">
                             <i class="fas fa-eye"></i>
+                        </button>
+                        
+                        <!-- NUEVO: Botón Checklist Documentos -->
+                        <button onclick="verChecklistDocumentos({{ beneficiario.id_beneficiario }})" 
+                                style="padding: 10px 14px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25); transition: all 0.2s; margin-right: 8px;" 
+                                title="Checklist de Documentos">
+                            <i class="fas fa-clipboard-check"></i>
+                        </button>
+                        
+                        <!-- NUEVO: Botón Enviar -->
+                        <button onclick="enviarBeneficiario({{ beneficiario.id_beneficiario }})" 
+                                style="padding: 10px 14px; background: #8b5cf6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 2px 6px rgba(139, 92, 246, 0.25); transition: all 0.2s;" 
+                                title="Enviar Documentos">
+                            <i class="fas fa-paper-plane"></i>
                         </button>
                     </td>
                 </tr>
