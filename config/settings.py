@@ -31,7 +31,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ["*"] 
+ALLOWED_HOSTS = [".onrender.com"]
 
 
 # Application definition
@@ -118,6 +118,7 @@ JAZZMIN_UI_TWEAKS = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -153,11 +154,11 @@ import dj_database_url
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='sqlite:///db.sqlite3', 
-        conn_max_age=600,
-        ssl_require=True
+        default='sqlite:///db.sqlite3',
+        conn_max_age=600
     )
 }
+
 
 
 # Password validation
@@ -199,6 +200,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 
 # Aquí le decimos a Celery que use Redis.
