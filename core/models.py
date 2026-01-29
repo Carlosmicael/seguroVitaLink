@@ -358,7 +358,7 @@ class Siniestro(models.Model):
     documento = models.FileField(upload_to='siniestros/', null=True, blank=True)
     
     # Auditoría
-    revisado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,blank=True, related_name='siniestros_revisados')
+    revisado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,blank=True, related_name='core_siniestros_revisados')
     comentarios = models.TextField(blank=True)
     fecha_limite_reporte = models.DateField(null=True, blank=True, help_text="Fecha límite para enviar a aseguradora")
     enviado = models.BooleanField(default=False, help_text="Indica si el siniestro fue enviado a la aseguradora",blank=True,null=True)

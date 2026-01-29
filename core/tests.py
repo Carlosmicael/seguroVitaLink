@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from .models import Poliza, Siniestro
+from siniestros.models import Poliza, Siniestro
 
 
 class PolizaModelTest(TestCase):
