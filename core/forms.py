@@ -1,6 +1,86 @@
 from django import forms
-from .models import Poliza, Estudiante, Solicitud,TcasDocumentos,Siniestro,Beneficiario,Factura,Pago,Aseguradora,PoliticaAseguradora
+from .models import Poliza, Estudiante, Solicitud,TcasDocumentos,Siniestro,Beneficiario,Factura,Pago,Aseguradora,PoliticaAseguradora,ReporteEvento
+from django.core.validators import RegexValidator
 
+
+
+class ActivacionPolizaForm(forms.ModelForm):
+    cedula_validator = RegexValidator(regex=r'^\d{10}$', message='La cédula debe contener exactamente 10 dígitos numéricos.')
+    
+    cedula_estudiante_fallecido = forms.CharField(max_length=10,required=True,validators=[cedula_validator],
+        widget=forms.TextInput(attrs={'class': 'input-field','placeholder': '1234567890','pattern': '[0-9]{10}','maxlength': '10'}),
+        label='Cédula del estudiante fallecido'
+    )
+    
+    nombre_estudiante_fallecido = forms.CharField(max_length=200,required=True,
+        widget=forms.TextInput(attrs={'class': 'input-field','placeholder': 'Nombre completo del estudiante fallecido'}),
+        label='Nombre completo del estudiante fallecido'
+    )
+    
+    motivo_muerte = forms.CharField(required=True,
+        widget=forms.Textarea(attrs={'class': 'input-field','placeholder': 'Describa el motivo del fallecimiento...','rows': 4}),
+        label='Motivo del fallecimiento'
+    )
+    
+    archivo_documento = forms.FileField(required=True,widget=forms.FileInput(attrs={'accept': '.pdf,.doc,.docx','class': 'input-field'}),
+        label='Certificado de Defunción',
+        help_text='Archivo obligatorio. Formatos: PDF, DOC, DOCX. Tamaño máximo: 5MB'
+    )
+    
+    acepta_terminos = forms.BooleanField(required=True,label='Acepto que la información proporcionada es verídica y autorizo su verificación')
+    
+    class Meta:
+        model = ReporteEvento
+        fields = [
+            'descripcion',
+            'nombre_beneficiario',
+            'relacion_beneficiario',
+            'telefono',
+            'email',
+            'nombre_estudiante_fallecido',
+            'cedula_estudiante_fallecido',
+            'motivo_muerte',
+            'archivo_documento'
+        ]
+        widgets = {
+            'descripcion': forms.Textarea(attrs={
+                'class': 'input-field',
+                'rows': 5,
+                'placeholder': 'Describa detalladamente el evento ocurrido...'
+            }),
+            'nombre_beneficiario': forms.TextInput(attrs={
+                'class': 'input-field',
+                'placeholder': 'Nombre completo del beneficiario'
+            }),
+            'relacion_beneficiario': forms.Select(attrs={
+                'class': 'input-field'
+            }),
+            'telefono': forms.TextInput(attrs={
+                'class': 'input-field',
+                'placeholder': '+593 99 123 4567'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'input-field',
+                'placeholder': 'correo@ejemplo.com'
+            }),
+        }
+    
+    def clean_archivo_documento(self):
+        """Validar que el archivo no supere 5MB"""
+        archivo = self.cleaned_data.get('archivo_documento')
+        if archivo:
+            if archivo.size > 5 * 1024 * 1024:  # 5MB
+                raise forms.ValidationError('El archivo no puede superar los 5MB.')
+        return archivo
+    
+    def clean_cedula_estudiante_fallecido(self):
+        """Validación adicional de cédula ecuatoriana"""
+        cedula = self.cleaned_data.get('cedula_estudiante_fallecido')
+        if cedula and not cedula.isdigit():
+            raise forms.ValidationError('La cédula solo debe contener números.')
+        if cedula and len(cedula) != 10:
+            raise forms.ValidationError('La cédula debe tener exactamente 10 dígitos.')
+        return cedula
 
 
 

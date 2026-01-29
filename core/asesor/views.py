@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from core.decorators import role_required
-from core.models import Poliza, Estudiante, Profile, Notificaciones, ReporteEvento, Siniestro, ConfiguracionSiniestro,Factura,Pago,Beneficiario
+from core.models import Poliza, Estudiante, Profile, Notificaciones, ReporteEvento, Siniestro, ConfiguracionSiniestro,Factura,Pago,Beneficiario,DocumentosAseguradora
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
@@ -26,7 +26,7 @@ from django.db.models import Count, Sum, F, Q
 from django.db import transaction
 from django.contrib import messages
 from decimal import Decimal
-
+from datetime import timedelta, date
 
 
 logger = logging.getLogger(__name__)
@@ -219,7 +219,6 @@ def siniestros_module_detalle(request, id):
     archivo_url = None
     archivo_tipo = None
     archivo_nombre = None
-    
     if siniestro.documento:
         archivo_url = siniestro.documento.url
         archivo_nombre = os.path.basename(siniestro.documento.name)
@@ -243,15 +242,13 @@ def siniestros_module_detalle(request, id):
             estudiantes_info.append(f"{estudiante.nombres} {estudiante.apellidos}")
     
     estudiantes_texto = ", ".join(estudiantes_info) if estudiantes_info else 'N/A'
-
     
     data = {
         'id': siniestro.id,
-        'poliza': {'numero': siniestro.poliza.numero_poliza if siniestro.poliza else 'Sin póliza','estudiante': estudiantes_texto,},
-
-
-
-
+        'poliza': {
+            'numero': siniestro.poliza.numero_poliza if siniestro.poliza else 'Sin póliza',
+            'estudiante': estudiantes_texto,
+        },
         'tipo': siniestro.get_tipo_display() if siniestro.tipo else 'N/A',
         'descripcion': siniestro.descripcion,
         'fecha_evento': siniestro.fecha_evento.strftime('%d/%m/%Y') if siniestro.fecha_evento else 'N/A',
@@ -266,6 +263,10 @@ def siniestros_module_detalle(request, id):
         'parentesco': siniestro.parentesco,
         'telefono': siniestro.telefono_contacto,
         'email': siniestro.email_contacto,
+        # ⭐ NUEVOS CAMPOS
+        'nombre_estudiante_fallecido': siniestro.nombre_estudiante_fallecido or 'N/A',
+        'cedula_estudiante_fallecido': siniestro.cedula_estudiante_fallecido or 'N/A',
+        'motivo_muerte': siniestro.motivo_muerte or 'N/A',
         'revisado_por': siniestro.revisado_por.username if siniestro.revisado_por else 'No revisado',
         'comentarios': siniestro.comentarios,
         'archivo_url': archivo_url,
@@ -274,7 +275,6 @@ def siniestros_module_detalle(request, id):
     }
     
     return JsonResponse(data)
-
 
 
 
@@ -310,6 +310,9 @@ def siniestros_module_crear(request):
             parentesco=data.get('parentesco', ''),
             telefono_contacto=data.get('telefono_contacto', ''),
             email_contacto=data.get('email_contacto', ''),
+            nombre_estudiante_fallecido=data.get('nombre_estudiante_fallecido', ''),
+            cedula_estudiante_fallecido=data.get('cedula_estudiante_fallecido', ''),
+            motivo_muerte=data.get('motivo_muerte', ''),
             estado='pendiente',
             enviado=False,
         )
@@ -602,6 +605,24 @@ def beneficiarios_module_crear(request):
                 """
                 
                 fecha_actual = datetime.now().strftime('%d/%m/%Y')
+
+
+                tipo_siniestro = siniestro.tipo 
+                aseguradora_siniestro = siniestro.poliza.aseguradora if siniestro.poliza else None
+                documentos_req = DocumentosAseguradora.objects.filter(siniestro_tipo=tipo_siniestro,activo=True,aseguradora=aseguradora_siniestro).order_by('dias_max_entrega')
+
+                lista_fechas_limite = []
+                fecha_hoy = date.today()
+
+                for doc in documentos_req:
+                    fecha_vencimiento = fecha_hoy + timedelta(days=doc.dias_max_entrega)
+                    lista_fechas_limite.append(fecha_vencimiento.strftime('%Y-%m-%d'))
+
+                beneficiario.fechas_limite = lista_fechas_limite
+                beneficiario.save()
+
+
+                print("aqui envia el mensaje al correo electronico")
                 
                 try:
                     enviar_recordatorio(user, mensaje, fecha_actual)
@@ -625,6 +646,117 @@ def beneficiarios_module_crear(request):
 
 
 
+@login_required(login_url='login')
+@role_required(['asesor'])
+@require_http_methods(["GET"])
+def beneficiario_checklist_documentos(request, beneficiario_id):
+    try:
+        print("beneficiario_idddddsdsdds", beneficiario_id)
+        beneficiario = Beneficiario.objects.get(id_beneficiario=beneficiario_id)
+        siniestro = beneficiario.siniestro
+        tipo_siniestro = siniestro.tipo
+        
+        # 1. Obtener documentos que YA subió el beneficiario
+        documentos_subidos = TcasDocumentos.objects.filter(beneficiario=beneficiario).select_related('documento_aseguradora')
+        
+        documentos_entregados = []
+        ids_documentos_entregados = []
+        
+        for doc in documentos_subidos:
+            if doc.documento_aseguradora:
+                documentos_entregados.append({
+                    'id': doc.doc_cod_doc,
+                    'nombre_documento': doc.documento_aseguradora.nombre_documento,
+                    'descripcion': doc.documento_aseguradora.descripcion or '',
+                    'obligatorio': doc.documento_aseguradora.obligatorio,
+                    'fecha_subida': doc.fec_creacion.strftime('%d/%m/%Y %H:%M') if doc.fec_creacion else 'N/A',
+                    'url': doc.doc_file.url if doc.doc_file else '#',
+                    'estado': doc.estado
+                })
+                ids_documentos_entregados.append(doc.documento_aseguradora.id_doc_req)
+        
+        # 2. Obtener documentos requeridos para este tipo de siniestro
+        documentos_requeridos = DocumentosAseguradora.objects.filter(siniestro_tipo=tipo_siniestro,activo=True)
+        
+        # 3. Filtrar documentos FALTANTES (que NO están en los entregados)
+        documentos_faltantes = []
+        for doc_req in documentos_requeridos:
+            if doc_req.id_doc_req not in ids_documentos_entregados:
+                documentos_faltantes.append({
+                    'id_doc_req': doc_req.id_doc_req,
+                    'nombre_documento': doc_req.nombre_documento,
+                    'descripcion': doc_req.descripcion or '',
+                    'obligatorio': doc_req.obligatorio,
+                    'dias_max_entrega': doc_req.dias_max_entrega
+                })
+        
+        return JsonResponse({
+            'success': True,
+            'beneficiario_nombre': beneficiario.nombre,
+            'siniestro_id': siniestro.id,
+            'siniestro_tipo': siniestro.get_tipo_display() if siniestro.tipo else 'N/A',
+            'documentos_entregados': documentos_entregados,
+            'documentos_faltantes': documentos_faltantes
+        })
+        
+    except Beneficiario.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Beneficiario no encontrado'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+
+
+
+@login_required(login_url='login')
+@role_required(['asesor'])
+@require_http_methods(["POST"])
+def subir_documentos_faltantes(request):
+    try:
+        beneficiario_id = request.POST.get('beneficiario_id')
+        beneficiario = Beneficiario.objects.get(id_beneficiario=beneficiario_id)
+        
+        documentos_guardados = 0
+        
+        index = 0
+        while True:
+            doc_id_key = f'documentos[{index}][doc_id]'
+            file_key = f'documentos[{index}][file]'
+            
+            if doc_id_key not in request.POST:
+                break
+            
+            doc_aseguradora_id = request.POST.get(doc_id_key)
+            archivo = request.FILES.get(file_key)
+            
+            if archivo and doc_aseguradora_id:
+
+                doc_aseguradora = DocumentosAseguradora.objects.get(id_doc_req=doc_aseguradora_id)
+                
+                # Crear el documento
+                nuevo_doc = TcasDocumentos(
+                    doc_descripcion=f"Documento: {doc_aseguradora.nombre_documento}",
+                    doc_file=archivo,
+                    estado='pendiente',
+                    beneficiario=beneficiario,
+                    documento_aseguradora=doc_aseguradora
+                )
+                nuevo_doc.save()
+                documentos_guardados += 1
+            
+            index += 1
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'{documentos_guardados} documento(s) subido(s) exitosamente'
+        })
+        
+    except Beneficiario.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Beneficiario no encontrado'}, status=404)
+    except DocumentosAseguradora.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Tipo de documento no encontrado'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 
 
@@ -670,7 +802,7 @@ pusher_client = pusher.Pusher(app_id=settings.PUSHER_APP_ID,key=settings.PUSHER_
 @role_required(['asesor'])
 @csrf_exempt
 def pusher_auth(request):
-    print("Llegó a pusher_auth!")
+    print("Llegó a pusher_auth asesorrrr!")
     if not request.user.is_authenticated:
         return HttpResponseForbidden()
 
@@ -683,6 +815,8 @@ def pusher_auth(request):
     
     auth = pusher_client.authenticate(channel=channel_name,socket_id=socket_id)
     return JsonResponse(auth)
+
+
 
 
 
@@ -747,12 +881,12 @@ from django.contrib.auth.decorators import login_required
 @login_required(login_url='login')
 @role_required(['asesor'])
 def lista_siniestros(request):
-    # Traer todos los siniestros sin filtros
     siniestros = Siniestro.objects.all().select_related('poliza').order_by('-fecha_reporte')
-    context = {
-        'siniestros': siniestros
-    }
+    context = {'siniestros': siniestros}
     return render(request, 'asesor/components/documentos/siniestros_lista.html', context)
+
+
+
 
 @login_required(login_url='login')
 @role_required(['asesor'])
@@ -850,6 +984,9 @@ def detalle_reporte(request, id):
         'archivo_url': archivo_url,
         'archivo_tipo': archivo_tipo,
         'archivo_nombre': archivo_nombre,
+        'estudiante_nombre': reporte.nombre_estudiante_fallecido,
+        'estudiante_cedula': reporte.cedula_estudiante_fallecido,
+        'motivo_muerte': reporte.motivo_muerte,
     })
 
 
@@ -1070,6 +1207,11 @@ def factura_detalle(request, factura_id):
     )
 
 
+
+
+
+
+
 @login_required(login_url='/login')
 @role_required(['asesor'])
 def reportes_liquidacion(request):
@@ -1084,10 +1226,8 @@ def reportes_liquidacion(request):
     export = request.GET.get('export')
     print(f"Export: {export}")
 
-    # Cambiamos 'siniestro__poliza__estudiante' por prefetch_related
     facturas_qs = Factura.objects.select_related('beneficiario', 'siniestro', 'siniestro__poliza').prefetch_related('pagos', 'siniestro__poliza__estudiantes').order_by('-fecha')
-    print(f"Facturas iniciales: {facturas_qs.count()}")
-    print(facturas_qs.query)
+    
     if beneficiario_id:
         facturas_qs = facturas_qs.filter(beneficiario_id=beneficiario_id)
 
@@ -1111,21 +1251,30 @@ def reportes_liquidacion(request):
             continue
 
         saldo_pendiente = factura.monto - total_pagado_total
+        
+        estudiante = None
+        if factura.siniestro and factura.siniestro.poliza:
+            estudiantes = factura.siniestro.poliza.estudiantes.all()
+            estudiante = estudiantes.first() if estudiantes.exists() else None
+        
         facturas_filtradas.append(
             {
                 'factura': factura,
                 'beneficiario': factura.beneficiario,
                 'siniestro': factura.siniestro,
-                'estudiante': factura.siniestro.poliza.estudiantes if factura.siniestro and factura.siniestro.poliza else None,
+                'estudiante': estudiante,  
                 'total_pagado': total_pagado_filtrado,
                 'saldo_pendiente': saldo_pendiente,
                 'estado': estado,
             }
         )
 
+        
+
     total_facturado = sum((item['factura'].monto for item in facturas_filtradas), Decimal('0.00'))
     total_pagado = sum((item['total_pagado'] for item in facturas_filtradas), Decimal('0.00'))
     saldo_pendiente = total_facturado - total_pagado
+
 
     if export == 'xlsx':
         from openpyxl import Workbook
@@ -1145,6 +1294,7 @@ def reportes_liquidacion(request):
             "Saldo pendiente",
             "Estado",
         ])
+        
         for item in facturas_filtradas:
             estudiante = item['estudiante']
             estudiante_nombre = f"{estudiante.nombres} {estudiante.apellidos}" if estudiante else "-"
@@ -1195,3 +1345,285 @@ def reportes_liquidacion(request):
             },
         },
     )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from core.decorators import role_required
+from core.models import Beneficiario 
+import json
+import pusher
+from django.conf import settings
+from django.utils import timezone
+
+# Cliente Pusher
+pusher_client = pusher.Pusher(
+    app_id=settings.PUSHER_APP_ID,
+    key=settings.PUSHER_KEY,
+    secret=settings.PUSHER_SECRET,
+    cluster=settings.PUSHER_CLUSTER,
+    ssl=True
+)
+
+
+@login_required(login_url='/login')
+@role_required(['asesor'])
+@csrf_exempt
+def enviar_mensaje_asesor(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            message = data.get('message', '').strip()
+            beneficiario_id = data.get('beneficiario_id')
+            print("Message:", message)
+            print("Beneficiario ID:", beneficiario_id)
+            
+            if len(message) == 0:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'El mensaje no puede estar vacío'
+                }, status=400)
+            
+            if len(message) > 200:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'El mensaje no puede superar los 200 caracteres'
+                }, status=400)
+            
+            if not beneficiario_id:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'ID de beneficiario requerido'
+                }, status=400)
+
+            try:
+                beneficiario = Beneficiario.objects.get(id_beneficiario=beneficiario_id)
+            except Beneficiario.DoesNotExist:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Beneficiario no encontrado'
+                }, status=404)
+
+            if not beneficiario.profile:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'El beneficiario no tiene perfil asociado'
+                }, status=400)
+
+            beneficiario_user = beneficiario.profile.user
+            beneficiario_user_id = beneficiario_user.id
+
+
+            print("Beneficiario User ID:", beneficiario_user_id)
+            channel_name = f"private-user-{beneficiario_user_id}"
+
+            print("Channel Name:", channel_name)
+            
+            pusher_client.trigger(channel_name, 'chat-message', {'message': message,'timestamp': str(timezone.now())})
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Mensaje enviado correctamente'
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Formato de datos inválido'
+            }, status=400)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Error al enviar mensaje: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Método no permitido'
+    }, status=405)
+
+
+
+
+
+    # En core/asesor/views.py
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from core.decorators import role_required
+from core.models import Beneficiario
+
+@login_required
+@role_required(['asesor'])
+def get_beneficiarios_para_chat(request):
+    """Obtener beneficiarios para mostrar en el chat del asesor"""
+    try:
+        # Obtener todos los beneficiarios
+        beneficiarios = Beneficiario.objects.all()
+        
+        beneficiarios_list = []
+        for benef in beneficiarios:
+            beneficiarios_list.append({
+                'id': benef.id_beneficiario,  # ID del beneficiario
+                'nombre': benef.nombre,
+                'email': benef.correo,
+                'telefono': benef.telefono or '',
+                'tiene_perfil': benef.profile is not None
+            })
+        
+        return JsonResponse({
+            'status': 'success',
+            'beneficiarios': beneficiarios_list,
+            'count': len(beneficiarios_list)
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Error al obtener beneficiarios: {str(e)}'
+        }, status=500)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from django.db.models import Sum
+from django.utils import timezone
+from decimal import Decimal
+from datetime import datetime
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from core.models import Poliza, Factura, Pago 
+
+@login_required(login_url='/login')
+@role_required(['asesor'])
+def analisis_siniestralidad(request):
+    # 1. Obtener póliza activa y fechas (mismo método que tus reportes)
+    poliza = Poliza.objects.filter(estado='activa').first()
+    if not poliza:
+        return render(request, 'asesor/components/siniestralidad/analisis_siniestralidad.html', {'error': 'No hay póliza activa'})
+
+    start_date = _parse_date(request.GET.get('fecha_inicio'))
+    end_date = _parse_date(request.GET.get('fecha_fin'))
+
+
+    facturas_qs = Factura.objects.select_related('beneficiario', 'siniestro', 'siniestro__poliza').prefetch_related('pagos', 'siniestro__poliza__estudiantes').order_by('-fecha')
+    
+
+    facturas_filtradas = []
+    for factura in facturas_qs:
+        pagos_qs = factura.pagos.all()
+        if start_date:
+            pagos_qs = pagos_qs.filter(fecha_pago__gte=start_date)
+        if end_date:
+            pagos_qs = pagos_qs.filter(fecha_pago__lte=end_date)
+
+        total_pagado_filtrado = pagos_qs.aggregate(total=Sum('monto_pagado')).get('total') or Decimal('0.00')
+        total_pagado_total = factura.pagos.aggregate(total=Sum('monto_pagado')).get('total') or Decimal('0.00')
+        estado = _factura_estado(factura.monto, total_pagado_total)
+
+        if start_date or end_date:
+            if total_pagado_filtrado == Decimal('0.00'):
+                continue
+
+
+        
+        estudiante = None
+        if factura.siniestro and factura.siniestro.poliza:
+            estudiantes = factura.siniestro.poliza.estudiantes.all()
+            estudiante = estudiantes.first() if estudiantes.exists() else None
+        
+        facturas_filtradas.append(
+            {
+                'factura': factura,
+                'beneficiario': factura.beneficiario,
+                'siniestro': factura.siniestro,
+                'estudiante': estudiante,  
+                'total_pagado': total_pagado_filtrado,
+                'estado': estado,
+            }
+        )
+
+        
+
+    total_facturado = sum((item['factura'].monto for item in facturas_filtradas), Decimal('0.00'))
+    total_pagado = sum((item['total_pagado'] for item in facturas_filtradas), Decimal('0.00'))
+
+
+    # --- FIN DE LÓGICA COPIADA ---
+
+    # 2. Análisis de Siniestralidad
+    # Cálculo de Prima Neta Acumulada (UTPL)
+    s_date = start_date if start_date else poliza.fecha_inicio
+    e_date = end_date if end_date else timezone.now().date()
+    diff_meses = (e_date.year - s_date.year) * 12 + (e_date.month - s_date.month) + 1
+    total_prima_utpl = poliza.prima_neta * diff_meses
+
+    # 3. Métricas para el Template
+    porcentaje_siniestralidad = 0
+    if total_prima_utpl > 0:
+        porcentaje_siniestralidad = (total_pagado / total_prima_utpl) * 100
+
+    # Análisis de Cobertura (Comparación con el monto_cobertura de la póliza)
+    uso_cobertura = (total_pagado / poliza.monto_cobertura * 100) if poliza.monto_cobertura > 0 else 0
+
+    context = {
+        'poliza': poliza,
+        'total_prima_utpl': total_prima_utpl,
+        'total_pagado_aseguradora': total_pagado, # Esta es la variable total_pagado que pediste
+        'total_facturado': total_facturado,
+        'porcentaje_siniestralidad': round(porcentaje_siniestralidad, 2),
+        'porcentaje_cobertura_consumida': round(uso_cobertura, 2),
+        'estado_analisis': "Saludable" if porcentaje_siniestralidad <= 60 else "Crítico",
+        'color_grafica': "#10b981" if porcentaje_siniestralidad <= 60 else "#ef4444",
+        'start_date': s_date,
+        'end_date': e_date,
+        'meses_analizados': diff_meses
+    }
+
+    return render(request, 'asesor/components/siniestralidad/analisis_siniestralidad.html', context)

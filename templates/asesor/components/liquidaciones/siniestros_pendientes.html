@@ -1,279 +1,578 @@
 {% extends "master/sideBar/sidebar_asesor.html" %}
-
 {% block title %}Liquidaciones pendientes{% endblock %}
-
 {% block content %}
 {% include "master/appBar/appBar.html" %}
-
+{% include "master/footer/chatFooter.html" %}
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
-
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     :root {
-        --glass-bg: rgba(255, 255, 255, 0.72);
-        --glass-border: rgba(148, 163, 184, 0.22);
-        --glass-shadow: 0 24px 50px rgba(15, 23, 42, 0.18);
-        --ink: #0f172a;
-        --muted: #64748b;
+        /* Paleta de verdes frescos */
+        --primary-50: #f0fdf4;
+        --primary-100: #dcfce7;
+        --primary-200: #bbf7d0;
+        --primary-300: #86efac;
+        --primary-400: #4ade80;
+        --primary-500: #22c55e;
+        --primary-600: #16a34a;
+        --primary-700: #15803d;
+        --primary-800: #166534;
+        --primary-900: #14532d;
+        
+        /* Neutros */
+        --slate-50: #f8fafc;
+        --slate-100: #f1f5f9;
+        --slate-200: #e2e8f0;
+        --slate-300: #cbd5e1;
+        --slate-400: #94a3b8;
+        --slate-500: #64748b;
+        --slate-600: #475569;
+        --slate-700: #334155;
+        --slate-800: #1e293b;
+        --slate-900: #0f172a;
+        
+        /* Efectos */
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
     }
-
+    * {
+        box-sizing: border-box;
+    }
     .ui-shell {
-        background:
-            radial-gradient(900px 420px at 12% 8%, rgba(20, 184, 166, 0.18), transparent 55%),
-            radial-gradient(980px 520px at 88% 18%, rgba(14, 165, 233, 0.2), transparent 60%),
-            linear-gradient(135deg, #f8fafc 0%, #eef2ff 45%, #f1f5f9 100%);
-        position: relative;
-        overflow: hidden;
-        font-family: 'Manrope', 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, var(--primary-50) 0%, var(--slate-50) 50%, var(--primary-50) 100%);
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        padding: 24px;
     }
-
-    .ui-shell::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        opacity: 0.06;
-        pointer-events: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
+    @media (min-width: 768px) {
+        .ui-shell {
+            padding: 32px 40px;
+        }
     }
-
     .ui-container {
-        max-width: 1180px;
+        max-width: 1280px;
         margin: 0 auto;
     }
-
-    .ui-icon {
+    /* Header Card */
+    .header-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px 28px;
+        margin-bottom: 24px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--primary-100);
+    }
+    .header-content {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+    .header-icon {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 40px;
-        height: 40px;
+        width: 48px;
+        height: 48px;
         border-radius: 12px;
-        background: rgba(15, 23, 42, 0.08);
-        color: var(--ink);
+        background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
     }
-
-    .ui-icon svg {
-        width: 20px;
-        height: 20px;
+    .header-icon svg {
+        width: 24px;
+        height: 24px;
     }
-
-    .ui-card {
-        background: linear-gradient(180deg, var(--glass-bg) 0%, rgba(255, 255, 255, 0.62) 100%);
-        border: 1px solid var(--glass-border);
-        border-radius: 24px;
-        box-shadow: var(--glass-shadow);
-        backdrop-filter: blur(14px);
-        transition: box-shadow 0.2s ease;
-        position: relative;
-        overflow: hidden;
+    .header-title {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--slate-800);
+        letter-spacing: -0.025em;
+        margin: 0;
     }
-
-    .ui-card:hover {
-        box-shadow: 0 30px 60px rgba(15, 23, 42, 0.22);
-    }
-
-    .ui-title {
-        font-size: 28px;
-        font-weight: 800;
-        color: var(--ink);
-        letter-spacing: -0.03em;
-    }
-
-    .ui-subtitle {
+    .header-subtitle {
         font-size: 14px;
-        color: var(--muted);
+        color: var(--slate-500);
+        margin-top: 4px;
     }
-
-    .pill {
+    .header-badge {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 6px 14px;
-        border-radius: 999px;
-        font-size: 11px;
-        letter-spacing: 0.2em;
+        padding: 8px 16px;
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
         text-transform: uppercase;
-        background: rgba(15, 23, 42, 0.08);
-        color: #475569;
+        background: var(--primary-100);
+        color: var(--primary-700);
+        border: 1px solid var(--primary-200);
     }
-
+    .header-badge::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--primary-500);
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    /* Siniestro Cards */
+    .siniestro-card {
+        background: white;
+        border-radius: 16px;
+        margin-bottom: 20px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--slate-200);
+        overflow: hidden;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .siniestro-card:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+    }
+    .siniestro-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 20px 24px;
+        background: linear-gradient(135deg, var(--primary-50) 0%, white 100%);
+        border-bottom: 1px solid var(--primary-100);
+    }
+    .siniestro-label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--primary-600);
+        margin-bottom: 4px;
+    }
+    .siniestro-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--slate-800);
+    }
+    .siniestro-date {
+        font-size: 13px;
+        color: var(--slate-500);
+        margin-top: 2px;
+    }
+    .beneficiarios-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 600;
+        background: white;
+        color: var(--primary-700);
+        border: 2px solid var(--primary-300);
+        box-shadow: var(--shadow-sm);
+    }
+    .beneficiarios-badge svg {
+        width: 16px;
+        height: 16px;
+    }
+    /* Table Container with Scroll */
+    .table-section {
+        padding: 20px 24px;
+    }
+    .table-label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--slate-400);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .table-label::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--slate-200);
+    }
+    .table-wrapper {
+        border-radius: 12px;
+        border: 1px solid var(--slate-200);
+        overflow: hidden;
+        background: white;
+    }
+    .table-scroll {
+        max-height: 400px;
+        overflow-y: auto;
+        overflow-x: auto;
+    }
+    /* Custom Scrollbar */
+    .table-scroll::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    .table-scroll::-webkit-scrollbar-track {
+        background: var(--slate-100);
+        border-radius: 4px;
+    }
+    .table-scroll::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, var(--primary-300) 0%, var(--primary-400) 100%);
+        border-radius: 4px;
+        border: 2px solid var(--slate-100);
+    }
+    .table-scroll::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, var(--primary-400) 0%, var(--primary-500) 100%);
+    }
+    .table-scroll::-webkit-scrollbar-corner {
+        background: var(--slate-100);
+    }
+    /* Table Styles */
+    .ui-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+    .ui-table thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    .ui-table th {
+        padding: 14px 16px;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--slate-500);
+        background: linear-gradient(180deg, var(--slate-50) 0%, var(--slate-100) 100%);
+        border-bottom: 2px solid var(--slate-200);
+        white-space: nowrap;
+    }
+    .ui-table th:last-child {
+        text-align: right;
+    }
+    .ui-table tbody tr {
+        transition: background 0.15s ease;
+    }
+    .ui-table tbody tr:hover {
+        background: var(--primary-50);
+    }
+    .ui-table td {
+        padding: 16px;
+        border-bottom: 1px solid var(--slate-100);
+        color: var(--slate-600);
+    }
+    .ui-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    .beneficiario-name {
+        font-weight: 600;
+        color: var(--slate-800);
+        margin-bottom: 2px;
+    }
+    .beneficiario-email {
+        font-size: 12px;
+        color: var(--slate-400);
+    }
+    /* Badges */
     .badge {
         display: inline-flex;
         align-items: center;
-        padding: 4px 12px;
-        border-radius: 999px;
-        font-size: 10px;
-        letter-spacing: 0.16em;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
         text-transform: uppercase;
-        font-weight: 700;
-        border: 1px solid transparent;
+        white-space: nowrap;
     }
-
     .badge-muted {
-        background: rgba(148, 163, 184, 0.12);
-        color: #64748b;
-        border-color: rgba(148, 163, 184, 0.3);
+        background: var(--slate-100);
+        color: var(--slate-500);
+        border: 1px solid var(--slate-200);
     }
-
     .badge-warning {
-        background: rgba(251, 191, 36, 0.15);
+        background: #fef3c7;
         color: #92400e;
-        border-color: rgba(251, 191, 36, 0.4);
+        border: 1px solid #fcd34d;
     }
-
     .badge-info {
-        background: rgba(56, 189, 248, 0.15);
-        color: #075985;
-        border-color: rgba(56, 189, 248, 0.4);
+        background: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #7dd3fc;
     }
-
     .badge-success {
-        background: rgba(16, 185, 129, 0.16);
-        color: #065f46;
-        border-color: rgba(16, 185, 129, 0.35);
+        background: var(--primary-100);
+        color: var(--primary-700);
+        border: 1px solid var(--primary-300);
     }
-
-    .ui-btn {
+    .badge-success::before,
+    .badge-warning::before,
+    .badge-info::before,
+    .badge-muted::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+    }
+    .badge-success::before {
+        background: var(--primary-500);
+    }
+    .badge-warning::before {
+        background: #f59e0b;
+    }
+    .badge-info::before {
+        background: #0ea5e9;
+    }
+    .badge-muted::before {
+        background: var(--slate-400);
+    }
+    /* Action Button */
+    .btn-action {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 0.55rem 1.2rem;
-        border-radius: 14px;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.18em;
+        gap: 6px;
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
         text-transform: uppercase;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s ease;
     }
-
-    .ui-btn-primary {
-        background: #0f172a;
-        color: #f8fafc;
-        box-shadow: 0 16px 28px rgba(15, 23, 42, 0.2);
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
     }
-
-    .ui-btn-primary:hover {
-        box-shadow: 0 20px 34px rgba(15, 23, 42, 0.26);
+    .btn-primary:hover {
+        background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+        box-shadow: 0 6px 16px rgba(34, 197, 94, 0.35);
+        transform: translateY(-1px);
     }
-
-    .ui-table th {
-        font-size: 11px;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: #94a3b8;
+    .btn-primary:active {
+        transform: translateY(0);
     }
-
+    /* Empty State */
+    .empty-state {
+        padding: 60px 24px;
+        text-align: center;
+    }
+    .empty-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background: var(--primary-100);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-500);
+    }
+    .empty-icon svg {
+        width: 32px;
+        height: 32px;
+    }
+    .empty-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--slate-700);
+        margin-bottom: 4px;
+    }
+    .empty-text {
+        font-size: 14px;
+        color: var(--slate-400);
+    }
+    /* Animations */
     .fade-in {
-        animation: fadeIn 0.45s ease-out;
+        animation: fadeIn 0.4s ease-out;
     }
-
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .stagger-1 { animation-delay: 0.05s; }
+    .stagger-2 { animation-delay: 0.1s; }
+    .stagger-3 { animation-delay: 0.15s; }
+    .stagger-4 { animation-delay: 0.2s; }
+    /* Responsive */
+    @media (max-width: 768px) {
+        .ui-shell {
+            padding: 16px;
+        }
+        .header-card {
+            padding: 20px;
+        }
+        .header-title {
+            font-size: 22px;
+        }
+        .siniestro-header {
+            padding: 16px 20px;
+        }
+        .table-section {
+            padding: 16px 20px;
+        }
+        .ui-table th,
+        .ui-table td {
+            padding: 12px;
+        }
+        .btn-action {
+            padding: 8px 14px;
+            font-size: 11px;
+        }
     }
 </style>
-
-<div class="ui-shell p-6 md:p-10">
-    <div class="ui-container space-y-6">
-        <div class="ui-card fade-in p-6">
-            <div class="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                    <div class="flex items-center gap-3">
-                        <span class="ui-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                                <path d="M4 7h16M4 12h10M4 17h7" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </span>
-                        <h1 class="ui-title">Liquidaciones pendientes</h1>
+<div class="ui-shell">
+    <div class="ui-container">
+        
+        <!-- Header -->
+        <div class="header-card fade-in">
+            <div class="header-content">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <span class="header-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 12h6M9 16h6" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <h1 class="header-title">Liquidaciones Pendientes</h1>
+                        <p class="header-subtitle">Siniestros aprobados con beneficiarios por liquidar</p>
                     </div>
-                    <p class="ui-subtitle mt-2">Siniestros aprobados con beneficiarios por liquidar.</p>
                 </div>
-                <div class="pill">Vista operativa</div>
+                <span class="header-badge">Vista Operativa</span>
             </div>
         </div>
-
-        <div class="space-y-6">
+        <!-- Siniestros List -->
+        <div class="siniestros-list">
             {% for item in siniestros_data %}
-            <div class="fade-in ui-card">
-                <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 px-6 py-5">
+            <div class="siniestro-card fade-in stagger-{{ forloop.counter }}">
+                
+                <!-- Siniestro Header -->
+                <div class="siniestro-header">
                     <div>
-                        <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Siniestro</div>
-                        <div class="text-lg font-semibold text-slate-900">#{{ item.siniestro.id }} | Poliza {{ item.siniestro.poliza.numero }}</div>
-                        <div class="text-sm text-slate-500">{{ item.siniestro.fecha_reporte|date:"d/m/Y H:i" }}</div>
+                        <div class="siniestro-label">Siniestro</div>
+                        <div class="siniestro-title">#{{ item.siniestro.id }} | Póliza {{ item.siniestro.poliza.numero }}</div>
+                        <div class="siniestro-date">{{ item.siniestro.fecha_reporte|date:"d/m/Y H:i" }}</div>
                     </div>
-                    <div class="pill">Beneficiarios {{ item.beneficiarios|length }}</div>
+                    <span class="beneficiarios-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        {{ item.beneficiarios|length }} Beneficiarios
+                    </span>
                 </div>
-
-                <div class="px-6 py-5">
-                    <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Beneficiarios</div>
-                    <div class="mt-4 overflow-hidden rounded-2xl border border-slate-100 bg-white/80">
-                        <table class="ui-table min-w-full text-sm">
-                            <thead class="bg-slate-50">
-                                <tr>
-                                    <th class="px-5 py-4">Beneficiario</th>
-                                    <th class="px-5 py-4">Factura</th>
-                                    <th class="px-5 py-4">Facturado</th>
-                                    <th class="px-5 py-4">Pagado</th>
-                                    <th class="px-5 py-4">Pendiente</th>
-                                    <th class="px-5 py-4">Estado</th>
-                                    <th class="px-5 py-4 text-right">Accion</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                {% for ben in item.beneficiarios %}
-                                <tr class="hover:bg-slate-50/70">
-                                    <td class="px-5 py-4">
-                                        <div class="font-semibold text-slate-900">{{ ben.beneficiario.nombre }}</div>
-                                        <div class="text-xs text-slate-500">{{ ben.beneficiario.correo }}</div>
-                                    </td>
-                                    <td class="px-5 py-4 text-slate-600">
-                                        {% if ben.factura %}
-                                            {{ ben.factura.numero_factura }}
-                                        {% else %}
-                                            Sin factura
-                                        {% endif %}
-                                    </td>
-                                    <td class="px-5 py-4 text-slate-600">
-                                        {% if ben.factura %}
-                                            ${{ ben.factura.monto|floatformat:2 }}
-                                        {% else %}
-                                            -
-                                        {% endif %}
-                                    </td>
-                                    <td class="px-5 py-4 text-slate-600">${{ ben.total_pagado|floatformat:2 }}</td>
-                                    <td class="px-5 py-4 text-slate-600">
-                                        {% if ben.restante is not None %}
-                                            ${{ ben.restante|floatformat:2 }}
-                                        {% else %}
-                                            -
-                                        {% endif %}
-                                    </td>
-                                    <td class="px-5 py-4">
-                                        {% if not ben.factura %}
-                                            <span class="badge badge-muted">Sin factura</span>
-                                        {% elif ben.restante is not None and ben.restante <= 0 %}
-                                            <span class="badge badge-success">Pagada</span>
-                                        {% elif ben.total_pagado and ben.total_pagado > 0 %}
-                                            <span class="badge badge-info">Parcial</span>
-                                        {% else %}
-                                            <span class="badge badge-warning">Pendiente</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="px-5 py-4 text-right">
-                                        <a href="{% url 'registrar_liquidacion' ben.beneficiario.id_beneficiario %}"
-                                           class="ui-btn ui-btn-primary">
-                                            Gestionar
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                <!-- Table Section -->
+                <div class="table-section">
+                    <div class="table-label">Detalle de Beneficiarios</div>
+                    
+                    <div class="table-wrapper">
+                        <div class="table-scroll">
+                            <table class="ui-table">
+                                <thead>
+                                    <tr>
+                                        <th>Beneficiario</th>
+                                        <th>Factura</th>
+                                        <th>Facturado</th>
+                                        <th>Pagado</th>
+                                        <th>Pendiente</th>
+                                        <th>Estado</th>
+                                        <th style="text-align: right;">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ben in item.beneficiarios %}
+                                    <tr>
+                                        <td>
+                                            <div class="beneficiario-name">{{ ben.beneficiario.nombre }}</div>
+                                            <div class="beneficiario-email">{{ ben.beneficiario.correo }}</div>
+                                        </td>
+                                        <td>
+                                            {% if ben.factura %}
+                                                {{ ben.factura.numero_factura }}
+                                            {% else %}
+                                                <span style="color: var(--slate-400);">—</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if ben.factura %}
+                                                ${{ ben.factura.monto|floatformat:2 }}
+                                            {% else %}
+                                                <span style="color: var(--slate-400);">—</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>${{ ben.total_pagado|floatformat:2 }}</td>
+                                        <td>
+                                            {% if ben.restante is not None %}
+                                                ${{ ben.restante|floatformat:2 }}
+                                            {% else %}
+                                                <span style="color: var(--slate-400);">—</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if not ben.factura %}
+                                                <span class="badge badge-muted">Sin factura</span>
+                                            {% elif ben.restante is not None and ben.restante <= 0 %}
+                                                <span class="badge badge-success">Pagada</span>
+                                            {% elif ben.total_pagado and ben.total_pagado > 0 %}
+                                                <span class="badge badge-info">Parcial</span>
+                                            {% else %}
+                                                <span class="badge badge-warning">Pendiente</span>
+                                            {% endif %}
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <a href="{% url 'registrar_liquidacion' ben.beneficiario.id_beneficiario %}" class="btn-action btn-primary">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                                Gestionar
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
             {% empty %}
-            <div class="ui-card p-8 text-center text-slate-400">
-                No hay siniestros pendientes de liquidacion.
+            
+            <!-- Empty State -->
+            <div class="siniestro-card fade-in">
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 11v6M9 14h6" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="empty-title">No hay liquidaciones pendientes</div>
+                    <div class="empty-text">Todos los siniestros han sido procesados correctamente</div>
+                </div>
             </div>
             {% endfor %}
         </div>

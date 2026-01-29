@@ -154,7 +154,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'seguros_personas',
         'USER': 'root',
-        'PASSWORD': 'password',
+        'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '3306',
     }
