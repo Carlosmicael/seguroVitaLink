@@ -95,7 +95,7 @@ urlpatterns = [
     path('asesor/reportes/liquidaciones/', asesor_views.reportes_liquidacion, name='reportes_liquidacion'),
     path('asesor/reportes/liquidaciones/factura/<int:factura_id>/', asesor_views.factura_detalle, name='factura_detalle'),
     # Ronal - Fin Gestión de Liquidaciones
-
+    path('analisis-siniestralidad/', asesor_views.analisis_siniestralidad, name='analisis_siniestralidad'),
 
     #Documentos
     path("documentos/poliza/", views.obtener_documentos_por_proceso, name="obtener_documentos"),
@@ -129,6 +129,12 @@ urlpatterns = [
     path('beneficiarios/', asesor_views.beneficiarios_module_lista, name='beneficiarios_module_lista'),
     path('beneficiarios/crear/', asesor_views.beneficiarios_module_crear, name='beneficiarios_module_crear'),
     path('beneficiarios/<int:id>/', asesor_views.beneficiarios_module_detalle, name='beneficiarios_module_detalle'),
+    path('beneficiarios/<int:beneficiario_id>/checklist-documentos/', asesor_views.beneficiario_checklist_documentos, name='beneficiario_checklist_documentos'),
+    path('beneficiarios/subir-documentos-faltantes/', asesor_views.subir_documentos_faltantes, name='subir_documentos_faltantes'),
+
+
+
+
     
 
 

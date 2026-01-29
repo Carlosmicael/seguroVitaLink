@@ -17,6 +17,9 @@ from django.contrib import messages
 from .models import ReporteEvento
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
+from django.views.generic import FormView
+from .forms import ActivacionPolizaForm
+from .models import ReporteEvento
 
 
 
@@ -120,6 +123,9 @@ def reportar_evento(request):
             telefono = request.POST.get('telefono')
             email = request.POST.get('email')
             archivo_documento = request.FILES.get('archivo_documento')
+            nombre_estudiante_fallecido = request.POST.get('nombre_estudiante_fallecido')
+            cedula_estudiante_fallecido = request.POST.get('cedula_estudiante_fallecido')
+            motivo_muerte = request.POST.get('motivo_muerte')
 
             reporte = ReporteEvento.objects.create(
                 descripcion=descripcion,
@@ -129,7 +135,10 @@ def reportar_evento(request):
                 email=email,
                 estado='nuevo',
                 evaluado=False,
-                archivo_documento=archivo_documento
+                archivo_documento=archivo_documento,
+                nombre_estudiante_fallecido=nombre_estudiante_fallecido,
+                cedula_estudiante_fallecido=cedula_estudiante_fallecido,
+                motivo_muerte=motivo_muerte
             )
             reporte.save()
 
@@ -144,6 +153,7 @@ def reportar_evento(request):
 
             recordatorio = Notificaciones.objects.create(
                 not_codcli=profile,
+                not_poliza = Poliza.objects.filter(estado="activa").first(),
                 not_fecha_proceso=fecha_hora_str, 
                 not_fecha_creacion=timezone.now(),
                 not_mensaje=f"Recordatorio de reporte se ha mandado un reporte de evento para {reporte.id}",
@@ -224,83 +234,71 @@ class SiniestrosInicioView(TemplateView):
 
 
 
+
+
+
+
 class FormularioActivacionView(FormView):
-    """Vista para el formulario de activación de póliza y reporte de evento"""
+    """Vista para el formulario de reporte de evento (fallecimiento)"""
     template_name = 'siniestros/formulario_activacion.html'
     form_class = ActivacionPolizaForm
     success_url = reverse_lazy('siniestros:inicio')
     
     def form_valid(self, form):
         """Procesar el formulario válido"""
-        # Obtener datos del formulario
-        descripcion = form.cleaned_data['descripcion']
-        nombre_beneficiario = form.cleaned_data['nombre_beneficiario']
-        relacion_beneficiario = form.cleaned_data['relacion_beneficiario']
-        telefono = form.cleaned_data['telefono']
-        email = form.cleaned_data['email']
-        archivo = form.cleaned_data.get('archivo_documento')
-        
-        # Crear registro del siniestro sin requerir póliza ni tipo
-        # El equipo de UTPL buscará la póliza del estudiante y asignará el tipo
         try:
-            # Necesitamos una póliza dummy para crear el siniestro
-            # El administrador actualizará estos datos después
-            # Crear estudiante dummy si no existe
-            estudiante_dummy, _ = Estudiante.objects.get_or_create(
-                codigo_estudiante='TEMP-PENDIENTE',
-                defaults={
-                    'cedula': '0000000000',
-                    'nombres': 'Estudiante',
-                    'apellidos': 'Pendiente',
-                    'email': 'temp@utpl.edu.ec',
-                    'carrera': 'Temporal',
-                    'estado': 'activo'
-                }
+            # Crear el reporte con todos los datos
+            reporte = ReporteEvento(
+                # Datos originales
+                descripcion=form.cleaned_data['descripcion'],
+                nombre_beneficiario=form.cleaned_data['nombre_beneficiario'],
+                relacion_beneficiario=form.cleaned_data['relacion_beneficiario'],
+                telefono=form.cleaned_data['telefono'],
+                email=form.cleaned_data['email'],
+                archivo_documento=form.cleaned_data.get('archivo_documento'),
+                
+                nombre_estudiante_fallecido=form.cleaned_data['nombre_estudiante_fallecido'],
+                cedula_estudiante_fallecido=form.cleaned_data['cedula_estudiante_fallecido'],
+                motivo_muerte=form.cleaned_data['motivo_muerte'],
+                
+                # Estado inicial
+                estado='nuevo',
+                evaluado=False
             )
-            
-            # Crear póliza dummy
-            poliza_dummy, created = Poliza.objects.get_or_create(
-                numero='TEMP-PENDIENTE',
-                defaults={
-                    'estudiante': estudiante_dummy,
-                    'estado': 'inactiva'
-                }
-            )
-            
-            siniestro = Siniestro(
-                poliza=poliza_dummy,  # Será actualizada por el equipo administrativo
-                tipo=None,  # Será asignado por el administrador
-                descripcion=descripcion,
-                nombre_beneficiario=nombre_beneficiario,
-                relacion_beneficiario=relacion_beneficiario,
-                telefono_contacto=telefono,
-                email_contacto=email,
-                documento=archivo if archivo else None,
-                estado='pendiente'
-            )
-            siniestro.save()
+            reporte.save()
             
             messages.success(
-                self.request, 
-                f'✓ Reporte #{siniestro.id} registrado exitosamente. El equipo de UTPL se contactará con los beneficiarios utilizando los datos proporcionados.'
+                self.request,
+                f'✓ Reporte #{reporte.id} registrado exitosamente. '
+                f'El equipo de VitalLink se contactará con los beneficiarios utilizando los datos proporcionados. '
+                f'Recibirá una confirmación en {reporte.email}.'
             )
-        except Poliza.DoesNotExist:
-            messages.error(self.request, 'Error al procesar el reporte. Por favor, intenta de nuevo.')
-            return self.form_invalid(form)
+            
         except Exception as e:
-            messages.error(self.request, f'Error al procesar el siniestro: {str(e)}')
+            messages.error(
+                self.request,
+                f'❌ Error al procesar el reporte: {str(e)}. Por favor, intenta nuevamente.'
+            )
             return self.form_invalid(form)
         
         return super().form_valid(form)
     
     def form_invalid(self, form):
         """Procesar formulario inválido"""
+        # Mostrar errores específicos
         for field, errors in form.errors.items():
             for error in errors:
-                messages.error(self.request, f'{field}: {error}')
+                field_name = form.fields[field].label if field in form.fields else field
+                messages.error(self.request, f'{field_name}: {error}')
+        
+        # Error general si no hay archivo
+        if not form.cleaned_data.get('archivo_documento'):
+            messages.error(
+                self.request,
+                'El certificado de defunción es obligatorio. Por favor, adjunta el documento.'
+            )
+        
         return super().form_invalid(form)
-
-
 
 
 

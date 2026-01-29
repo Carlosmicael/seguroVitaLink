@@ -144,6 +144,28 @@
                         </div>
                     </div>
 
+                    <!-- NUEVA SECCIÓN: Información del Estudiante Fallecido -->
+                    <div style="margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <i class="fas fa-user-injured" style="color: #ef4444; font-size: 20px; margin-right: 12px;"></i>
+                            <h3 style="color: #1e293b; font-size: 16px; font-weight: 600; margin: 0;">Información del Estudiante Fallecido</h3>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                            <div style="background: #fef2f2; padding: 14px; border-radius: 10px; border-left: 3px solid #ef4444;">
+                                <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Nombre Completo</p>
+                                <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-nombre-estudiante"></p>
+                            </div>
+                            <div style="background: #fef2f2; padding: 14px; border-radius: 10px; border-left: 3px solid #ef4444;">
+                                <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Cédula</p>
+                                <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-cedula-estudiante"></p>
+                            </div>
+                            <div style="background: #fef2f2; padding: 14px; border-radius: 10px; border-left: 3px solid #ef4444; grid-column: span 3;">
+                                <p style="color: #64748b; font-size: 12px; margin-bottom: 4px;">Motivo del Fallecimiento</p>
+                                <p style="color: #1e293b; font-weight: 600; font-size: 14px; margin: 0;" id="modal-motivo-muerte"></p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Descripción -->
                     <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #ef4444; margin-bottom: 24px;">
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
@@ -200,160 +222,195 @@
 
 
     <!-- Modal Crear Siniestro -->
-    <div id="modalCrear" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; backdrop-filter: blur(8px); background: rgba(0, 0, 0, 0.4); animation: fadeIn 0.3s ease-out;">
-        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
-            <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 750px; width: 100%; max-height: 90vh; padding: 0; overflow: hidden; animation: slideUp 0.3s ease-out; display: flex; flex-direction: column;">
-                
-                <!-- Header Modal -->
-                <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 28px; position: relative;">
-                    <button onclick="cerrarModalCrear()" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.2); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; color: white; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
-                        <i class="fas fa-times"></i>
-                    </button>
-                    <h2 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">
-                        <i class="fas fa-plus-circle" style="margin-right: 10px;"></i>
-                        Reportar Nuevo Siniestro
-                    </h2>
-                    <p style="color: rgba(255, 255, 255, 0.9); margin-top: 8px; font-size: 14px;">Complete el formulario para registrar un nuevo siniestro</p>
-                </div>
+        <div id="modalCrear" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; backdrop-filter: blur(8px); background: rgba(0, 0, 0, 0.4); animation: fadeIn 0.3s ease-out;">
+            <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+                <div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 750px; width: 100%; max-height: 90vh; padding: 0; overflow: hidden; animation: slideUp 0.3s ease-out; display: flex; flex-direction: column;">
+                    
+                    <!-- Header Modal -->
+                    <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 28px; position: relative;">
+                        <button onclick="cerrarModalCrear()" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.2); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; color: white; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <h2 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">
+                            <i class="fas fa-plus-circle" style="margin-right: 10px;"></i>
+                            Reportar Nuevo Siniestro
+                        </h2>
+                        <p style="color: rgba(255, 255, 255, 0.9); margin-top: 8px; font-size: 14px;">Complete el formulario para registrar un nuevo siniestro</p>
+                    </div>
 
-                <!-- Body Modal con Scroll -->
-                <div style="padding: 24px; overflow-y: auto; max-height: calc(90vh - 180px);">
-                    <form id="formCrearSiniestro" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <!-- Póliza -->
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
-                                <i class="fas fa-shield-alt" style="color: #ef4444; margin-right: 6px;"></i>
-                                Póliza *
-                            </label>
-                            <select name="poliza" required style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white; cursor: pointer;">
-                                <option value="">Seleccione una póliza activa</option>
-                                {% for poliza in polizas_activas %}
-                                <option value="{{ poliza.id }}">{{ poliza.numero_poliza }} - {{ poliza.estudiante.nombres }} {{ poliza.estudiante.apellidos }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
+                    <!-- Body Modal con Scroll -->
+                    <div style="padding: 24px; overflow-y: auto; max-height: calc(90vh - 180px);">
+                        <form id="formCrearSiniestro" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <!-- ⭐ NUEVA SECCIÓN: Información del Estudiante Fallecido -->
+                            <div style="background: #fef2f2; padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #ef4444;">
+                                <h4 style="color: #991b1b; font-size: 15px; font-weight: 600; margin-bottom: 16px;">
+                                    <i class="fas fa-user-injured" style="color: #ef4444; margin-right: 8px;"></i>
+                                    Información del Estudiante Fallecido
+                                </h4>
+                                
+                                <div style="margin-bottom: 16px;">
+                                    <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                        Nombre Completo del Estudiante
+                                    </label>
+                                    <input type="text" name="nombre_estudiante_fallecido" id="nombre_estudiante_fallecido" placeholder="Nombre completo del estudiante fallecido" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
+                                </div>
 
-                        <!-- Grid: Tipo y Fecha Evento -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-                            <div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                                    <div>
+                                        <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                            Cédula del Estudiante
+                                        </label>
+                                        <input type="text" name="cedula_estudiante_fallecido" id="cedula_estudiante_fallecido" placeholder="1234567890" maxlength="10" pattern="[0-9]{10}" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                            &nbsp;
+                                        </label>
+                                        <p style="color: #64748b; font-size: 12px; margin-top: 8px;">10 dígitos numéricos</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                        Motivo del Fallecimiento
+                                    </label>
+                                    <textarea name="motivo_muerte" id="motivo_muerte" rows="3" placeholder="Describa el motivo del fallecimiento..." style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white; resize: vertical;"></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- Póliza -->
+                            <div style="margin-bottom: 20px;">
                                 <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
-                                    <i class="fas fa-tag" style="color: #ef4444; margin-right: 6px;"></i>
-                                    Tipo de Siniestro *
+                                    <i class="fas fa-shield-alt" style="color: #ef4444; margin-right: 6px;"></i>
+                                    Póliza *
                                 </label>
-                                <select name="tipo" required style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white;">
-                                    <option value="">Seleccione tipo</option>
-                                    {% for key, value in tipos_siniestro %}
-                                    <option value="{{ key }}">{{ value }}</option>
+                                <select name="poliza" required style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white; cursor: pointer;">
+                                    <option value="">Seleccione una póliza activa</option>
+                                    {% for poliza in polizas_activas %}
+                                    <option value="{{ poliza.id }}">{{ poliza.numero_poliza }} - {{ poliza.estudiante.nombres }} {{ poliza.estudiante.apellidos }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div>
+
+                            <!-- Grid: Tipo y Fecha Evento -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                                <div>
+                                    <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                        <i class="fas fa-tag" style="color: #ef4444; margin-right: 6px;"></i>
+                                        Tipo de Siniestro *
+                                    </label>
+                                    <select name="tipo" required style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white;">
+                                        <option value="">Seleccione tipo</option>
+                                        {% for key, value in tipos_siniestro %}
+                                        <option value="{{ key }}">{{ value }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                        <i class="fas fa-calendar-day" style="color: #ef4444; margin-right: 6px;"></i>
+                                        Fecha del Evento *
+                                    </label>
+                                    <input type="date" name="fecha_evento" required style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white;">
+                                </div>
+                            </div>
+
+                            <!-- Descripción -->
+                            <div style="margin-bottom: 20px;">
                                 <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
-                                    <i class="fas fa-calendar-day" style="color: #ef4444; margin-right: 6px;"></i>
-                                    Fecha del Evento *
+                                    <i class="fas fa-file-alt" style="color: #ef4444; margin-right: 6px;"></i>
+                                    Descripción del Evento *
                                 </label>
-                                <input type="date" name="fecha_evento" required style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white;">
+                                <textarea name="descripcion" required rows="4" placeholder="Describa detalladamente lo ocurrido..." style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white; resize: vertical;"></textarea>
                             </div>
-                        </div>
 
-                        <!-- Descripción -->
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
-                                <i class="fas fa-file-alt" style="color: #ef4444; margin-right: 6px;"></i>
-                                Descripción del Evento *
-                            </label>
-                            <textarea name="descripcion" required rows="4" placeholder="Describa detalladamente lo ocurrido..." style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white; resize: vertical;"></textarea>
-                        </div>
+                            <!-- Información del Beneficiario -->
+                            <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                                <h4 style="color: #1e293b; font-size: 15px; font-weight: 600; margin-bottom: 16px;">
+                                    <i class="fas fa-user" style="color: #ef4444; margin-right: 8px;"></i>
+                                    Información del Beneficiario
+                                </h4>
+                                
+                                <div style="margin-bottom: 16px;">
+                                    <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                        Nombre Completo
+                                    </label>
+                                    <input type="text" name="nombre_beneficiario" placeholder="Nombre del beneficiario" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
+                                </div>
 
-                        <!-- Información del Beneficiario -->
-                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-                            <h4 style="color: #1e293b; font-size: 15px; font-weight: 600; margin-bottom: 16px;">
-                                <i class="fas fa-user" style="color: #ef4444; margin-right: 8px;"></i>
-                                Información del Beneficiario
-                            </h4>
-                            
-                            <div style="margin-bottom: 16px;">
-                                <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
-                                    Nombre Completo
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                    <div>
+                                        <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                            Relación
+                                        </label>
+                                        <input type="text" name="relacion_beneficiario" placeholder="Ej: Familiar" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                            Parentesco
+                                        </label>
+                                        <input type="text" name="parentesco" placeholder="Ej: Padre/Madre" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Información de Contacto -->
+                            <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                                <h4 style="color: #1e293b; font-size: 15px; font-weight: 600; margin-bottom: 16px;">
+                                    <i class="fas fa-phone" style="color: #ef4444; margin-right: 8px;"></i>
+                                    Información de Contacto
+                                </h4>
+                                
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                    <div>
+                                        <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                            Teléfono
+                                        </label>
+                                        <input type="tel" name="telefono_contacto" placeholder="0999999999" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
+                                            Email
+                                        </label>
+                                        <input type="email" name="email_contacto" placeholder="correo@ejemplo.com" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Documento Adjunto -->
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                                    <i class="fas fa-paperclip" style="color: #ef4444; margin-right: 6px;"></i>
+                                    Documento Adjunto
                                 </label>
-                                <input type="text" name="nombre_beneficiario" placeholder="Nombre del beneficiario" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
+                                <input type="file" name="documento" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white; cursor: pointer;">
+                                <p style="color: #64748b; font-size: 12px; margin-top: 6px;">Formatos permitidos: PDF, JPG, PNG, DOC, DOCX (Max 10MB)</p>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                                <div>
-                                    <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
-                                        Relación
-                                    </label>
-                                    <input type="text" name="relacion_beneficiario" placeholder="Ej: Familiar" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
-                                </div>
-                                <div>
-                                    <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
-                                        Parentesco
-                                    </label>
-                                    <input type="text" name="parentesco" placeholder="Ej: Padre/Madre" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
-                                </div>
+                            <!-- Mensaje de Error -->
+                            <div id="mensajeError" style="display: none; background: #fee2e2; border: 2px solid #ef4444; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+                                <p style="color: #991b1b; font-size: 14px; margin: 0;"></p>
                             </div>
-                        </div>
 
-                        <!-- Información de Contacto -->
-                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-                            <h4 style="color: #1e293b; font-size: 15px; font-weight: 600; margin-bottom: 16px;">
-                                <i class="fas fa-phone" style="color: #ef4444; margin-right: 8px;"></i>
-                                Información de Contacto
-                            </h4>
-                            
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                                <div>
-                                    <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
-                                        Teléfono
-                                    </label>
-                                    <input type="tel" name="telefono_contacto" placeholder="0999999999" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
-                                </div>
-                                <div>
-                                    <label style="display: block; color: #1e293b; font-size: 13px; font-weight: 600; margin-bottom: 8px;">
-                                        Email
-                                    </label>
-                                    <input type="email" name="email_contacto" placeholder="correo@ejemplo.com" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: white;">
-                                </div>
-                            </div>
-                        </div>
+                        </form>
+                    </div>
 
-                        <!-- Documento Adjunto -->
-                        <div style="margin-bottom: 20px;">
-                            <label style="display: block; color: #1e293b; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
-                                <i class="fas fa-paperclip" style="color: #ef4444; margin-right: 6px;"></i>
-                                Documento Adjunto
-                            </label>
-                            <input type="file" name="documento" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white; cursor: pointer;">
-                            <p style="color: #64748b; font-size: 12px; margin-top: 6px;">Formatos permitidos: PDF, JPG, PNG, DOC, DOCX (Max 10MB)</p>
-                        </div>
-
-                        <!-- Mensaje de Error -->
-                        <div id="mensajeError" style="display: none; background: #fee2e2; border: 2px solid #ef4444; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
-                            <p style="color: #991b1b; font-size: 14px; margin: 0;"></p>
-                        </div>
-
-                    </form>
-                </div>
-
-
-
-                <!-- Footer Modal -->
-                <div style="padding: 20px 24px; border-top: 2px solid #f1f5f9; background: #f8fafc; display: flex; gap: 12px; justify-content: flex-end;">
-                    <button onclick="cerrarModalCrear()" style="padding: 12px 24px; background: #e2e8f0; color: #475569; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s;">
-                        <i class="fas fa-times" style="margin-right: 6px;"></i>
-                        Cancelar
-                    </button>
-                    <button onclick="enviarFormulario()" id="btnGuardar" style="padding: 12px 24px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); transition: all 0.2s;">
-                        <i class="fas fa-save" style="margin-right: 6px;"></i>
-                        Guardar Siniestro
-                    </button>
+                    <!-- Footer Modal -->
+                    <div style="padding: 20px 24px; border-top: 2px solid #f1f5f9; background: #f8fafc; display: flex; gap: 12px; justify-content: flex-end;">
+                        <button onclick="cerrarModalCrear()" style="padding: 12px 24px; background: #e2e8f0; color: #475569; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s;">
+                            <i class="fas fa-times" style="margin-right: 6px;"></i>
+                            Cancelar
+                        </button>
+                        <button onclick="enviarFormulario()" id="btnGuardar" style="padding: 12px 24px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); transition: all 0.2s;">
+                            <i class="fas fa-save" style="margin-right: 6px;"></i>
+                            Guardar Siniestro
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
 
 
@@ -743,6 +800,15 @@ function limpiarFiltros() {
 }
 
 function abrirModalCrear() {
+
+    const nombreEstudiante = localStorage.getItem('nombre_estudiante_fallecido') || '';
+    const cedulaEstudiante = localStorage.getItem('cedula_estudiante_fallecido') || '';
+    const motivoMuerte = localStorage.getItem('motivo_muerte') || '';
+    
+    document.getElementById('nombre_estudiante_fallecido').value = nombreEstudiante;
+    document.getElementById('cedula_estudiante_fallecido').value = cedulaEstudiante;
+    document.getElementById('motivo_muerte').value = motivoMuerte;
+    
     $('#modalCrear').fadeIn(300);
 }
 
@@ -840,6 +906,9 @@ function verDetalle(id) {
             $('#modal-comentarios').text(data.comentarios || 'Sin comentarios');
             $('#modal-fecha-limite').text(data.fecha_limite);
             $('#modal-dias-restantes').text(data.dias_restantes !== null ? data.dias_restantes : 'N/A');
+            $('#modal-nombre-estudiante').text(data.nombre_estudiante_fallecido);
+            $('#modal-cedula-estudiante').text(data.cedula_estudiante_fallecido);
+            $('#modal-motivo-muerte').text(data.motivo_muerte);
             
             let estadoBadge = '';
             if (data.estado === 'pendiente') {

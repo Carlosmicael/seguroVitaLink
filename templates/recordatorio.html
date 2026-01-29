@@ -5,66 +5,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Recordatorio VitaLink</title>
+    <title>Recordatorio VitalLink</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f0f4f3; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;">
-    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f0f4f3;">
+<body style="margin: 0; padding: 0; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0f9ff 100%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Arial, sans-serif;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0f9ff 100%);">
         <tr>
-            <td align="center" style="padding: 40px 20px;">
-                <table border="0" cellspacing="0" cellpadding="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden;">
+            <td align="center" style="padding: 50px 20px;">
+                <table border="0" cellspacing="0" cellpadding="0" width="100%" style="max-width: 650px; background-color: #ffffff; border-radius: 24px; box-shadow: 0 20px 60px rgba(15, 118, 110, 0.15), 0 0 1px rgba(0,0,0,0.05); overflow: hidden;">
                     
-                    <!-- Header con gradiente teal -->
+                    <!-- Header Premium con Logo -->
                     <tr>
-                        <td style="background: linear-gradient(135deg, #115e59 0%, #134e4a 50%, #0f766e 100%); padding: 30px 40px; text-align: center;">
+                        <td style="background: linear-gradient(135deg, #0d9488 0%, #0f766e 50%, #115e59 100%); padding: 0; position: relative; overflow: hidden;">
+                            <!-- Patrón decorativo de fondo -->
                             <table border="0" cellspacing="0" cellpadding="0" width="100%">
                                 <tr>
-                                    <td align="center">
-                                        <!-- Logo VitaLink -->
-                                        <div style="display: inline-block; margin-bottom: 15px;">
-                                            <table border="0" cellspacing="0" cellpadding="0">
-                                                <tr>
-                                                    <td style="padding-right: 8px;">
-                                                        <div style="display: inline-block; width: 8px; height: 32px; background-color: #34d399; border-radius: 2px; transform: skewX(-12deg);"></div>
-                                                    </td>
-                                                    <td style="padding-right: 12px;">
-                                                        <div style="display: inline-block; width: 8px; height: 32px; background-color: #10b981; border-radius: 2px; transform: skewX(-12deg);"></div>
-                                                    </td>
-                                                    <td>
-                                                        <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: 0.5px;">VitaLink</h1>
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                        </div>
+                                    <td style="position: relative; padding: 45px 40px 40px;">
+                                        <!-- Círculos decorativos sutiles -->
+                                        <div style="position: absolute; top: -30px; right: -30px; width: 150px; height: 150px; background: rgba(52, 211, 153, 0.08); border-radius: 50%;"></div>
+                                        <div style="position: absolute; bottom: -40px; left: -40px; width: 180px; height: 180px; background: rgba(16, 185, 129, 0.06); border-radius: 50%;"></div>
+                                        
+                                        <table border="0" cellspacing="0" cellpadding="0" width="100%">
+                                            <tr>
+                                                <td align="center">
+                                                    <!-- Logo Oficial VitalLink -->
+                                                    <div style="margin-bottom: 20px; position: relative; z-index: 10;">
+                                                        <img src="https://github.com/Carlosmicael/seguroVitaLink/blob/kriss/img/logo_vitalink_verde.png?raw=true" 
+                                                             alt="VitalLink Logo" 
+                                                             style="height: 85px; width: auto; display: block; margin: 0 auto; filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));">
+                                                    </div>
+                                                    
+                                                    <!-- Subtítulo elegante -->
+                                                    <p style="margin: 0; color: rgba(255, 255, 255, 0.95); font-size: 15px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase;">
+                                                        Sistema de Seguros
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
                                     </td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
 
+                    <!-- Línea decorativa gradiente -->
+                    <tr>
+                        <td style="height: 4px; background: linear-gradient(90deg, #34d399 0%, #10b981 50%, #34d399 100%);"></td>
+                    </tr>
+
                     <!-- Contenido principal -->
                     <tr>
-                        <td style="padding: 40px;">
-                            <h2 style="font-size: 22px; color: #1e293b; margin: 0 0 20px 0; font-weight: 600;">
-                                Hola, {{ usuario.first_name }} {{ usuario.last_name }}
-                            </h2>
+                        <td style="padding: 50px 45px;">
+                            <!-- Saludo personalizado -->
+                            <table border="0" cellspacing="0" cellpadding="0" width="100%">
+                                <tr>
+                                    <td>
+                                        <h2 style="font-size: 28px; color: #0f172a; margin: 0 0 12px 0; font-weight: 700; line-height: 1.3;">
+                                            Hola, <span style="color: #0f766e;">{{ usuario.first_name }}</span>
+                                        </h2>
+                                        <div style="width: 60px; height: 4px; background: linear-gradient(90deg, #10b981 0%, #34d399 100%); border-radius: 2px; margin-bottom: 25px;"></div>
+                                    </td>
+                                </tr>
+                            </table>
                             
-                            <p style="font-size: 16px; color: #475569; line-height: 1.6; margin: 0 0 25px 0;">
-                                Te enviamos este recordatorio importante desde tu cuenta en <strong style="color: #0f766e;">VitaLink</strong>:
+                            <p style="font-size: 17px; color: #475569; line-height: 1.7; margin: 0 0 35px 0; font-weight: 400;">
+                                Te enviamos este recordatorio importante desde tu cuenta en <strong style="color: #0f766e; font-weight: 600;">VitalLink</strong>:
                             </p>
                             
-                            <!-- Alerta de advertencia -->
-                            <table border="0" cellspacing="0" cellpadding="0" width="100%" style="margin: 30px 0;">
+                            <!-- Alerta Premium con Glassmorphism -->
+                            <table border="0" cellspacing="0" cellpadding="0" width="100%" style="margin: 35px 0;">
                                 <tr>
-                                    <td style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 6px solid #f59e0b; border-radius: 12px; padding: 30px; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);">
+                                    <td style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #fef3c7 100%); border-left: 6px solid #f59e0b; border-radius: 16px; padding: 40px 35px; box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.5);">
                                         
-                                        <!-- Icono centrado -->
+                                        <!-- Icono moderno con efecto -->
                                         <table border="0" cellspacing="0" cellpadding="0" width="100%">
                                             <tr>
-                                                <td align="center" style="padding-bottom: 20px;">
+                                                <td align="center" style="padding-bottom: 25px;">
                                                     <table border="0" cellspacing="0" cellpadding="0">
                                                         <tr>
-                                                            <td align="center" style="width: 50px; height: 50px; background-color: #f59e0b; border-radius: 50%;">
-                                                                <span style="color: #ffffff; font-size: 28px; font-weight: bold; line-height: 50px; display: block; text-align: center;">⚠️</span>
+                                                            <td align="center" style="position: relative;">
+                                                                <!-- Círculo exterior con pulso -->
+                                                                <div style="width: 70px; height: 70px; background: rgba(245, 158, 11, 0.15); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+                                                                <!-- Círculo principal -->
+                                                                <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4); position: relative;">
+                                                                    <span style="font-size: 30px; line-height: 1; display: block;">⚠️</span>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -72,22 +96,23 @@
                                             </tr>
                                         </table>
 
-                                        <!-- Título -->
+                                        <!-- Título con estilo premium -->
                                         <table border="0" cellspacing="0" cellpadding="0" width="100%">
                                             <tr>
-                                                <td align="center" style="padding-bottom: 15px;">
-                                                    <h3 style="margin: 0; color: #92400e; font-size: 19px; font-weight: 700; text-align: center;">
-                                                        Advertencia Importante
+                                                <td align="center" style="padding-bottom: 20px;">
+                                                    <h3 style="margin: 0; color: #78350f; font-size: 22px; font-weight: 700; text-align: center; letter-spacing: -0.3px;">
+                                                        Notificación Importante
                                                     </h3>
+                                                    <div style="width: 50px; height: 3px; background: linear-gradient(90deg, transparent 0%, #f59e0b 50%, transparent 100%); margin: 12px auto 0;"></div>
                                                 </td>
                                             </tr>
                                         </table>
 
-                                        <!-- Mensaje -->
+                                        <!-- Mensaje en caja blanca elegante -->
                                         <table border="0" cellspacing="0" cellpadding="0" width="100%">
                                             <tr>
-                                                <td style="background-color: rgba(255, 255, 255, 0.5); padding: 20px; border-radius: 8px;">
-                                                    <p style="font-size: 16px; color: #78350f; line-height: 1.7; margin: 0; font-weight: 500; text-align: center;">
+                                                <td style="background-color: #ffffff; padding: 25px 28px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border: 1px solid rgba(245, 158, 11, 0.2);">
+                                                    <p style="font-size: 16px; color: #92400e; line-height: 1.8; margin: 0; font-weight: 500; text-align: center;">
                                                         {{ mensaje }}
                                                     </p>
                                                 </td>
@@ -98,28 +123,71 @@
                                 </tr>
                             </table>
 
-                            <p style="font-size: 15px; color: #64748b; line-height: 1.6; margin: 25px 0 30px 0;">
-                                Si tienes alguna pregunta o necesitas más detalles sobre tu póliza, no dudes en acceder a tu panel de control.
-                            </p>
-                            
-                            <!-- Botón CTA -->
-                            <table border="0" cellspacing="0" cellpadding="0" style="margin: 30px 0;">
+                            <!-- Texto informativo -->
+                            <table border="0" cellspacing="0" cellpadding="0" width="100%" style="margin: 35px 0;">
                                 <tr>
-                                    <td align="center" style="background: linear-gradient(135deg, #0f766e 0%, #115e59 100%); border-radius: 10px; box-shadow: 0 4px 12px rgba(15, 118, 110, 0.3);">
-                                        <a href="http://64.227.81.217/" target="_blank" style="font-size: 16px; font-weight: 600; color: #ffffff; text-decoration: none; padding: 14px 35px; border-radius: 10px; display: inline-block; letter-spacing: 0.3px;">
-                                            🔐 Acceder a VitaLink
-                                        </a>
+                                    <td style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); padding: 22px 28px; border-radius: 12px; border-left: 4px solid #14b8a6;">
+                                        <p style="font-size: 15px; color: #134e4a; line-height: 1.7; margin: 0; font-weight: 500;">
+                                            💡 <strong>Consejo:</strong> Si tienes alguna pregunta o necesitas más detalles sobre tu póliza, no dudes en acceder a tu panel de control.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Botón CTA Premium -->
+                            <table border="0" cellspacing="0" cellpadding="0" width="100%" style="margin: 40px 0 35px;">
+                                <tr>
+                                    <td align="center">
+                                        <table border="0" cellspacing="0" cellpadding="0">
+                                            <tr>
+                                                <td align="center" style="background: linear-gradient(135deg, #0f766e 0%, #115e59 100%); border-radius: 12px; box-shadow: 0 8px 24px rgba(15, 118, 110, 0.35), 0 2px 8px rgba(15, 118, 110, 0.2);">
+                                                    <a href="http://64.227.81.217/" target="_blank" style="font-size: 17px; font-weight: 600; color: #ffffff; text-decoration: none; padding: 16px 45px; border-radius: 12px; display: inline-block; letter-spacing: 0.3px;">
+                                                        🔐 Acceder a Mi Panel
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
                                     </td>
                                 </tr>
                             </table>
 
-                            <!-- Información adicional -->
-                            <table border="0" cellspacing="0" cellpadding="0" width="100%" style="margin-top: 35px; padding-top: 25px; border-top: 2px solid #e2e8f0;">
+                            <!-- Información adicional con diseño moderno -->
+                            <table border="0" cellspacing="0" cellpadding="0" width="100%" style="margin-top: 40px; padding-top: 30px; border-top: 2px dashed #e2e8f0;">
                                 <tr>
-                                    <td style="padding: 15px; background-color: #f8fafc; border-radius: 8px;">
-                                        <p style="margin: 0; color: #64748b; font-size: 13px; line-height: 1.5;">
-                                            <strong style="color: #0f766e;">📅 Fecha del recordatorio:</strong><br>
-                                            {{ fecha|date:"d/m/Y H:i" }}
+                                    <td>
+                                        <table border="0" cellspacing="0" cellpadding="0" width="100%">
+                                            <tr>
+                                                <!-- Fecha -->
+                                                <td style="padding: 18px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 10px; border: 1px solid #e2e8f0; width: 50%;">
+                                                    <p style="margin: 0 0 6px 0; color: #0f766e; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                        📅 Fecha
+                                                    </p>
+                                                    <p style="margin: 0; color: #1e293b; font-size: 14px; font-weight: 600;">
+                                                        {{ fecha|date:"d/m/Y" }}
+                                                    </p>
+                                                </td>
+                                                <td style="width: 20px;"></td>
+                                                <!-- Hora -->
+                                                <td style="padding: 18px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 10px; border: 1px solid #e2e8f0; width: 50%;">
+                                                    <p style="margin: 0 0 6px 0; color: #0f766e; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                        🕐 Hora
+                                                    </p>
+                                                    <p style="margin: 0; color: #1e293b; font-size: 14px; font-weight: 600;">
+                                                        {{ fecha|date:"H:i" }}
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Mensaje de confianza -->
+                            <table border="0" cellspacing="0" cellpadding="0" width="100%" style="margin-top: 35px;">
+                                <tr>
+                                    <td align="center" style="padding: 20px; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 10px; border: 1px solid #a7f3d0;">
+                                        <p style="margin: 0; color: #065f46; font-size: 14px; font-weight: 600; line-height: 1.6;">
+                                            ✓ Comunicación oficial de VitalLink Seguros
                                         </p>
                                     </td>
                                 </tr>
@@ -127,25 +195,55 @@
                         </td>
                     </tr>
 
-                    <!-- Footer -->
+                    <!-- Línea decorativa gradiente -->
                     <tr>
-                        <td style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px 40px; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
-                            <p style="margin: 0 0 10px 0; color: #94a3b8; font-size: 13px; text-align: center; line-height: 1.5;">
-                                Este es un correo automático. Por favor no respondas a este mensaje.
+                        <td style="height: 2px; background: linear-gradient(90deg, transparent 0%, #e2e8f0 50%, transparent 100%);"></td>
+                    </tr>
+
+                    <!-- Footer Premium -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 40px 45px;">
+                            <!-- Logo pequeño en footer -->
+                            <table border="0" cellspacing="0" cellpadding="0" width="100%">
+                                <tr>
+                                    <td align="center" style="padding-bottom: 20px;">
+                                        <img src="https://github.com/Carlosmicael/seguroVitaLink/blob/kriss/img/logo_vitalink_verde.png?raw=true" 
+                                             alt="VitalLink" 
+                                             style="height: 45px; width: auto; opacity: 0.7;">
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="margin: 0 0 15px 0; color: #94a3b8; font-size: 14px; text-align: center; line-height: 1.6;">
+                                Este es un correo automático generado por el sistema.<br>
+                                Por favor, no respondas a este mensaje.
                             </p>
-                            <p style="margin: 0; color: #64748b; font-size: 12px; text-align: center;">
-                                &copy; 2025 VitaLink Seguros. Todos los derechos reservados.
+                            
+                            <!-- Separador -->
+                            <table border="0" cellspacing="0" cellpadding="0" width="100%">
+                                <tr>
+                                    <td style="padding: 20px 0;">
+                                        <div style="height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(148, 163, 184, 0.3) 50%, transparent 100%);"></div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="margin: 0; color: #64748b; font-size: 13px; text-align: center; font-weight: 500;">
+                                &copy; 2025 VitalLink Seguros. Todos los derechos reservados.
                             </p>
                         </td>
                     </tr>
                 </table>
 
                 <!-- Texto legal pequeño -->
-                <table border="0" cellspacing="0" cellpadding="0" width="100%" style="max-width: 600px; margin-top: 20px;">
+                <table border="0" cellspacing="0" cellpadding="0" width="100%" style="max-width: 650px; margin-top: 25px;">
                     <tr>
-                        <td align="center">
-                            <p style="margin: 0; color: #94a3b8; font-size: 11px; line-height: 1.4; padding: 0 20px;">
-                                Has recibido este correo porque tienes una cuenta activa en VitaLink.
+                        <td align="center" style="padding: 0 20px;">
+                            <p style="margin: 0 0 8px 0; color: #64748b; font-size: 12px; line-height: 1.5;">
+                                Has recibido este correo porque tienes una cuenta activa en VitalLink.
+                            </p>
+                            <p style="margin: 0; color: #94a3b8; font-size: 11px; line-height: 1.4;">
+                                Si consideras que este correo no debería haberte llegado, por favor contacta con soporte.
                             </p>
                         </td>
                     </tr>

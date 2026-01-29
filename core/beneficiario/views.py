@@ -86,6 +86,7 @@ def documentos_aseguradora_api(request, poliza_numero):
 
             if fecha_hoy < fecha_limite_obj:
                 data.append({
+                    "id_doc":doc.id_doc_req,
                     "siniestro_tipo": doc.siniestro_tipo,
                     "nombre_documento": doc.nombre_documento,
                     "descripcion": doc.descripcion,
@@ -106,8 +107,6 @@ def documentos_aseguradora_api(request, poliza_numero):
 
 
 
-
-
 @login_required(login_url='login')
 @csrf_exempt  
 def subir_documento(request):
@@ -117,6 +116,8 @@ def subir_documento(request):
             descripcion = request.POST.get('doc_descripcion')
             archivo = request.FILES.get('archivo')
             beneficiario_id = request.POST.get('beneficiario_id')
+            id_doc_aseguradora = request.POST.get('id_doc_aseguradora')
+            print('ID documento aseguradora:', id_doc_aseguradora)
 
             if not descripcion or not archivo or not beneficiario_id:
                 return JsonResponse({'error': 'Faltan datos obligatorios.'}, status=400)
@@ -127,7 +128,8 @@ def subir_documento(request):
                 doc_descripcion=descripcion,
                 doc_file=archivo,
                 fecha_edit=timezone.now(),
-                beneficiario=beneficiario
+                beneficiario=beneficiario,
+                documento_aseguradora=DocumentosAseguradora.objects.get(id_doc_req=id_doc_aseguradora)
             )
             documentos.save()
 

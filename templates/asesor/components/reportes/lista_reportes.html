@@ -857,10 +857,10 @@
             <span class="close-modal" onclick="cerrarModal()">&times;</span>
         </div>
         <div class="modal-body">
-            <!-- Grid de Información -->
+            <h3>👤 Información del Beneficiario</h3>
             <div class="detail-grid">
                 <div class="detail-item">
-                    <label>👤 Beneficiario</label>
+                    <label>Nombre</label>
                     <div class="value" id="modalBeneficiario"></div>
                 </div>
                 <div class="detail-item">
@@ -885,18 +885,34 @@
                 </div>
             </div>
 
-            <!-- Descripción -->
+            <hr>
+
+            <h3>🎓 Datos del Estudiante Fallecido</h3>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Nombre Completo</label>
+                    <div class="value" id="modalEstudianteNombre"></div>
+                </div>
+                <div class="detail-item">
+                    <label>🪪 Cédula</label>
+                    <div class="value" id="modalEstudianteCedula"></div>
+                </div>
+            </div>
+
             <div class="descripcion-box">
-                <label>📝 Descripción del Evento</label>
+                <label>⚰️ Motivo de la Muerte</label>
+                <div class="value" id="modalMotivoMuerte"></div>
+            </div>
+
+            <div class="descripcion-box">
+                <label>📝 Descripción del Evento (Comentarios)</label>
                 <div class="value" id="modalDescripcion"></div>
             </div>
 
-            <!-- Sección de Archivo Adjunto -->
             <div class="archivo-section">
-                <h3>📎 Archivo Adjunto</h3>
+                <h3>📎 Certificado de Defunción / Adjunto</h3>
                 <div class="archivo-viewer" id="archivoViewer">
-                    <!-- El contenido se cargará dinámicamente -->
-                </div>
+                    </div>
             </div>
         </div>
     </div>
@@ -904,10 +920,18 @@
 
 <script>
 
+    let nombre_estudiante_fallecido = "";
+    let cedula_estudiante_fallecido = "";
+    let motivo_muerte = "";
+
     function verReporte(id) {
     fetch(`/reportes/${id}/`)
         .then(response => response.json())
         .then(data => {
+
+            console.error('Data:', data);
+
+
             document.getElementById('modalReporteId').textContent = `#${data.id}`;
             document.getElementById('modalBeneficiario').textContent = data.beneficiario;
             document.getElementById('modalRelacion').textContent = data.relacion;
@@ -915,6 +939,14 @@
             document.getElementById('modalEmail').textContent = data.email;
             document.getElementById('modalFecha').textContent = data.fecha;
             document.getElementById('modalDescripcion').textContent = data.descripcion;
+            document.getElementById('modalEstudianteNombre').textContent = data.estudiante_nombre || 'No registrado';
+            document.getElementById('modalEstudianteCedula').textContent = data.estudiante_cedula || 'No registrado';
+            document.getElementById('modalMotivoMuerte').textContent = data.motivo_muerte || 'No especificado';
+            
+            // Asignar valores a variables globales
+            nombre_estudiante_fallecido = data.estudiante_nombre || 'No registrado';
+            cedula_estudiante_fallecido = data.estudiante_cedula || 'No registrado';
+            motivo_muerte = data.motivo_muerte || 'No especificado';
 
             // Estado con badge
             let estadoBadge = '';
@@ -1067,8 +1099,20 @@
         }
     }
 
+
+
+
+
+
     function enviarReporte(id) {
         if (confirm('¿Desea marcar este reporte como enviado?')) {
+
+
+            localStorage.clear();
+            localStorage.setItem('nombre_estudiante_fallecido', nombre_estudiante_fallecido || '');
+            localStorage.setItem('cedula_estudiante_fallecido', cedula_estudiante_fallecido || '');
+            localStorage.setItem('motivo_muerte', motivo_muerte || '');
+                
             const formData = new FormData();
             formData.append('estado', 'enviado');
             formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
@@ -1092,6 +1136,12 @@
             });
         }
     }
+
+
+
+
+
+
 
     function confirmarEliminar(id) {
         if (confirm('¿Está seguro de que desea eliminar este reporte? Esta acción no se puede deshacer.')) {

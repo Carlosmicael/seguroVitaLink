@@ -1,486 +1,1091 @@
 {% extends "master/sideBar/sidebar_beneficiario.html" %}
-
 {% block content %}
 {% include "master/appBar/appBar_Beneficiario.html" %}
 {% include "master/footer/chatFooterBeneficiario.html" %}
 <style>
-.table-container {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
-}
-
-.btn-action {
-    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-    color: white;
-    font-weight: 600;
-    padding: 8px 20px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
-    font-size: 14px;
-}
-
-.btn-action:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
-}
-
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    padding: 20px;
-}
-
-.modal-overlay.hidden {
-    display: none;
-}
-
-.modal-content {
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    position: relative;
-    max-height: 90vh;
-    overflow-y: auto;
-    animation: modalSlideIn 0.3s ease-out;
-}
-
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-50px) scale(0.9);
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    :root {
+        /* Paleta principal - Teal profesional */
+        --primary-50: #f0fdfa;
+        --primary-100: #ccfbf1;
+        --primary-200: #99f6e4;
+        --primary-300: #5eead4;
+        --primary-400: #2dd4bf;
+        --primary-500: #14b8a6;
+        --primary-600: #0d9488;
+        --primary-700: #0f766e;
+        --primary-800: #115e59;
+        --primary-900: #134e4a;
+        
+        /* Acentos */
+        --emerald-500: #10b981;
+        --emerald-600: #059669;
+        
+        /* Neutros */
+        --slate-50: #f8fafc;
+        --slate-100: #f1f5f9;
+        --slate-200: #e2e8f0;
+        --slate-300: #cbd5e1;
+        --slate-400: #94a3b8;
+        --slate-500: #64748b;
+        --slate-600: #475569;
+        --slate-700: #334155;
+        --slate-800: #1e293b;
+        --slate-900: #0f172a;
+        
+        /* Estados */
+        --warning-bg: #fef3c7;
+        --warning-text: #92400e;
+        --warning-border: #fcd34d;
+        --success-bg: #d1fae5;
+        --success-text: #065f46;
+        --success-border: #6ee7b7;
+        --error-bg: #fee2e2;
+        --error-text: #991b1b;
+        --error-border: #fca5a5;
+        --info-bg: #e0e7ff;
+        --info-text: #3730a3;
+        --info-border: #a5b4fc;
     }
-    to {
+    * {
+        box-sizing: border-box;
+    }
+    .page-shell {
+        background: linear-gradient(135deg, var(--slate-50) 0%, var(--primary-50) 50%, var(--slate-50) 100%);
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        padding: 32px;
+    }
+    @media (max-width: 768px) {
+        .page-shell {
+            padding: 20px;
+        }
+    }
+    .page-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    /* Header */
+    .page-header {
+        margin-bottom: 32px;
+    }
+    .header-content {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+    }
+    .header-title-group {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .header-icon {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-800) 100%);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 24px rgba(15, 118, 110, 0.25);
+    }
+    .header-icon svg {
+        width: 28px;
+        height: 28px;
+        color: white;
+    }
+    .header-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--primary-900);
+        letter-spacing: -0.02em;
+        margin: 0;
+    }
+    .header-subtitle {
+        font-size: 15px;
+        color: var(--slate-500);
+        margin-top: 4px;
+    }
+    .header-stats {
+        display: flex;
+        gap: 12px;
+    }
+    .stat-chip {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--slate-200);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+    .stat-chip-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .stat-chip-icon.pending {
+        background: var(--warning-bg);
+        color: var(--warning-text);
+    }
+    .stat-chip-icon.approved {
+        background: var(--success-bg);
+        color: var(--success-text);
+    }
+    .stat-chip-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--slate-800);
+    }
+    .stat-chip-label {
+        font-size: 12px;
+        color: var(--slate-500);
+    }
+    /* Table Card */
+    .table-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        border: 1px solid var(--slate-200);
+        overflow: hidden;
+    }
+    .table-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--slate-100);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    .table-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--slate-800);
+    }
+    .table-title-icon {
+        width: 36px;
+        height: 36px;
+        background: var(--primary-100);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-700);
+    }
+    .table-title-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+    /* Table Wrapper with Scroll */
+    .table-wrapper {
+        overflow-x: auto;
+    }
+    .table-wrapper::-webkit-scrollbar {
+        height: 6px;
+    }
+    .table-wrapper::-webkit-scrollbar-track {
+        background: var(--slate-100);
+    }
+    .table-wrapper::-webkit-scrollbar-thumb {
+        background: var(--primary-300);
+        border-radius: 3px;
+    }
+    /* Table */
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .data-table thead {
+        background: linear-gradient(180deg, var(--slate-50) 0%, var(--slate-100) 100%);
+    }
+    .data-table th {
+        padding: 14px 20px;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--slate-500);
+        border-bottom: 2px solid var(--slate-200);
+        white-space: nowrap;
+    }
+    .data-table th.center {
+        text-align: center;
+    }
+    .data-table tbody tr {
+        transition: background 0.15s ease;
+        border-bottom: 1px solid var(--slate-100);
+    }
+    .data-table tbody tr:last-child {
+        border-bottom: none;
+    }
+    .data-table tbody tr:hover {
+        background: var(--primary-50);
+    }
+    .data-table td {
+        padding: 16px 20px;
+        font-size: 14px;
+        color: var(--slate-600);
+        vertical-align: middle;
+    }
+    .data-table td.center {
+        text-align: center;
+    }
+    /* ID Badge */
+    .id-badge {
+        width: 44px;
+        height: 44px;
+        background: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-800) 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
+    }
+    /* Text styles */
+    .text-primary {
+        color: var(--slate-800);
+        font-weight: 600;
+    }
+    .text-secondary {
+        color: var(--slate-500);
+        font-size: 13px;
+    }
+    .text-truncate {
+        max-width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    /* Status Badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .status-badge svg {
+        width: 14px;
+        height: 14px;
+    }
+    .status-pending {
+        background: var(--warning-bg);
+        color: var(--warning-text);
+        border: 1px solid var(--warning-border);
+    }
+    .status-approved {
+        background: var(--success-bg);
+        color: var(--success-text);
+        border: 1px solid var(--success-border);
+    }
+    .status-rejected {
+        background: var(--error-bg);
+        color: var(--error-text);
+        border: 1px solid var(--error-border);
+    }
+    .status-paid {
+        background: var(--info-bg);
+        color: var(--info-text);
+        border: 1px solid var(--info-border);
+    }
+    .status-default {
+        background: var(--slate-100);
+        color: var(--slate-600);
+        border: 1px solid var(--slate-200);
+    }
+    /* Action Button */
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        background: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-800) 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
+        white-space: nowrap;
+    }
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(15, 118, 110, 0.35);
+    }
+    .btn-action svg {
+        width: 16px;
+        height: 16px;
+    }
+    /* Empty State */
+    .empty-state {
+        padding: 80px 40px;
+        text-align: center;
+    }
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: var(--slate-100);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--slate-400);
+    }
+    .empty-icon svg {
+        width: 40px;
+        height: 40px;
+    }
+    .empty-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--slate-700);
+        margin-bottom: 8px;
+    }
+    .empty-text {
+        font-size: 14px;
+        color: var(--slate-500);
+    }
+    /* Modal Overlay */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(8px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        padding: 20px;
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transition: opacity 0.3s ease;
     }
-}
-
-.modal-header {
-    background: linear-gradient(135deg, #115e59 0%, #0f766e 100%);
-    color: white;
-    padding: 24px 30px;
-    border-radius: 20px 20px 0 0;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.modal-body {
-    padding: 30px;
-}
-
-.close-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 36px;
-    height: 36px;
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 50%;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 11;
-}
-
-.close-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: rotate(90deg);
-}
-
-.doc-card {
-    background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
-    border: 1px solid rgba(16, 185, 129, 0.2);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-}
-
-.doc-card:hover {
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
-    transform: translateX(4px);
-}
-
-.doc-info p {
-    margin: 6px 0;
-    color: #374151;
-    font-size: 14px;
-}
-
-.doc-info strong {
-    color: #115e59;
-    font-weight: 600;
-}
-
-.badge-obligatorio {
-    display: inline-block;
-    background: #fef3c7;
-    color: #92400e;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.upload-area {
-    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-    border: 2px dashed #d1d5db;
-    border-radius: 12px;
-    padding: 40px 30px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.upload-area:hover {
-    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-    border-color: #10b981;
-}
-
-.upload-area i {
-    font-size: 48px;
-    color: #10b981;
-    margin-bottom: 12px;
-}
-
-.btn-select-file {
-    background: white;
-    border: 1px solid #d1d5db;
-    padding: 10px 24px;
-    border-radius: 8px;
-    font-weight: 600;
-    color: #374151;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.btn-select-file:hover {
-    background: #f9fafb;
-    border-color: #10b981;
-    color: #10b981;
-}
-
-.btn-submit {
-    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-    color: white;
-    font-weight: 700;
-    padding: 12px 32px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-.btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-}
-
-.btn-cancel {
-    background: #e5e7eb;
-    color: #374151;
-    font-weight: 600;
-    padding: 12px 32px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.btn-cancel:hover {
-    background: #d1d5db;
-}
-
-.file-selected {
-    background: #ecfdf5;
-    border: 1px solid #10b981;
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin-top: 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #065f46;
-}
-
-.file-selected i {
-    color: #10b981;
-}
-
-/* DataTables custom styling */
-.dataTables_wrapper .dataTables_paginate .paginate_button {
-    padding: 6px 12px;
-    margin: 0 4px;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    background: white;
-    color: #374151;
-    transition: all 0.2s ease;
-}
-
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background: #10b981;
-    color: white;
-    border-color: #10b981;
-}
-
-.dataTables_wrapper .dataTables_paginate .paginate_button.current {
-    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-    color: white;
-    border-color: #10b981;
-}
-
-.dataTables_wrapper .dataTables_filter input {
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    padding: 8px 16px;
-    margin-left: 8px;
-}
-
-.dataTables_wrapper .dataTables_filter input:focus {
-    outline: none;
-    border-color: #10b981;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
+    .modal-overlay.hidden {
+        display: none;
+    }
+    /* Modal Content */
+    .modal-content {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+        position: relative;
+        max-height: 90vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        animation: modalSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-30px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    /* Modal Header */
+    .modal-header {
+        background: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-900) 100%);
+        color: white;
+        padding: 28px 32px;
+        position: relative;
+        overflow: hidden;
+    }
+    .modal-header::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 250px;
+        height: 250px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .modal-header-content {
+        position: relative;
+        z-index: 1;
+    }
+    .modal-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 22px;
+        font-weight: 700;
+        margin: 0;
+    }
+    .modal-title svg {
+        width: 28px;
+        height: 28px;
+    }
+    .modal-subtitle {
+        margin: 8px 0 0 0;
+        opacity: 0.85;
+        font-size: 14px;
+    }
+    .close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.15);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+    }
+    .close-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: rotate(90deg);
+    }
+    /* Modal Body */
+    .modal-body {
+        padding: 28px 32px;
+        overflow-y: auto;
+        flex: 1;
+    }
+    .modal-body::-webkit-scrollbar {
+        width: 6px;
+    }
+    .modal-body::-webkit-scrollbar-track {
+        background: var(--slate-100);
+    }
+    .modal-body::-webkit-scrollbar-thumb {
+        background: var(--primary-300);
+        border-radius: 3px;
+    }
+    /* Document Card */
+    .doc-card {
+        background: linear-gradient(135deg, var(--primary-50) 0%, white 100%);
+        border: 1px solid var(--primary-200);
+        border-radius: 16px;
+        padding: 20px 24px;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        transition: all 0.2s ease;
+    }
+    .doc-card:hover {
+        border-color: var(--primary-400);
+        box-shadow: 0 8px 24px rgba(20, 184, 166, 0.12);
+        transform: translateX(4px);
+    }
+    .doc-card:last-child {
+        margin-bottom: 0;
+    }
+    .doc-icon {
+        width: 48px;
+        height: 48px;
+        background: white;
+        border: 1px solid var(--primary-200);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-600);
+        flex-shrink: 0;
+    }
+    .doc-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+    .doc-info {
+        flex: 1;
+    }
+    .doc-name {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--primary-800);
+        margin-bottom: 8px;
+    }
+    .doc-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    .doc-meta-item {
+        font-size: 13px;
+        color: var(--slate-600);
+    }
+    .doc-meta-item strong {
+        color: var(--slate-700);
+        font-weight: 600;
+    }
+    .doc-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .doc-badge.required {
+        background: var(--warning-bg);
+        color: var(--warning-text);
+    }
+    .doc-badge.optional {
+        background: var(--slate-100);
+        color: var(--slate-600);
+    }
+    .btn-upload {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        background: linear-gradient(135deg, var(--emerald-500) 0%, var(--emerald-600) 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        white-space: nowrap;
+    }
+    .btn-upload:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    .btn-upload svg {
+        width: 18px;
+        height: 18px;
+    }
+    /* Upload Modal */
+    .upload-area {
+        background: linear-gradient(135deg, var(--slate-50) 0%, white 100%);
+        border: 2px dashed var(--slate-300);
+        border-radius: 16px;
+        padding: 48px 32px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .upload-area:hover {
+        background: var(--primary-50);
+        border-color: var(--primary-400);
+    }
+    .upload-icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 16px;
+        background: var(--primary-100);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-600);
+    }
+    .upload-icon svg {
+        width: 36px;
+        height: 36px;
+    }
+    .upload-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--slate-800);
+        margin-bottom: 8px;
+    }
+    .upload-text {
+        font-size: 14px;
+        color: var(--slate-500);
+        margin-bottom: 20px;
+    }
+    .btn-select-file {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: white;
+        border: 2px solid var(--slate-200);
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--slate-700);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .btn-select-file:hover {
+        border-color: var(--primary-500);
+        color: var(--primary-600);
+        background: var(--primary-50);
+    }
+    .file-selected {
+        background: var(--success-bg);
+        border: 1px solid var(--success-border);
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-top: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--success-text);
+    }
+    .file-selected svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+    }
+    .file-selected-name {
+        font-weight: 600;
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .file-formats {
+        font-size: 13px;
+        color: var(--slate-500);
+        margin-top: 16px;
+    }
+    /* Modal Footer */
+    .modal-footer {
+        padding: 20px 32px;
+        border-top: 1px solid var(--slate-200);
+        background: var(--slate-50);
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+    .btn-cancel {
+        padding: 12px 24px;
+        background: var(--slate-200);
+        color: var(--slate-700);
+        border: none;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .btn-cancel:hover {
+        background: var(--slate-300);
+    }
+    .btn-submit {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background: linear-gradient(135deg, var(--emerald-500) 0%, var(--emerald-600) 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+    .btn-submit svg {
+        width: 18px;
+        height: 18px;
+    }
+    /* Loading Spinner */
+    .loading-spinner {
+        width: 48px;
+        height: 48px;
+        border: 3px solid var(--primary-200);
+        border-top-color: var(--primary-600);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    .loading-state {
+        text-align: center;
+        padding: 60px 40px;
+    }
+    .loading-text {
+        margin-top: 16px;
+        font-size: 15px;
+        color: var(--slate-600);
+    }
+    /* Error State */
+    .error-state {
+        text-align: center;
+        padding: 60px 40px;
+    }
+    .error-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 16px;
+        background: var(--error-bg);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--error-text);
+    }
+    .error-icon svg {
+        width: 32px;
+        height: 32px;
+    }
+    .error-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--error-text);
+        margin-bottom: 8px;
+    }
+    .error-text {
+        font-size: 14px;
+        color: var(--slate-500);
+    }
+    /* DataTables Overrides */
+    .dataTables_wrapper {
+        padding: 0 24px 24px;
+    }
+    .dataTables_wrapper .dataTables_filter {
+        margin-bottom: 16px;
+    }
+    .dataTables_wrapper .dataTables_filter input {
+        border: 2px solid var(--slate-200);
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        margin-left: 8px;
+    }
+    .dataTables_wrapper .dataTables_filter input:focus {
+        outline: none;
+        border-color: var(--primary-500);
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+    }
+    .dataTables_wrapper .dataTables_length select {
+        border: 2px solid var(--slate-200);
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin: 0 8px;
+    }
+    .dataTables_wrapper .dataTables_paginate {
+        margin-top: 20px;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 8px 14px;
+        margin: 0 4px;
+        border-radius: 8px;
+        border: 1px solid var(--slate-200) !important;
+        background: white !important;
+        color: var(--slate-600) !important;
+        transition: all 0.2s ease;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: var(--primary-600) !important;
+        color: white !important;
+        border-color: var(--primary-600) !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%) !important;
+        color: white !important;
+        border-color: var(--primary-600) !important;
+        font-weight: 600;
+    }
+    .dataTables_wrapper .dataTables_info {
+        color: var(--slate-500);
+        font-size: 14px;
+        padding-top: 16px;
+    }
+    /* Animations */
+    .fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 </style>
-
-<div style="padding: 40px; background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); min-height: 100vh;">
-    <div style="max-width: 1400px; margin: 0 auto;">
+<div class="page-shell">
+    <div class="page-container">
+        
         <!-- Header -->
-        <div style="margin-bottom: 32px;">
-            <h1 style="font-size: 32px; font-weight: 800; color: #115e59; margin-bottom: 8px;">
-                📋 Mis Siniestros
-            </h1>
-            <p style="color: #6b7280; font-size: 16px;">
-                Gestiona y revisa el estado de tus siniestros reportados
-            </p>
+        <div class="page-header fade-in">
+            <div class="header-content">
+                <div>
+                    <div class="header-title-group">
+                        <div class="header-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M9 12h6M9 16h6" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="header-title">Mis Siniestros</h1>
+                            <p class="header-subtitle">Gestiona y revisa el estado de tus siniestros reportados</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <!-- Table Container -->
-        <div style="background: white; padding: 24px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto;">
-            <table id="tablaSiniestros" class="display" style="width: 100%; border-collapse: separate; border-spacing: 0;">
-                <thead>
-                    <tr style="background: #f8fafc;">
-                        <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">ID</th>
-                        <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Beneficiario</th>
-                        <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Tipo</th>
-                        <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Descripción</th>
-                        <th style="padding: 16px; text-align: center; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Estado</th>
-                        <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Fecha Evento</th>
-                        <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Fecha Reporte</th>
-                        <th style="padding: 16px; text-align: left; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Póliza</th>
-                        <th style="padding: 16px; text-align: center; color: #64748b; font-weight: 600; font-size: 13px; border-bottom: 2px solid #e2e8f0; white-space: nowrap;">Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for sin in siniestros %}
-                    <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" 
-                        onmouseover="this.style.background='#f8fafc'" 
-                        onmouseout="this.style.background='white'">
-                        
-                        <td style="padding: 16px;">
-                            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #115e59 0%, #0f766e 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px;">
-                                {{ sin.id }}
-                            </div>
-                        </td>
-                        
-                        <td style="padding: 16px;">
-                            <div style="color: #1e293b; font-weight: 600; font-size: 14px;">{{ sin.beneficiario_nombre }}</div>
-                        </td>
-                        
-                        <td style="padding: 16px; white-space: nowrap;">
-                            <div style="color: #1e293b; font-weight: 500; font-size: 14px;">{{ sin.tipo }}</div>
-                        </td>
-                        
-                        <td style="padding: 16px;">
-                            <div style="color: #475569; font-size: 14px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ sin.descripcion }}">
-                                {{ sin.descripcion }}
-                            </div>
-                        </td>
-                        
-                        <td style="padding: 16px; text-align: center; white-space: nowrap;">
-                            {% if sin.estado == 'pendiente' or sin.estado == 'Pendiente de revisión' %}
-                                <span style="display: inline-block; padding: 6px 16px; background: #fef3c7; color: #92400e; border-radius: 20px; font-size: 12px; font-weight: 600;">
-                                    <i class="fas fa-clock"></i> Pendiente
+        <!-- Table Card -->
+        <div class="table-card fade-in">
+            <div class="table-header">
+                <div class="table-title">
+                    <div class="table-title-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    Lista de Siniestros
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table id="tablaSiniestros" class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Beneficiario</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th class="center">Estado</th>
+                            <th>Fecha Evento</th>
+                            <th>Fecha Reporte</th>
+                            <th>Póliza</th>
+                            <th class="center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sin in siniestros %}
+                        <tr>
+                            <td>
+                                <div class="id-badge">{{ sin.id }}</div>
+                            </td>
+                            <td>
+                                <span class="text-primary">{{ sin.beneficiario_nombre }}</span>
+                            </td>
+                            <td>
+                                <span class="text-primary">{{ sin.tipo }}</span>
+                            </td>
+                            <td>
+                                <div class="text-truncate" title="{{ sin.descripcion }}">
+                                    {{ sin.descripcion }}
+                                </div>
+                            </td>
+                            <td class="center">
+                                {% if sin.estado == 'pendiente' or sin.estado == 'Pendiente de revisión' %}
+                                <span class="status-badge status-pending">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M12 6v6l4 2" stroke-linecap="round"/>
+                                    </svg>
+                                    Pendiente
                                 </span>
-                            {% elif sin.estado == 'aprobado' or sin.estado == 'Aprobado' %}
-                                <span style="display: inline-block; padding: 6px 16px; background: #d1fae5; color: #065f46; border-radius: 20px; font-size: 12px; font-weight: 600;">
-                                    <i class="fas fa-check-circle"></i> Aprobado
+                                {% elif sin.estado == 'aprobado' or sin.estado == 'Aprobado' %}
+                                <span class="status-badge status-approved">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-linecap="round"/>
+                                        <path d="M22 4L12 14.01l-3-3" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Aprobado
                                 </span>
-                            {% elif sin.estado == 'rechazado' or sin.estado == 'Rechazado' %}
-                                <span style="display: inline-block; padding: 6px 16px; background: #fee2e2; color: #991b1b; border-radius: 20px; font-size: 12px; font-weight: 600;">
-                                    <i class="fas fa-times-circle"></i> Rechazado
+                                {% elif sin.estado == 'rechazado' or sin.estado == 'Rechazado' %}
+                                <span class="status-badge status-rejected">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M15 9l-6 6M9 9l6 6" stroke-linecap="round"/>
+                                    </svg>
+                                    Rechazado
                                 </span>
-                            {% elif sin.estado == 'pagado' or sin.estado == 'Pagado' %}
-                                <span style="display: inline-block; padding: 6px 16px; background: #e0e7ff; color: #3730a3; border-radius: 20px; font-size: 12px; font-weight: 600;">
-                                    <i class="fas fa-dollar-sign"></i> Pagado
+                                {% elif sin.estado == 'pagado' or sin.estado == 'Pagado' %}
+                                <span class="status-badge status-paid">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Pagado
                                 </span>
-                            {% else %}
-                                <span style="display: inline-block; padding: 6px 16px; background: #dbeafe; color: #1e40af; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                {% else %}
+                                <span class="status-badge status-default">
                                     {{ sin.estado }}
                                 </span>
-                            {% endif %}
-                        </td>
-                        
-                        <td style="padding: 16px; color: #475569; font-size: 14px; white-space: nowrap;">
-                            {{ sin.fecha_evento|date:"d/m/Y" }}
-                        </td>
-                        
-                        <td style="padding: 16px; color: #475569; font-size: 14px; white-space: nowrap;">
-                            {{ sin.fecha_reporte|date:"d/m/Y" }}
-                            <div style="color: #94a3b8; font-size: 12px;">{{ sin.fecha_reporte|date:"h:i A" }}</div>
-                        </td>
-                        
-                        <td style="padding: 16px;">
-                            <div style="color: #1e293b; font-weight: 600; font-size: 14px;">{{ sin.poliza_numero }}</div>
-                        </td>
-                        
-                        <td style="padding: 16px; text-align: center; white-space: nowrap;">
-                            <button class="abrirModal"
-                                    data-poliza="{{ sin.poliza_numero }}"
-                                    data-beneficiario="{{ sin.beneficiario_id }}"
-                                    style="padding: 10px 14px; background: linear-gradient(135deg, #115e59 0%, #0f766e 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 2px 6px rgba(17, 94, 89, 0.25); transition: all 0.2s;" 
-                                    title="Ver Documentos"
-                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(17, 94, 89, 0.35)'"
-                                    onmouseout="this.style.transform=''; this.style.boxShadow='0 2px 6px rgba(17, 94, 89, 0.25)'">
-                                <i class="fas fa-folder-open"></i> Ver Documentos
-                            </button>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="9" style="text-align: center; padding: 60px 20px; color: #94a3b8;">
-                            <div style="font-size: 48px; margin-bottom: 16px;">
-                                <i class="fas fa-folder-open"></i>
-                            </div>
-                            <div style="font-size: 18px; font-weight: 600;">No tienes siniestros registrados</div>
-                            <div style="font-size: 14px; margin-top: 8px;">Los siniestros aprobados aparecerán aquí</div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="text-primary">{{ sin.fecha_evento|date:"d/m/Y" }}</span>
+                            </td>
+                            <td>
+                                <span class="text-primary">{{ sin.fecha_reporte|date:"d/m/Y" }}</span>
+                                <div class="text-secondary">{{ sin.fecha_reporte|date:"h:i A" }}</div>
+                            </td>
+                            <td>
+                                <span class="text-primary">{{ sin.poliza_numero }}</span>
+                            </td>
+                            <td class="center">
+                                <button class="btn-action abrirModal"
+                                        data-poliza="{{ sin.poliza_numero }}"
+                                        data-beneficiario="{{ sin.beneficiario_id }}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Ver Documentos
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9">
+                                <div class="empty-state">
+                                    <div class="empty-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M12 11v6M9 14h6" stroke-linecap="round"/>
+                                        </svg>
+                                    </div>
+                                    <div class="empty-title">No tienes siniestros registrados</div>
+                                    <div class="empty-text">Los siniestros aprobados aparecerán aquí</div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
-
 <!-- Modal Documentos Requeridos -->
 <div id="modalSiniestro" class="modal-overlay hidden">
-    <div class="modal-content" style="width: 90%; max-width: 1000px;">
+    <div class="modal-content" style="width: 90%; max-width: 900px;">
         <div class="modal-header">
             <button class="close-btn" id="cerrarModal">×</button>
-            <h2 style="font-size: 24px; font-weight: 700; margin: 0;">
-                📂 Documentos Requeridos
-            </h2>
-            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">
-                Revisa y carga los documentos necesarios para tu siniestro
-            </p>
+            <div class="modal-header-content">
+                <h2 class="modal-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Documentos Requeridos
+                </h2>
+                <p class="modal-subtitle">Revisa y carga los documentos necesarios para tu siniestro</p>
+            </div>
         </div>
         <div class="modal-body">
             <div id="documentosContainer">
-                <div style="text-align: center; padding: 40px; color: #6b7280;">
-                    <div style="width: 48px; height: 48px; border: 3px solid #10b981; border-top-color: transparent; border-radius: 50%; margin: 0 auto 16px; animation: spin 1s linear infinite;"></div>
-                    <p style="font-size: 16px;">Cargando documentos...</p>
+                <div class="loading-state">
+                    <div class="loading-spinner" style="margin: 0 auto;"></div>
+                    <p class="loading-text">Cargando documentos...</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 <!-- Modal Subir Documento -->
 <div id="modalDocumento" class="modal-overlay hidden">
-    <div class="modal-content" style="width: 90%; max-width: 600px;">
+    <div class="modal-content" style="width: 90%; max-width: 560px;">
         <div class="modal-header">
             <button class="close-btn" onclick="cerrarModal('modalDocumento')">×</button>
-            <h3 style="font-size: 22px; font-weight: 700; margin: 0;">
-                📤 Subir Documento
-            </h3>
+            <div class="modal-header-content">
+                <h3 class="modal-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M17 8l-5-5-5 5M12 3v12" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Subir Documento
+                </h3>
+            </div>
         </div>
-        <div class="modal-body">
-            <form id="formSubirDocumento" enctype="multipart/form-data">
-                {% csrf_token %}
-                <input type="hidden" name="beneficiario_id" id="beneficiario_id">
-                <input type="hidden" name="doc_descripcion" id="doc_descripcion">
-
-                <div style="margin-bottom: 24px;">
-                    <label style="display: block; color: #374151; font-weight: 600; margin-bottom: 12px; font-size: 15px;">
-                        Selecciona tu archivo
-                    </label>
-                    <div class="upload-area" onclick="document.getElementById('archivoInput').click()">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <h4 style="color: #374151; font-size: 18px; font-weight: 600; margin: 12px 0 8px 0;">
-                            Arrastra aquí tu archivo
-                        </h4>
-                        <p style="color: #6b7280; font-size: 14px; margin-bottom: 16px;">
-                            o haz clic para seleccionar
-                        </p>
-                        <button type="button" class="btn-select-file">
-                            Seleccionar archivo
-                        </button>
+        <form id="formSubirDocumento" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="beneficiario_id" id="beneficiario_id">
+            <input type="hidden" name="doc_descripcion" id="doc_descripcion">
+            
+            <div class="modal-body">
+                <div class="upload-area" onclick="document.getElementById('archivoInput').click()">
+                    <div class="upload-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M17 8l-5-5-5 5M12 3v12" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </div>
-                    <input type="file" id="archivoInput" name="archivo" style="display: none;" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
-                    <div id="archivoSeleccionado" class="file-selected" style="display: none;">
-                        <i class="fas fa-file-alt"></i>
-                        <span id="nombreArchivo" style="font-weight: 600;"></span>
-                    </div>
-                    <p style="color: #6b7280; font-size: 13px; margin-top: 12px;">
-                        Formatos aceptados: PDF, DOC, DOCX, JPG, PNG (Max. 10MB)
-                    </p>
-                </div>
-
-                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px;">
-                    <button type="button" class="btn-cancel" onclick="cerrarModal('modalDocumento')">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="btn-submit">
-                        <i class="fas fa-upload"></i> Subir Documento
+                    <div class="upload-title">Arrastra tu archivo aquí</div>
+                    <div class="upload-text">o haz clic para seleccionar</div>
+                    <button type="button" class="btn-select-file">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14 2v6h6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Seleccionar archivo
                     </button>
                 </div>
-            </form>
-        </div>
+                
+                <input type="file" id="archivoInput" name="archivo" style="display: none;" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
+                
+                <div id="archivoSeleccionado" class="file-selected" style="display: none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14 2v6h6M9 15l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span id="nombreArchivo" class="file-selected-name"></span>
+                </div>
+                
+                <p class="file-formats">Formatos aceptados: PDF, DOC, DOCX, JPG, PNG (Máx. 10MB)</p>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="cerrarModal('modalDocumento')">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn-submit">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M17 8l-5-5-5 5M12 3v12" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Subir Documento
+                </button>
+            </div>
+        </form>
     </div>
 </div>
-
-<style>
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-</style>
-
 <!-- jQuery y DataTables -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
 <script>
 function cerrarModal(id) {
     $('#' + id).addClass('hidden');
 }
-
 $(document).ready(function() {
     $('#tablaSiniestros').DataTable({ 
         pageLength: 10, 
@@ -501,30 +1106,20 @@ $(document).ready(function() {
             zeroRecords: "No se encontraron registros coincidentes"
         }
     });
-
-
-
-
+    var id_doc_aseguradora = "";
     // Abrir modal siniestro
     $('.abrirModal').click(function() {
         const polizaId = $(this).data('poliza');
         const beneficiarioId = $(this).data('beneficiario');
+        
         $('#documentosContainer').html(`
-            <div style="text-align: center; padding: 40px; color: #6b7280;">
-                <div style="width: 48px; height: 48px; border: 3px solid #10b981; border-top-color: transparent; border-radius: 50%; margin: 0 auto 16px; animation: spin 1s linear infinite;"></div>
-                <p style="font-size: 16px;">Cargando documentos...</p>
+            <div class="loading-state">
+                <div class="loading-spinner" style="margin: 0 auto;"></div>
+                <p class="loading-text">Cargando documentos...</p>
             </div>
         `);
+        
         $('#modalSiniestro').removeClass('hidden');
-
-
-
-
-
-
-
-
-
         fetch(`/api/documentos_aseguradora/${polizaId}/`)
             .then(res => res.json())
             .then(data => {
@@ -532,84 +1127,85 @@ $(document).ready(function() {
                 container.empty();
                 if (data.length === 0) {
                     container.html(`
-                        <div style="text-align: center; padding: 40px; color: #6b7280;">
-                            <svg style="width: 64px; height: 64px; margin: 0 auto 16px; color: #d1d5db;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            <p style="font-size: 18px; font-weight: 600;">No hay documentos requeridos</p>
+                        <div class="empty-state" style="padding: 40px;">
+                            <div class="empty-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M14 2v6h6" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="empty-title">No hay documentos requeridos</div>
+                            <div class="empty-text">Este siniestro no requiere documentación adicional</div>
                         </div>
                     `);
                     return;
                 }
                 data.forEach(doc => {
-                    const obligatorioHTML = doc.obligatorio 
-                        ? '<span class="badge-obligatorio">✓ Obligatorio</span>' 
-                        : '<span style="display: inline-block; background: #e5e7eb; color: #6b7280; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">Opcional</span>';
+                    const badgeClass = doc.obligatorio ? 'required' : 'optional';
+                    const badgeText = doc.obligatorio ? '✓ Obligatorio' : 'Opcional';
                     
-
-
                     const html = `
                         <div class="doc-card">
-                            <div class="doc-info" style="flex: 1;">
-                                <p style="font-size: 16px; font-weight: 700; color: #115e59; margin-bottom: 8px;">
-                                    📄 ${doc.nombre_documento}
-                                </p>
-                                <p><strong>Tipo Siniestro:</strong> ${doc.siniestro_tipo}</p>
-                                <p><strong>Descripción:</strong> ${doc.descripcion || 'N/A'}</p>
-                                <p><strong>Estado:</strong> ${obligatorioHTML}</p>
-                                <p style="color: #6b7280; font-size: 13px;"><strong>Versión:</strong> ${doc.fecha_version}</p>
-                                 <p style="font-size: 16px; font-weight: 700; color: #115e59; margin-bottom: 8px;">
-                                    📄 ${doc.fecha_vencimiento}
-                                </p>
-
+                            <div class="doc-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
                             </div>
-                            <button class="abrirModalSubir btn-action" 
+                            <div class="doc-info">
+                                <div class="doc-name">${doc.nombre_documento}</div>
+                                <div class="doc-meta">
+                                    <span class="doc-meta-item"><strong>Tipo:</strong> ${doc.siniestro_tipo}</span>
+                                    <span class="doc-meta-item"><strong>Versión:</strong> ${doc.fecha_version}</span>
+                                    <span class="doc-badge ${badgeClass}">${badgeText}</span>
+                                </div>
+                                ${doc.descripcion ? `<div class="doc-meta" style="margin-top: 8px;"><span class="doc-meta-item">${doc.descripcion}</span></div>` : ''}
+                            </div>
+                            <button class="btn-upload abrirModalSubir" 
                                     data-descripcion="${doc.nombre_documento}" 
-                                    data-beneficiario="${beneficiarioId}">
-                                📤 Subir
+                                    data-beneficiario="${beneficiarioId}"
+                                    data-id-doc="${doc.id_doc}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M17 8l-5-5-5 5M12 3v12" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Subir
                             </button>
                         </div>
                     `;
                     container.append(html);
                 });
             })
-
-
-
-
             .catch(err => {
                 $('#documentosContainer').html(`
-                    <div style="text-align: center; padding: 40px;">
-                        <svg style="width: 64px; height: 64px; margin: 0 auto 16px; color: #ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <p style="color: #ef4444; font-size: 18px; font-weight: 600;">Error al cargar documentos</p>
-                        <p style="color: #6b7280; font-size: 14px; margin-top: 8px;">Por favor, intenta nuevamente</p>
+                    <div class="error-state">
+                        <div class="error-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 8v4M12 16h.01" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="error-title">Error al cargar documentos</div>
+                        <div class="error-text">Por favor, intenta nuevamente</div>
                     </div>
                 `);
                 console.error(err);
             });
     });
-
-
-
-
-
-
-    
     $(document).on('click', '.abrirModalSubir', function() {
         const descripcion = $(this).data('descripcion');
         const beneficiarioId = $(this).data('beneficiario');
-
+        const idDoc = $(this).data('id-doc'); 
+        
+        window.id_doc_aseguradora = idDoc;
+        
         $('#doc_descripcion').val(descripcion);
         $('#beneficiario_id').val(beneficiarioId);
         $('#modalDocumento').removeClass('hidden');
         $('#archivoSeleccionado').hide();
         $('#archivoInput').val('');
     });
-
     $('#cerrarModal').click(() => $('#modalSiniestro').addClass('hidden'));
-
     $('#archivoInput').on('change', function() {
         if (this.files.length > 0) {
             const fileName = this.files[0].name;
@@ -617,18 +1213,18 @@ $(document).ready(function() {
             $('#archivoSeleccionado').show();
         }
     });
-
-
-
-
     $('#formSubirDocumento').submit(function(e) {
         e.preventDefault();
+        
         const formData = new FormData(this);
+        formData.append('id_doc_aseguradora', window.id_doc_aseguradora);
+        
         const submitBtn = $(this).find('button[type="submit"]');
         const originalText = submitBtn.html();
-        
-        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Subiendo...');
-
+        submitBtn.prop('disabled', true).html(`
+            <svg class="loading-spinner" style="width: 18px; height: 18px; border-width: 2px;" viewBox="0 0 24 24"></svg>
+            Subiendo...
+        `);
         fetch("{% url 'subir_documento_api' %}", {
             method: 'POST',
             headers: { 'X-CSRFToken': '{{ csrf_token }}' },
@@ -650,5 +1246,4 @@ $(document).ready(function() {
     });
 });
 </script>
-
 {% endblock %}

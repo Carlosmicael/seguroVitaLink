@@ -1,63 +1,674 @@
 {% extends "master/sideBar/sidebar_asesor.html" %}
-
 {% block title %}Detalle de factura{% endblock %}
-
 {% block content %}
 {% include "master/appBar/appBar.html" %}
 {% include "master/footer/chatFooter.html" %}
-
-
-<div class="space-y-6">
-    <div class="flex flex-wrap items-start justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-900">Factura {{ factura.numero_factura }}</h1>
-            <p class="mt-2 text-sm text-slate-500">
-                Siniestro #{{ factura.siniestro.id }} | Beneficiario {{ factura.beneficiario.nombre }}
-            </p>
-        </div>
-        <a href="{% url 'reportes_liquidacion' %}" class="text-sm font-semibold text-slate-500 hover:text-slate-700">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    :root {
+        /* Paleta de verdes frescos */
+        --primary-50: #f0fdf4;
+        --primary-100: #dcfce7;
+        --primary-200: #bbf7d0;
+        --primary-300: #86efac;
+        --primary-400: #4ade80;
+        --primary-500: #22c55e;
+        --primary-600: #16a34a;
+        --primary-700: #15803d;
+        --primary-800: #166534;
+        --primary-900: #14532d;
+        
+        /* Neutros */
+        --slate-50: #f8fafc;
+        --slate-100: #f1f5f9;
+        --slate-200: #e2e8f0;
+        --slate-300: #cbd5e1;
+        --slate-400: #94a3b8;
+        --slate-500: #64748b;
+        --slate-600: #475569;
+        --slate-700: #334155;
+        --slate-800: #1e293b;
+        --slate-900: #0f172a;
+    }
+    * {
+        box-sizing: border-box;
+    }
+    .invoice-shell {
+        background: linear-gradient(135deg, var(--primary-50) 0%, var(--slate-50) 50%, var(--primary-50) 100%);
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        padding: 24px;
+    }
+    @media (min-width: 768px) {
+        .invoice-shell {
+            padding: 32px 40px;
+        }
+    }
+    .invoice-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    /* Invoice Card */
+    .invoice-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+        border: 1px solid var(--slate-200);
+        overflow: hidden;
+    }
+    /* Invoice Header */
+    .invoice-header {
+        background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+        padding: 32px;
+        position: relative;
+        overflow: hidden;
+    }
+    .invoice-header::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .invoice-header::after {
+        content: "";
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .invoice-header-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+    }
+    .invoice-brand {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .invoice-logo {
+        width: 56px;
+        height: 56px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(8px);
+    }
+    .invoice-logo svg {
+        width: 28px;
+        height: 28px;
+        color: white;
+    }
+    .invoice-title-group h1 {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.8);
+        margin: 0 0 6px 0;
+    }
+    .invoice-number {
+        font-size: 28px;
+        font-weight: 800;
+        color: white;
+        letter-spacing: -0.02em;
+        margin: 0;
+    }
+    .invoice-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .invoice-status.paid {
+        background: rgba(34, 197, 94, 0.3);
+        border-color: rgba(34, 197, 94, 0.5);
+    }
+    .invoice-status.partial {
+        background: rgba(59, 130, 246, 0.3);
+        border-color: rgba(59, 130, 246, 0.5);
+    }
+    .invoice-status.pending {
+        background: rgba(251, 191, 36, 0.3);
+        border-color: rgba(251, 191, 36, 0.5);
+    }
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.6; transform: scale(0.9); }
+    }
+    /* Invoice Meta */
+    .invoice-meta {
+        padding: 24px 32px;
+        background: var(--slate-50);
+        border-bottom: 1px solid var(--slate-200);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 24px;
+    }
+    .meta-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .meta-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: white;
+        border: 1px solid var(--slate-200);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-600);
+        flex-shrink: 0;
+    }
+    .meta-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+    .meta-content label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--slate-400);
+        margin-bottom: 4px;
+    }
+    .meta-content span {
+        display: block;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--slate-800);
+    }
+    /* Amount Cards */
+    .amounts-section {
+        padding: 32px;
+    }
+    .amounts-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+    @media (max-width: 640px) {
+        .amounts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .amount-card {
+        padding: 24px;
+        border-radius: 16px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .amount-card.total {
+        background: linear-gradient(135deg, var(--slate-800) 0%, var(--slate-900) 100%);
+        color: white;
+    }
+    .amount-card.paid {
+        background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+        color: white;
+    }
+    .amount-card.pending {
+        background: white;
+        border: 2px solid var(--slate-200);
+        color: var(--slate-800);
+    }
+    .amount-card::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -30%;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .amount-label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.8;
+        margin-bottom: 12px;
+        position: relative;
+        z-index: 1;
+    }
+    .amount-value {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        position: relative;
+        z-index: 1;
+    }
+    .amount-card.pending .amount-label {
+        color: var(--slate-500);
+    }
+    /* Progress Bar */
+    .progress-section {
+        padding: 0 32px 32px;
+    }
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    .progress-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--slate-600);
+    }
+    .progress-percentage {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--primary-600);
+    }
+    .progress-bar {
+        height: 10px;
+        background: var(--slate-200);
+        border-radius: 100px;
+        overflow: hidden;
+    }
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-400) 0%, var(--primary-500) 100%);
+        border-radius: 100px;
+        transition: width 0.6s ease;
+        position: relative;
+    }
+    .progress-fill::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+        animation: shimmer 2s infinite;
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+    /* Payments Table */
+    .payments-section {
+        border-top: 1px solid var(--slate-200);
+    }
+    .payments-header {
+        padding: 24px 32px;
+        background: var(--slate-50);
+        border-bottom: 1px solid var(--slate-200);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .payments-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--slate-800);
+    }
+    .payments-title-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: var(--primary-100);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-600);
+    }
+    .payments-title-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+    .payments-count {
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 100px;
+        background: var(--primary-100);
+        color: var(--primary-700);
+    }
+    .payments-table-wrapper {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    .payments-table-wrapper::-webkit-scrollbar {
+        width: 6px;
+    }
+    .payments-table-wrapper::-webkit-scrollbar-track {
+        background: var(--slate-100);
+    }
+    .payments-table-wrapper::-webkit-scrollbar-thumb {
+        background: var(--primary-300);
+        border-radius: 3px;
+    }
+    .payments-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .payments-table th {
+        padding: 16px 32px;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--slate-400);
+        background: white;
+        border-bottom: 1px solid var(--slate-200);
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+    .payments-table td {
+        padding: 20px 32px;
+        border-bottom: 1px solid var(--slate-100);
+        font-size: 14px;
+        color: var(--slate-600);
+    }
+    .payments-table tr:last-child td {
+        border-bottom: none;
+    }
+    .payments-table tr:hover td {
+        background: var(--primary-50);
+    }
+    .payment-date {
+        font-weight: 600;
+        color: var(--slate-800);
+    }
+    .payment-method {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        background: var(--slate-100);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--slate-600);
+    }
+    .payment-method svg {
+        width: 14px;
+        height: 14px;
+    }
+    .payment-amount {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--primary-600);
+    }
+    /* Empty State */
+    .empty-state {
+        padding: 60px 32px;
+        text-align: center;
+    }
+    .empty-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background: var(--slate-100);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--slate-400);
+    }
+    .empty-icon svg {
+        width: 28px;
+        height: 28px;
+    }
+    .empty-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--slate-600);
+        margin-bottom: 4px;
+    }
+    .empty-text {
+        font-size: 13px;
+        color: var(--slate-400);
+    }
+    /* Back Link */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--slate-600);
+        background: white;
+        border: 1px solid var(--slate-200);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        margin-bottom: 24px;
+    }
+    .back-link:hover {
+        background: var(--slate-50);
+        border-color: var(--slate-300);
+        color: var(--slate-800);
+        transform: translateX(-4px);
+    }
+    .back-link svg {
+        width: 16px;
+        height: 16px;
+    }
+    /* Animations */
+    .fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+<div class="invoice-shell">
+    <div class="invoice-container">
+        
+        <!-- Back Link -->
+        <a href="{% url 'reportes_liquidacion' %}" class="back-link fade-in">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
             Volver al reporte
         </a>
-    </div>
-
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Monto facturado</div>
-            <div class="mt-3 text-2xl font-extrabold text-slate-900">${{ factura.monto|floatformat:2 }}</div>
+        <!-- Invoice Card -->
+        <div class="invoice-card fade-in">
+            
+            <!-- Header -->
+            <div class="invoice-header">
+                <div class="invoice-header-content">
+                    <div class="invoice-brand">
+                        <div class="invoice-logo">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div class="invoice-title-group">
+                            <h1>Factura</h1>
+                            <p class="invoice-number">{{ factura.numero_factura }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if restante <= 0 %}
+                    <span class="invoice-status paid">
+                        <span class="status-dot"></span>
+                        Pagada
+                    </span>
+                    {% elif total_pagado > 0 %}
+                    <span class="invoice-status partial">
+                        <span class="status-dot"></span>
+                        Pago Parcial
+                    </span>
+                    {% else %}
+                    <span class="invoice-status pending">
+                        <span class="status-dot"></span>
+                        Pendiente
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- Meta Info -->
+            <div class="invoice-meta">
+                <div class="meta-item">
+                    <div class="meta-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <div class="meta-content">
+                        <label>Beneficiario</label>
+                        <span>{{ factura.beneficiario.nombre }}</span>
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 9v4M12 17h.01" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="meta-content">
+                        <label>Siniestro</label>
+                        <span>#{{ factura.siniestro.id }}</span>
+                    </div>
+                </div>
+               
+            </div>
+            <!-- Amounts -->
+            <div class="amounts-section">
+                <div class="amounts-grid">
+                    <div class="amount-card total">
+                        <div class="amount-label">Monto Facturado</div>
+                        <div class="amount-value">${{ factura.monto|floatformat:2 }}</div>
+                    </div>
+                    <div class="amount-card paid">
+                        <div class="amount-label">Total Pagado</div>
+                        <div class="amount-value">${{ total_pagado|floatformat:2 }}</div>
+                    </div>
+                    <div class="amount-card pending">
+                        <div class="amount-label">Saldo Pendiente</div>
+                        <div class="amount-value">${{ restante|floatformat:2 }}</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Progress Bar -->
+            {% if factura.monto > 0 %}
+            <div class="progress-section">
+                <div class="progress-header">
+                    <span class="progress-label">Progreso de pago</span>
+                    <span class="progress-percentage">
+                        {% widthratio total_pagado factura.monto 100 %}%
+                    </span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {% widthratio total_pagado factura.monto 100 %}%;"></div>
+                </div>
+            </div>
+            {% endif %}
+            <!-- Payments Table -->
+            <div class="payments-section">
+                <div class="payments-header">
+                    <div class="payments-title">
+                        <div class="payments-title-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                                <path d="M1 10h22" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        Historial de Pagos
+                    </div>
+                    <span class="payments-count">{{ pagos|length }} pagos</span>
+                </div>
+                {% if pagos %}
+                <div class="payments-table-wrapper">
+                    <table class="payments-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha de Pago</th>
+                                <th>Método</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pago in pagos %}
+                            <tr>
+                                <td>
+                                    <span class="payment-date">{{ pago.fecha_pago|date:"d/m/Y" }}</span>
+                                </td>
+                                <td>
+                                    <span class="payment-method">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                                            <path d="M1 10h22" stroke-linecap="round"/>
+                                        </svg>
+                                        {{ pago.metodo_pago }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="payment-amount">${{ pago.monto_pagado|floatformat:2 }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="empty-title">Sin pagos registrados</div>
+                    <div class="empty-text">Aún no se han realizado pagos para esta factura</div>
+                </div>
+                {% endif %}
+            </div>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Total pagado</div>
-            <div class="mt-3 text-2xl font-extrabold text-slate-900">${{ total_pagado|floatformat:2 }}</div>
-        </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="text-xs uppercase tracking-[0.2em] text-slate-400">Saldo pendiente</div>
-            <div class="mt-3 text-2xl font-extrabold text-slate-900">${{ restante|floatformat:2 }}</div>
-        </div>
-    </div>
-
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table class="min-w-full text-sm">
-            <thead class="bg-slate-50 text-left text-xs uppercase tracking-[0.2em] text-slate-400">
-                <tr>
-                    <th class="px-6 py-4">Fecha pago</th>
-                    <th class="px-6 py-4">Metodo</th>
-                    <th class="px-6 py-4">Monto</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                {% for pago in pagos %}
-                <tr>
-                    <td class="px-6 py-4 text-slate-600">{{ pago.fecha_pago|date:"d/m/Y" }}</td>
-                    <td class="px-6 py-4 text-slate-600">{{ pago.metodo_pago }}</td>
-                    <td class="px-6 py-4 text-slate-600">${{ pago.monto_pagado|floatformat:2 }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3" class="px-6 py-12 text-center text-slate-400">No hay pagos registrados.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
     </div>
 </div>
 {% endblock %}

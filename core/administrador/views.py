@@ -88,6 +88,8 @@ def lista_polizas(request):
 
 
 
+
+
 def aseguradoras_list(request):
     aseguradoras = Aseguradora.objects.all().order_by('-fecha_creacion')
     return render(
@@ -110,8 +112,11 @@ def crear_poliza(request):
         prima_neta = request.POST.get('prima_neta')
         aseguradora_id = request.POST.get('aseguradora')
         regla_poliza_id = request.POST.get('regla_poliza')
+        iva = request.POST.get('iva')
+        superintendencia = request.POST.get('superintendencia')
+        seguro_campesino = request.POST.get('seguro_campesino')
         
-        if not all([estudiantes_ids, numero_poliza, estado, tipo_cobertura, fecha_inicio, prima_neta, regla_poliza_id]):
+        if not all([estudiantes_ids, numero_poliza, estado, tipo_cobertura, fecha_inicio, prima_neta, regla_poliza_id, iva, superintendencia, seguro_campesino]):
             return JsonResponse({'success': False,'message': 'Todos los campos obligatorios deben ser completados'}, status=400)
         
         # Obtener regla de póliza
@@ -163,7 +168,10 @@ def crear_poliza(request):
             fecha_inicio=fecha_inicio,
             fecha_fin=fecha_fin,
             fecha_vencimiento=fecha_vencimiento,
-            prima_neta=prima_neta_decimal
+            prima_neta=prima_neta_decimal,
+            iva=float(iva),
+            superintendencia=float(superintendencia),
+            seguro_campesino=float(seguro_campesino)
         )
         
         estudiantes = Estudiante.objects.filter(id__in=estudiantes_ids)
