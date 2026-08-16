@@ -1,5 +1,5 @@
 # Guía de Configuración: Seguros Personas (Django + Tailwind)
-[Haz clic aquí para abrir el archivo](https://drive.google.com/file/d/1p9OiuB7h2gLv1PAVrf6PzaJhIu9KpEeO/view?usp=sharing).
+[Haz clic aquí para abrir el archivo](https://drive.google.com/file/d/1RZHv-MiPdQjEKhYXiqQQY0gzviOJDt4-/view?usp=sharing).
 
 ## 1️⃣ Configuración del Entorno Python
 Sigue estos comandos para preparar el entorno virtual e instalar las dependencias del backend:
